@@ -1,0 +1,386 @@
+name: Release
+
+# Builds both apps and hands them to the stores: iOS to TestFlight, Android to Google Play. Started by
+# hand or by creating a GitHub release; a release tagged v<MAJOR.MINOR.PATCH> ships under that version,
+# a release under any other tag builds nothing.
+#
+# One workflow for both platforms: the `version` job decides the version and the build
+# number once, and both platform jobs take them from it - so a release carries the same build number on
+# the iPhone and on Android by construction, not by two workflows happening to agree.
+#
+# The model is not in the repository - it is generated - so each platform fetches the weights of a
+# training run out of Azure and exports them in its own format, Core ML or LiteRT, from the same best.pt.
+# models.json travels into each bundle with the run id, the commit and the metrics, which ties a build in
+# TestFlight or Play to a run in the thesis.
+#
+# Everything here also runs locally through src/scripts/release_ios.sh and src/scripts/release_android.sh, which
+# is where a failure should be reproduced. A run with track `none` is the rehearsal: it builds and signs
+# both apps and uploads nothing.
+#
+# Google Play accepts uploads through the API only for an app that already exists in the Play Console
+# and has had one bundle uploaded by hand - see "Releasing to Google Play" in src/app/android/README.md.
+
+on:
+  workflow_dispatch:
+    inputs:
+      platforms:
+        description: 'Which apps to build'
+        type: choice
+        options: [both, ios, android]
+        default: both
+      run_id:
+        description: 'Training run whose model ships (blank = the newest finished one)'
+        default: ''
+      variant:
+        description: 'Model variant to bundle'
+        type: choice
+        options: [c, a, b1, b2]
+        default: c
+      version:
+        description: 'Version (blank = MARKETING_VERSION in src/app/ios/project.yml)'
+        default: ''
+      track:
+        description: 'Where the builds go: TestFlight, and this Play track (none = build only, keep them as artefacts)'
+        type: choice
+        options: [internal, alpha, beta, production, none]
+        default: internal
+      status:
+        description: 'Release status in Play - completed makes the build available to the testers at once'
+        type: choice
+        options: [completed, draft]
+        default: completed
+  release:
+    types: [created]
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  version:
+    name: 🏷️ Determine version
+    # `release` has no tag filter of its own, so the convention is held here - and every job below needs
+    # this one, so a release under another tag stops all of them.
+    if: github.event_name != 'release' || startsWith(github.event.release.tag_name, 'v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    env:
+      # The build number is the iOS build number and the Android versionCode alike. Both stores refuse a
+      # number that is not higher than the ones before it - and say so only at the upload, after the build.
+      # The run counter rises whatever branch a run came from, but it restarts whenever this file is
+      # renamed or the workflow starts in another repository, so it is lifted by a fixed offset.
+      #
+      # 1200 lies above every build number that has reached TestFlight or Play. Raise it if an upload
+      # is ever refused as too low; never lower it, and never remove it.
+      BUILD_NUMBER_OFFSET: 1200
+    outputs:
+      version: ${{ steps.resolve.outputs.version }}
+      build-number: ${{ steps.resolve.outputs.build-number }}
+    steps:
+      - name: 📥 Check out
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # A re-run keeps its run number, so a platform that failed can be run again under the same number.
+      - name: 🔢 Resolve version and build number
+        id: resolve
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          RESOLVED=$(bash src/scripts/lib/release.sh resolve --version "$INPUT_VERSION" \
+                     --build "$(( GITHUB_RUN_NUMBER + BUILD_NUMBER_OFFSET ))")
+          echo "$RESOLVED" >> "$GITHUB_OUTPUT"
+          echo "::notice title=Release::JassCardEye $(sed -n 's/^version=//p' <<<"$RESOLVED") ($(sed -n 's/^build-number=//p' <<<"$RESOLVED"))"
+
+  ios:
+    name: 🍎 iOS to TestFlight
+    needs: version
+    if: inputs.platforms != 'android'
+    runs-on: macos-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - name: 📥 Check out
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # First, because everything below is minutes on a macOS runner and a missing secret is a second.
+      # All nine listed here have to be there: the two Azure secrets and the storage variable fetch the
+      # model, the rest sign and upload. The variable is checked like a secret because Actions hands an
+      # unset one over as an empty string, and the model fetch would then look for runs in a container
+      # without a name.
+      - name: 🔐 Check the secrets are set
+        env:
+          DIST_CERT_BASE64: ${{ secrets.DIST_CERT_BASE64 }}
+          DIST_CERT_P12_PASSWORD: ${{ secrets.DIST_CERT_P12_PASSWORD }}
+          PROVISIONING_PROFILE: ${{ secrets.PROVISIONING_PROFILE }}
+          APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+          APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+          APPSTORE_API_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+          AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
+          AZURE_STORAGE_SAS_TOKEN: ${{ secrets.AZURE_STORAGE_SAS_TOKEN }}
+          AZURE_STORAGE_CONTAINER: ${{ vars.AZURE_STORAGE_CONTAINER }}
+        run: |
+          set -euo pipefail
+          missing=""
+          for name in DIST_CERT_BASE64 DIST_CERT_P12_PASSWORD PROVISIONING_PROFILE \
+                      APPSTORE_API_KEY_ID APPSTORE_ISSUER_ID APPSTORE_API_PRIVATE_KEY \
+                      AZURE_STORAGE_ACCOUNT AZURE_STORAGE_SAS_TOKEN AZURE_STORAGE_CONTAINER; do
+            [ -n "${!name:-}" ] || missing="$missing $name"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repository secrets or variables:$missing"
+            exit 1
+          fi
+          echo "All nine secrets and variables are set."
+
+      - name: 🧰 Install XcodeGen
+        run: brew install xcodegen
+
+      # The distribution certificate, in a keychain of its own that is thrown away at the end.
+      # Without an existing certificate, -allowProvisioningUpdates would mint a new one on every
+      # run and walk into Apple's limit of three.
+      - name: 📜 Install the Apple distribution certificate
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.DIST_CERT_BASE64 }}
+          P12_PASSWORD: ${{ secrets.DIST_CERT_P12_PASSWORD }}
+        run: |
+          set -euo pipefail
+          CERT=$RUNNER_TEMP/dist.p12
+          KEYCHAIN=$RUNNER_TEMP/app-signing.keychain-db
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode --output "$CERT"
+          security create-keychain -p "$P12_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$P12_PASSWORD" "$KEYCHAIN"
+          security import "$CERT" -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN"
+          # Without this, codesign asks for the key interactively and the build fails with
+          # errSecInternalComponent.
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$P12_PASSWORD" "$KEYCHAIN" >/dev/null
+          security list-keychain -d user -s "$KEYCHAIN"
+
+      # Manual signing, and this is why: a build machine holds a distribution certificate and no
+      # development one, while automatic signing archives with the *development* identity and only
+      # re-signs for distribution at export. So the archive needs a distribution profile by name.
+      # The name is read out of the profile itself rather than written down twice.
+      - name: 🪪 Install the provisioning profile
+        env:
+          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.PROVISIONING_PROFILE }}
+        run: |
+          set -euo pipefail
+          PP=$RUNNER_TEMP/build_pp.mobileprovision
+          echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode --output "$PP"
+
+          # Xcode 16 and newer read profiles from Developer/Xcode/UserData, older versions from
+          # Library/MobileDevice. Install into both so the build works on any runner image.
+          for dir in "$HOME/Library/MobileDevice/Provisioning Profiles" \
+                     "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"; do
+            mkdir -p "$dir"
+            cp "$PP" "$dir"
+          done
+
+          NAME=$(security cms -D -i "$PP" | plutil -extract Name raw -o - -)
+          APP_ID=$(security cms -D -i "$PP" | plutil -extract Entitlements.application-identifier raw -o - -)
+          echo "PROVISIONING_PROFILE_NAME=$NAME" >> "$GITHUB_ENV"
+          echo "Profile '$NAME' for $APP_ID"
+          case "$APP_ID" in
+            *ch.yarx.JassCardEye) ;;
+            *) echo "::error::That profile is for $APP_ID, not ch.yarx.JassCardEye."; exit 1 ;;
+          esac
+
+      - name: 🔑 Install the App Store Connect API key
+        env:
+          APPSTORE_API_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+          APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+        run: |
+          set -euo pipefail
+          # ~/private_keys is where altool looks by itself; xcodebuild is given the path.
+          mkdir -p ~/private_keys
+          echo -n "$APPSTORE_API_PRIVATE_KEY" | base64 --decode --output ~/private_keys/AuthKey_$APPSTORE_API_KEY_ID.p8
+          echo "APPSTORE_API_KEY_PATH=$HOME/private_keys/AuthKey_$APPSTORE_API_KEY_ID.p8" >> "$GITHUB_ENV"
+
+      - name: 🧠 Fetch the model and export it to Core ML
+        uses: ./.github/actions/fetch-model
+        with:
+          format: coreml
+          run-id: ${{ inputs.run_id }}
+          variant: ${{ inputs.variant || 'c' }}
+          azure-storage-account: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
+          azure-storage-container: ${{ vars.AZURE_STORAGE_CONTAINER }}
+          azure-storage-sas-token: ${{ secrets.AZURE_STORAGE_SAS_TOKEN }}
+
+      - name: 🚀 Archive, export and upload to TestFlight
+        # Every value that comes from outside travels through the environment, never through
+        # `${{ }}` inside the script. GitHub substitutes those textually before bash parses the
+        # line, so a dispatch input carrying a quote would run as code - in this step, which has
+        # the signing keychain unlocked and the App Store key on disk.
+        env:
+          APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+          APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+          RELEASE_VERSION: ${{ needs.version.outputs.version }}
+          RELEASE_BUILD: ${{ needs.version.outputs.build-number }}
+          INPUT_VARIANT: ${{ inputs.variant || 'c' }}
+          TRACK: ${{ inputs.track || 'internal' }}
+        run: |
+          set -euo pipefail
+          ARGS=(--variant "${INPUT_VARIANT:-c}" --version "$RELEASE_VERSION" --build "$RELEASE_BUILD")
+          # Every Play track is TestFlight for iOS; only `none` keeps the build here. An `[ … ] && ARGS+=(…)`
+          # would be a failing AND-OR list whenever the test is false - one `set -e` subtlety too many.
+          if [ "$TRACK" = "none" ]; then ARGS+=(--no-upload); fi
+          src/scripts/release_ios.sh "${ARGS[@]}"
+
+      - name: 💾 Keep the build as an artefact
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: ios-build
+          path: |
+            artifacts/ios/ipa-*/*.ipa
+            src/app/ios/Models/models.json
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: 🧹 Clean up the keychain and the profile
+        if: always()
+        run: |
+          security delete-keychain "$RUNNER_TEMP/app-signing.keychain-db" || true
+          rm -f "$HOME/Library/MobileDevice/Provisioning Profiles/build_pp.mobileprovision"
+          rm -f "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles/build_pp.mobileprovision"
+
+  android:
+    name: 🤖 Android to Google Play
+    needs: version
+    if: inputs.platforms != 'ios'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - name: 📥 Check out
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # First, because everything below takes minutes and a missing secret is a second. The service
+      # account is only needed when something is uploaded. As in the iOS job, the storage variable is
+      # checked like the secrets.
+      - name: 🔐 Check the secrets are set
+        id: secrets
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
+          AZURE_STORAGE_SAS_TOKEN: ${{ secrets.AZURE_STORAGE_SAS_TOKEN }}
+          AZURE_STORAGE_CONTAINER: ${{ vars.AZURE_STORAGE_CONTAINER }}
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          TRACK: ${{ inputs.track || 'internal' }}
+        run: |
+          set -euo pipefail
+          missing=""
+          for name in ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS \
+                      ANDROID_KEY_PASSWORD AZURE_STORAGE_ACCOUNT AZURE_STORAGE_SAS_TOKEN \
+                      AZURE_STORAGE_CONTAINER; do
+            [ -n "${!name:-}" ] || missing="$missing $name"
+          done
+          if [ "$TRACK" != "none" ] && [ -z "${PLAY_SERVICE_ACCOUNT_JSON:-}" ]; then
+            missing="$missing PLAY_SERVICE_ACCOUNT_JSON"
+          fi
+          echo "track=$TRACK" >> "$GITHUB_OUTPUT"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repository secrets or variables:$missing"
+            exit 1
+          fi
+          echo "All secrets and variables for track '$TRACK' are set."
+
+      - name: 🧰 Set up the Android build
+        uses: ./.github/actions/setup-android
+
+      - name: 🧠 Fetch the model and export it to LiteRT
+        uses: ./.github/actions/fetch-model
+        with:
+          format: litert
+          run-id: ${{ inputs.run_id }}
+          variant: ${{ inputs.variant || 'c' }}
+          azure-storage-account: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
+          azure-storage-container: ${{ vars.AZURE_STORAGE_CONTAINER }}
+          azure-storage-sas-token: ${{ secrets.AZURE_STORAGE_SAS_TOKEN }}
+
+      # The upload key, not the app signing key: Play App Signing keeps the latter, so losing this one
+      # is recoverable through the Play Console. It lives in the runner's temp folder and nowhere else.
+      - name: 🔑 Install the keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          set -euo pipefail
+          echo -n "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/upload.jks"
+          echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/upload.jks" >> "$GITHUB_ENV"
+
+      - name: 🏗️ Test, build and sign the bundle
+        id: build
+        # As for iOS: everything from outside travels through the environment, never through `${{ }}`
+        # inside the script, where a quote in a dispatch input would run as code.
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          RELEASE_VERSION: ${{ needs.version.outputs.version }}
+          RELEASE_BUILD: ${{ needs.version.outputs.build-number }}
+          INPUT_VARIANT: ${{ inputs.variant || 'c' }}
+        run: |
+          set -euo pipefail
+          # The script also checks that the bundle carries the upload key's certificate.
+          src/scripts/release_android.sh --variant "${INPUT_VARIANT:-c}" --version "$RELEASE_VERSION" --build "$RELEASE_BUILD"
+          AAB="artifacts/android/JassCardEye-${RELEASE_VERSION}-${RELEASE_BUILD}.aab"
+          MAPPING="artifacts/android/mapping-${RELEASE_VERSION}-${RELEASE_BUILD}.txt"
+          [ -f "$MAPPING" ] || MAPPING=""
+          SYMBOLS="artifacts/android/native-debug-symbols-${RELEASE_VERSION}-${RELEASE_BUILD}.zip"
+          [ -f "$SYMBOLS" ] || SYMBOLS=""
+          echo "aab=$AAB" >> "$GITHUB_OUTPUT"
+          echo "mapping=$MAPPING" >> "$GITHUB_OUTPUT"
+          echo "symbols=$SYMBOLS" >> "$GITHUB_OUTPUT"
+
+      - name: 💾 Keep the build as an artefact
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: android-build
+          path: |
+            artifacts/android/*.aab
+            artifacts/android/mapping-*.txt
+            artifacts/android/native-debug-symbols-*.zip
+            src/app/android/app/src/main/assets/models/models.json
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: 🚀 Upload to Google Play
+        if: ${{ steps.secrets.outputs.track != 'none' }}
+        # Pinned to a commit, because this step holds a service account with release rights: a tag can be
+        # moved to other code by whoever controls that repository, a commit cannot. To update, look the
+        # new release's commit up and replace both the commit and the version beside it.
+        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: ch.yarx.jasscardeye
+          releaseFiles: ${{ steps.build.outputs.aab }}
+          mappingFile: ${{ steps.build.outputs.mapping }}
+          # LiteRT's native symbol tables. Inside the bundle as well, but on an upload through the API Play
+          # lists them only when they are uploaded like mapping.txt - see "Native debug symbols" in
+          # src/app/android/README.md.
+          debugSymbols: ${{ steps.build.outputs.symbols }}
+          tracks: ${{ steps.secrets.outputs.track }}
+          # Completed by default, so every run puts a build in front of the internal testers that can then be
+          # promoted in the Play Console - the way a TestFlight upload reaches its testers. Google accepts only
+          # drafts while an app has never been rolled out anywhere, so an app's first release goes out by hand.
+          status: ${{ inputs.status || 'completed' }}
+
+      - name: 🧹 Remove the keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/upload.jks"

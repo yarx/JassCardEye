@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+/* The app's own look: a near-black ground and the green it uses for everything to tap. */
+@theme {
+  --color-ground: #121212;
+  --color-panel: #1c1c1e;
+  --color-line: #2c2c2e;
+  --color-jass: #30d158;
+  --color-jass-dark: #248a3d;
+  --color-muted: #a1a1aa;
+}

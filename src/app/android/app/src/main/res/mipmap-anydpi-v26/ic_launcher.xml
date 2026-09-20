@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The iOS icon, scaled into the adaptive icon's safe zone on its own felt green, as the background
+     layer; the art carries everything, so the foreground stays empty. The monochrome layer is what
+     a launcher tints when themed icons are switched on. Both bitmaps come from
+     src/tools/make_android_icon.py. -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@mipmap/ic_launcher_background" />
+    <foreground android:drawable="@android:color/transparent" />
+    <monochrome android:drawable="@mipmap/ic_launcher_monochrome" />
+</adaptive-icon>

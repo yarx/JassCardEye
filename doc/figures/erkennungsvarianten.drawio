@@ -1,0 +1,76 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Erkennungsansätze" id="Erkennungsansätze">
+    <mxGraphModel dx="1414" dy="1202" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="lblA" parent="1" style="text;html=1;align=center;verticalAlign=middle;fontSize=13;fontStyle=1;fontColor=#4d4d4d;rounded=0;" value="A" vertex="1">
+          <mxGeometry height="64" width="40" x="60" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="imgA" parent="1" style="rounded=0;arcSize=6;whiteSpace=wrap;html=1;fillColor=light-dark(#FFFFFF,#FFFFFF);strokeColor=light-dark(#999999,#FFFF00);fontSize=11;verticalAlign=middle;strokeWidth=2;fontColor=light-dark(#000000,#000000);" value="Bild 640×640" vertex="1">
+          <mxGeometry height="64" width="150" x="130" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="clsA" parent="1" style="rounded=0;arcSize=6;whiteSpace=wrap;html=1;fillColor=light-dark(#FFFFFF,#FFFFFF);strokeColor=light-dark(#4D4D4D,#6666FF);fontSize=11;verticalAlign=middle;strokeWidth=2;fontColor=light-dark(#000000,#000000);" value="Klassifikator&lt;br&gt;73 Klassen (72 + none)" vertex="1">
+          <mxGeometry height="64" width="150" x="320" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="outA" parent="1" style="rounded=0;arcSize=6;whiteSpace=wrap;html=1;fillColor=light-dark(#FFFFFF,#FFFFFF);strokeColor=light-dark(#4D4D4D,#009900);fontSize=11;verticalAlign=middle;strokeWidth=2;fontColor=light-dark(#000000,#000000);" value="Klasse" vertex="1">
+          <mxGeometry height="64" width="150" x="510" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="lblB" parent="1" style="text;html=1;align=center;verticalAlign=middle;fontSize=13;fontStyle=1;fontColor=#4d4d4d;rounded=0;" value="B" vertex="1">
+          <mxGeometry height="64" width="40" x="60" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="imgB" parent="1" style="rounded=0;arcSize=6;whiteSpace=wrap;html=1;fillColor=light-dark(#FFFFFF,#FFFFFF);strokeColor=light-dark(#999999,#FFFF00);fontSize=11;verticalAlign=middle;strokeWidth=2;fontColor=light-dark(#000000,#000000);" value="Bild 640×640" vertex="1">
+          <mxGeometry height="64" width="150" x="130" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="loc" parent="1" style="rounded=0;arcSize=6;whiteSpace=wrap;html=1;fillColor=light-dark(#FFFFFF,#FFFFFF);strokeColor=light-dark(#4D4D4D,#6666FF);fontSize=11;verticalAlign=middle;strokeWidth=2;fontColor=light-dark(#000000,#000000);" value="OBB-Detektor&lt;br&gt;1 Klasse «Karte»" vertex="1">
+          <mxGeometry height="64" width="150" x="320" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="rect" parent="1" style="rounded=0;arcSize=6;whiteSpace=wrap;html=1;fillColor=light-dark(#FFFFFF,#FFFFFF);strokeColor=light-dark(#4D4D4D,#FFFF00);fontSize=11;verticalAlign=middle;strokeWidth=2;fontColor=light-dark(#000000,#000000);" value="Entzerrung&lt;br&gt;(Homographie)" vertex="1">
+          <mxGeometry height="64" width="150" x="510" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="clsB" parent="1" style="rounded=0;arcSize=6;whiteSpace=wrap;html=1;fillColor=light-dark(#FFFFFF,#FFFFFF);strokeColor=light-dark(#4D4D4D,#6666FF);fontSize=11;verticalAlign=middle;strokeWidth=2;fontColor=light-dark(#000000,#000000);" value="Klassifikator&lt;br&gt;72 Klassen" vertex="1">
+          <mxGeometry height="64" width="150" x="700" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="outB" parent="1" style="rounded=0;arcSize=6;whiteSpace=wrap;html=1;fillColor=light-dark(#FFFFFF,#FFFFFF);strokeColor=light-dark(#4D4D4D,#009900);fontSize=11;verticalAlign=middle;strokeWidth=2;fontColor=light-dark(#000000,#000000);" value="Klasse&lt;br&gt;+ Box" vertex="1">
+          <mxGeometry height="64" width="150" x="890" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="lblC" parent="1" style="text;html=1;align=center;verticalAlign=middle;fontSize=13;fontStyle=1;fontColor=#4d4d4d;rounded=0;" value="C" vertex="1">
+          <mxGeometry height="64" width="40" x="60" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="imgC" parent="1" style="rounded=0;arcSize=6;whiteSpace=wrap;html=1;fillColor=light-dark(#FFFFFF,#FFFFFF);strokeColor=light-dark(#999999,#FFFF00);fontSize=11;verticalAlign=middle;strokeWidth=2;fontColor=light-dark(#000000,#000000);" value="Bild 640×640" vertex="1">
+          <mxGeometry height="64" width="150" x="130" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="det" parent="1" style="rounded=0;arcSize=6;whiteSpace=wrap;html=1;fillColor=light-dark(#FFFFFF,#FFFFFF);strokeColor=light-dark(#4D4D4D,#6666FF);fontSize=11;verticalAlign=middle;strokeWidth=2;fontColor=light-dark(#000000,#000000);" value="Detektor&lt;br&gt;72 Klassen" vertex="1">
+          <mxGeometry height="64" width="150" x="320" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="outC" parent="1" style="rounded=0;arcSize=6;whiteSpace=wrap;html=1;fillColor=light-dark(#FFFFFF,#FFFFFF);strokeColor=light-dark(#4D4D4D,#009900);fontSize=11;verticalAlign=middle;strokeWidth=2;fontColor=light-dark(#000000,#000000);" value="Klasse&lt;br&gt;+ Box" vertex="1">
+          <mxGeometry height="64" width="150" x="510" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="a1" edge="1" parent="1" source="imgA" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;endSize=6;strokeColor=#4d4d4d;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="clsA">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a2" edge="1" parent="1" source="clsA" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;endSize=6;strokeColor=#4d4d4d;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="outA">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="b1" edge="1" parent="1" source="imgB" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;endSize=6;strokeColor=#4d4d4d;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="loc">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="b2" edge="1" parent="1" source="loc" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;endSize=6;strokeColor=#4d4d4d;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="rect">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="b3" edge="1" parent="1" source="rect" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;endSize=6;strokeColor=#4d4d4d;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="clsB">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="b4" edge="1" parent="1" source="clsB" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;endSize=6;strokeColor=#4d4d4d;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="outB">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c1" edge="1" parent="1" source="imgC" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;endSize=6;strokeColor=#4d4d4d;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="det">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c2" edge="1" parent="1" source="det" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;endSize=6;strokeColor=#4d4d4d;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="outC">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

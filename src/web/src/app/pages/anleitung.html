@@ -1,0 +1,43 @@
+<article class="mx-auto max-w-3xl px-4 py-12">
+  <h1 class="text-4xl font-extrabold tracking-tight">Anleitung</h1>
+  <p class="mt-4 text-lg leading-relaxed text-zinc-300">
+    Gezählt wird nach dem Spiel: Die Karten, die eine Partei gewonnen hat, werden der Reihe nach vor der
+    Kamera auf einen Stapel gelegt. Die App erkennt jeweils die oberste Karte und rechnet mit.
+  </p>
+
+  <h2 class="mt-12 text-2xl font-bold">Eine Zählung</h2>
+  <ol class="mt-4 list-decimal space-y-3 pl-6 leading-relaxed text-zinc-300 marker:text-jass">
+    <li><strong class="text-white">Zählen starten</strong> antippen.</li>
+    <li>Blatt, Spielart, letzten Stich und Faktor wählen – das weiss nach dem Spiel ja jede Partei – und nochmals <strong class="text-white">Zählen starten</strong> antippen.</li>
+    <li>Die Karten eine nach der anderen oben auf den Stapel legen. Jede gezählte Karte bestätigt die App mit einem kurzen Ton und einer Vibration. Ton und Vibration lassen sich in den Einstellungen unter «Rückmeldung» einstellen oder abschalten.</li>
+    <li>Die Punkte stehen links, die des Gegners rechts. Mit <strong class="text-white">Fertig</strong> endet die Zählung, das Resultat steht bis zur nächsten Zählung auf dem Startbildschirm.</li>
+  </ol>
+
+  <h2 class="mt-12 text-2xl font-bold">So klappt der Scan</h2>
+  <div class="mt-4 grid gap-4 sm:grid-cols-2">
+    @for (rule of rules; track rule.title) {
+      <div class="rounded-2xl bg-panel p-5 ring-1 ring-line">
+        <h3 class="font-semibold text-jass">{{ rule.title }}</h3>
+        <p class="mt-2 text-sm leading-relaxed text-zinc-300">{{ rule.text }}</p>
+      </div>
+    }
+  </div>
+
+  <h2 class="mt-12 text-2xl font-bold">Korrigieren</h2>
+  <ul class="mt-4 list-disc space-y-3 pl-6 leading-relaxed text-zinc-300 marker:text-jass">
+    <li>Falsch erkannt? Dann die Karte in der Liste unten antippen – sie wird aus der Zählung entfernt.</li>
+    <li><strong class="text-white">Karte fehlt?</strong> Über diesen Knopf lässt sich eine Karte von Hand hinzufügen, etwa eine, die sehr flach liegt.</li>
+    <li><strong class="text-white">Reset</strong> leert den Stapel und beginnt von vorne.</li>
+  </ul>
+
+  <h2 class="mt-12 text-2xl font-bold">Diese Karten kennt die App</h2>
+  <ul class="mt-4 space-y-3 leading-relaxed text-zinc-300">
+    <li><strong class="text-white">Französisch:</strong> die Schweizer Jasskarten mit französischen Farben von AGMüller (Neuhausen) – Kreuz, Ecken, Herz, Schaufel.</li>
+    <li><strong class="text-white">Deutsch:</strong> die Schaffhauser Spielkarten «Opti-Quatro» von AGMüller – Eichel, Schellen, Rosen, Schilten.</li>
+  </ul>
+  <p class="mt-4 leading-relaxed text-zinc-300">
+    Andere Motive – auch von anderen Herstellern mit denselben Farben – erkennt die App nicht zuverlässig.
+    Spielt ihr mit einem anderen Blatt? <a routerLink="/support" class="font-semibold text-jass underline">Meldet euch</a>,
+    mit Fotos der 36 Karten lässt sich die Erkennung darauf trainieren.
+  </p>
+</article>

@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="Cards/JassCardEye.Dataset.Cards.csproj" />
+  <Project Path="Generation/JassCardEye.Dataset.Generation.csproj" />
+  <Project Path="Cli/JassCardEye.Dataset.Cli.csproj" />
+  <Project Path="Viewer/JassCardEye.Dataset.Viewer.csproj" />
+  <Project Path="Checks/JassCardEye.Dataset.Checks.csproj" />
+</Solution>

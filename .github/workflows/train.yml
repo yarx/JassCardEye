@@ -1,0 +1,256 @@
+name: train
+
+# Rents a GPU, hands the pod everything it needs, waits just long enough to see it come alive, and
+# leaves. The training runs for hours after this job is over.
+#
+# The training does not run inside this job on purpose: a GitHub job dies at six hours, which a
+# four-variant run exceeds, and a lost connection would be a lost training.
+#
+# The pod is the run: docker/start.sh clones the commit, trains, uploads to Azure as it goes,
+# reports to Telegram, and terminates itself. This job's only questions are "did the pod start" and
+# "did it get far enough to write its first manifest" - both answered in minutes, both worth
+# answering here rather than on a phone an hour later.
+
+on:
+  workflow_dispatch:
+    inputs:
+      variants:
+        description: 'Approaches to train (comma separated, or "all")'
+        default: 'c'
+      size:
+        description: 'Model size'
+        type: choice
+        options: [n, s, m]
+        default: n
+      count:
+        description: 'Synthetic training images (half French, half German)'
+        default: '200000'
+      seed:
+        description: 'Dataset seed - same seed means bit-identical images'
+        default: '1'
+      epochs:
+        default: '20'
+      imgsz:
+        default: '640'
+      batch:
+        default: '64'
+      max_hours:
+        description: 'Ceiling for the training itself; the pod stops itself at this'
+        default: '20'
+      image_tag:
+        description: 'Trainer image tag (blank = latest; a commit of main runs the image built from it)'
+        default: ''
+
+concurrency:
+  group: train-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  launch:
+    runs-on: ubuntu-latest
+    # Minutes, not hours. Everything this job does is bounded: create a pod, watch for its first
+    # sign of life, report where to look. If it ever approaches this ceiling something is wrong.
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      RUNPOD_API_KEY: ${{ secrets.RUNPOD_API_KEY }}
+      AZURE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
+      AZURE_CONTAINER: ${{ vars.AZURE_STORAGE_CONTAINER }}
+
+    steps:
+      - name: 📥 Check out
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # <date>-<commit>, because this is the name of the folder the results live in: sortable,
+      # readable, and it says which code produced them. The Actions run id goes to the pod
+      # separately and lands in the manifest, where nobody has to recognise it as a number.
+      - name: 🏷️ Name this run
+        run: echo "RUN_ID=$(date -u +%Y%m%d-%H%M)-$(git rev-parse --short=7 HEAD)" >> "$GITHUB_ENV"
+
+      # :latest unless told otherwise. image.yml builds from main only and also tags every build with
+      # its commit, so image_tag holding such a commit runs an earlier image - the way back when a
+      # docker/ change broke the pod, until the fix is merged. A tag that was never pushed gets a pod
+      # that cannot pull anything and sits there until the wait below reclaims it.
+      - name: 🐳 Choose the image
+        id: image
+        # Through the environment, never through `${{ }}` in the script: GitHub substitutes those
+        # textually before bash sees the line, so a dispatch input can carry shell syntax. See the
+        # note on the next step, which is the one holding the secrets.
+        env:
+          REPO: ${{ github.repository }}
+          IN_IMAGE_TAG: ${{ inputs.image_tag }}
+        run: |
+          set -euo pipefail
+          # A tag is letters, digits, dot, underscore and dash. Checked rather than trusted, because
+          # this line writes a step output, and a newline in the value would let it write others.
+          case "$IN_IMAGE_TAG" in
+            '') TAG=latest ;;
+            *[!A-Za-z0-9._-]*)
+              echo "::error::image_tag may only hold letters, digits, dot, underscore and dash."
+              exit 1 ;;
+            *) TAG="$IN_IMAGE_TAG" ;;
+          esac
+          IMAGE="ghcr.io/$(printf '%s' "$REPO" | tr '[:upper:]' '[:lower:]')/trainer"
+          echo "ref=${IMAGE}:${TAG}" >> "$GITHUB_OUTPUT"
+          echo "Using ${IMAGE}:${TAG}"
+
+      - name: 🚀 Rent a GPU and start the run
+        id: pod
+        env:
+          # The clone credential. It is scoped to this repository, expires with this job, and is
+          # used in the pod's first seconds - which is why the next step waits rather than exiting
+          # immediately: while this job lives, the token the pod is cloning with is still valid.
+          # Named here exactly as the pod will see them, because that is what they are: the
+          # environment docker/start.sh wakes up in. jq reads them straight out of this block below,
+          # so each value appears once instead of once here, once as a --arg and once in an object.
+          REPO_SLUG: ${{ github.repository }}
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GIT_SHA: ${{ github.sha }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          POD_TERMINATE_KEY: ${{ secrets.RUNPOD_API_KEY }}
+          AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
+          AZURE_STORAGE_SAS_TOKEN: ${{ secrets.AZURE_STORAGE_SAS_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          # The dispatch inputs, and the image ref that was built from one of them. They come
+          # through the environment because `${{ }}` is substituted textually before bash parses
+          # the line - a value carrying a quote would run as code, in this step, which holds the
+          # clone token, the RunPod key, the Azure SAS token and the Telegram token. The IN_ prefix
+          # keeps them out of the jq selection below, so none of them reaches the pod by accident.
+          IN_VARIANTS: ${{ inputs.variants }}
+          IN_SIZE: ${{ inputs.size }}
+          IN_COUNT: ${{ inputs.count }}
+          IN_SEED: ${{ inputs.seed }}
+          IN_EPOCHS: ${{ inputs.epochs }}
+          IN_IMGSZ: ${{ inputs.imgsz }}
+          IN_BATCH: ${{ inputs.batch }}
+          IN_MAX_HOURS: ${{ inputs.max_hours }}
+          IMAGE_REF: ${{ steps.image.outputs.ref }}
+        run: |
+          set -euo pipefail
+
+          # Checked, not trusted because the dispatch form looks like a form. Two reasons beyond
+          # the injection the environment already closed: these values are passed on to the pod as
+          # a word list, so a stray one becomes an argument to the training; and a wrong number
+          # here is not noticed until a rented GPU has been failing for hours.
+          number() {  # <name> <value>
+            case "$2" in
+              ''|*[!0-9]*)
+                echo "::error::$1 must be a whole number, got '$2'"; exit 1 ;;
+            esac
+            [ "$2" -gt 0 ] || { echo "::error::$1 must be greater than zero."; exit 1; }
+          }
+          number count "$IN_COUNT"
+          number seed "$IN_SEED"
+          number epochs "$IN_EPOCHS"
+          number imgsz "$IN_IMGSZ"
+          number batch "$IN_BATCH"
+          number max_hours "$IN_MAX_HOURS"
+
+          # "all", or a comma separated list of the four approaches - the same set
+          # src/scripts/run_training.sh expands and src/training/train.py accepts.
+          [ -n "$IN_VARIANTS" ] || { echo "::error::variants must not be empty."; exit 1; }
+          if [ "$IN_VARIANTS" != all ]; then
+            for variant in $(printf '%s' "$IN_VARIANTS" | tr ',' ' '); do
+              case "$variant" in
+                a|b1|b2|c) ;;
+                *) echo "::error::variants must be 'all' or a comma separated list of a, b1, b2, c - got '$variant'."
+                   exit 1 ;;
+              esac
+            done
+          fi
+
+          case "$IN_SIZE" in
+            n|s|m) ;;
+            *) echo "::error::size must be n, s or m - got '$IN_SIZE'."; exit 1 ;;
+          esac
+
+          # Identifiers are the "GPU ID" column of https://docs.runpod.io/references/gpu-types -
+          # the full product name, not the short display name. Offered in this order; RunPod takes
+          # the first one that is free, and for a model this small even the last is ample.
+          TYPES=$(jq -cn '$ARGS.positional' --args \
+            "NVIDIA A100 80GB PCIe" \
+            "NVIDIA H100 80GB HBM3" \
+            "NVIDIA H100 NVL" \
+            "NVIDIA H100 PCIe" \
+            "NVIDIA L40S")
+
+          # A single space separated string on purpose: docker/start.sh hands it to
+          # src/scripts/run_training.sh unquoted, as a word list.
+          export TRAIN_ARGS="--variant $IN_VARIANTS --size $IN_SIZE \
+            --count $IN_COUNT --seed $IN_SEED \
+            --epochs $IN_EPOCHS --imgsz $IN_IMGSZ \
+            --batch $IN_BATCH --workers 16 --device 0"
+          # Arithmetic expansion evaluates what it is given, and an array subscript inside it runs
+          # commands - which is why max_hours is checked to be a plain number above.
+          export MAX_RUN_SECONDS=$(( IN_MAX_HOURS * 3600 ))
+          export AZURE_STORAGE_CONTAINER="${AZURE_CONTAINER:-training-runs}"
+
+          # Everything the pod needs for its whole life, handed over once at creation. Taken from
+          # this step's own environment, so the list below is the only place the names appear.
+          # Unset optional secrets become empty strings, which is what "not configured" means
+          # everywhere else in this pipeline.
+          ENV_JSON=$(jq -cn 'env | {RUN_ID, REPO_SLUG, REPO_TOKEN, GIT_SHA, TRAIN_ARGS,
+                                    MAX_RUN_SECONDS, POD_TERMINATE_KEY,
+                                    AZURE_STORAGE_ACCOUNT, AZURE_STORAGE_CONTAINER,
+                                    AZURE_STORAGE_SAS_TOKEN,
+                                    TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, GITHUB_RUN_ID}
+                                 | map_values(. // "")')
+
+          # 120 GB of container disk. The generator writes every variant, about 86 KB per image
+          # (measured on 1000), so 200 000 images are ~17 GB and 500 000 ~43 GB - which the 60 GB
+          # this used to be would not have held beside the checkout, the build and the weights.
+          # A million images (~86 GB) still fits. The disk costs next to nothing while a pod runs.
+          POD_ID=$(curl -sf -X POST https://rest.runpod.io/v1/pods \
+            -H "Authorization: Bearer $RUNPOD_API_KEY" -H "Content-Type: application/json" \
+            -d "$(jq -cn --arg name "$RUN_ID" --arg image "$IMAGE_REF" \
+                        --argjson types "$TYPES" --argjson env "$ENV_JSON" '{
+                  name: $name, imageName: $image,
+                  gpuTypeIds: $types, gpuTypePriority: "custom", gpuCount: 1,
+                  containerDiskInGb: 120, env: $env
+                }')" | jq -r '.id')
+
+          [ -n "$POD_ID" ] && [ "$POD_ID" != "null" ] || { echo "No pod id returned."; exit 1; }
+          echo "pod_id=$POD_ID" >> "$GITHUB_OUTPUT"
+          echo "Pod $POD_ID created for run $RUN_ID"
+
+      - name: ⏳ Wait for the pod to come alive
+        if: steps.pod.outputs.pod_id != ''
+        env:
+          AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
+          AZURE_STORAGE_CONTAINER: ${{ vars.AZURE_STORAGE_CONTAINER }}
+          AZURE_STORAGE_SAS_TOKEN: ${{ secrets.AZURE_STORAGE_SAS_TOKEN }}
+          # Straight out of RunPod's answer, so it is somebody else's string - and this step holds
+          # the key that can delete pods. Through the environment like everything else.
+          POD_ID: ${{ steps.pod.outputs.pod_id }}
+        run: |
+          if python3 src/scripts/wait_for_run.py --run-id "$RUN_ID"; then exit 0; fi
+          echo "::error::The pod never wrote a manifest."
+          echo "Terminating it rather than leaving a GPU billing for nothing."
+          curl -sf -X DELETE "https://rest.runpod.io/v1/pods/${POD_ID}" \
+            -H "Authorization: Bearer $RUNPOD_API_KEY" >/dev/null && echo "Pod removed."
+          exit 1
+
+      - name: 👀 Where to watch
+        if: always() && steps.pod.outputs.pod_id != ''
+        env:
+          POD_ID: ${{ steps.pod.outputs.pod_id }}
+          IMAGE_REF: ${{ steps.image.outputs.ref }}
+          IN_MAX_HOURS: ${{ inputs.max_hours }}
+        run: |
+          {
+            echo "### Run \`${RUN_ID}\`"
+            echo ""
+            echo "| | |"
+            echo "|---|---|"
+            echo "| pod | \`${POD_ID}\` |"
+            echo "| image | \`${IMAGE_REF}\` |"
+            echo "| results | \`${AZURE_CONTAINER:-training-runs}/${RUN_ID}/\` |"
+            echo "| ceiling | ${IN_MAX_HOURS} h |"
+            echo ""
+            echo "The pod continues on its own and terminates itself when the run ends."
+            echo "Progress arrives by Telegram; \`manifest.json\` in the run folder is the record."
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,40 @@
+\section{Repository und Reproduzierbarkeit}\label{app:repro}
+
+Der gesamte Code liegt unter \url{https://github.com/yarx/JassCardEye}.
+Die wichtigsten Verzeichnisse:
+
+\begin{description}
+  \item[Dataset] \path{src/tools/dataset/}: .NET-Lösung mit Domänenmodell, Render-Engine, CLI, Viewer und Checks.
+  \item[Daten] \path{data/}: 72 Kartenscans, 25 reale Negativfotos und das reale Validierungsset mit Bildern und Quell-Labels.
+  \item[\code{src/training/}] Trainings-, Export- und Fetch-Skripte (Python, Ultralytics) sowie die Pipeline-Dokumentation.
+  \item[Pipeline] \path{src/scripts/} und \path{docker/} enthalten Laufskript und Container. Die Workflows liegen unter \path{.github/workflows/}. Der Release-Workflow baut beide Apps mit demselben Modell.
+  \item[Apps] \path{src/app/ios/} und \path{src/app/android/}: SwiftUI und Kotlin.
+  \item[\code{context/}] Projektwissen: Vision, Architektur inklusive der Tabelle aller Werte zwischen Kamera und gezählter Karte.
+  \item[\code{doc/}] Diese Arbeit und das Arbeitsjournal (LaTeX).
+\end{description}
+
+Datensatz und Training lassen sich mit drei Befehlen reproduzieren. Derselbe
+Seed erzeugt auf jeder Maschine bit-identische Bilder. Die handgelabelten
+Validierungsdaten sind versioniert, synthetische Daten und Trainingsartefakte
+werden bewusst erzeugt statt eingecheckt (Abschnitt~\ref{sec:repro}).
+
+\begin{verbatim}
+dotnet run -c Release --project src/tools/dataset/Cli -- \
+    generate --count 200000 --seed 1
+dotnet run -c Release --project src/tools/dataset/Cli -- \
+    rebuild --dataset data/real/val
+src/training/.venv/bin/python src/training/train.py --variant c
+\end{verbatim}
+
+Ein vollständiger Cloud-Lauf wird mit \code{src/scripts/run\_training.sh
+--variant all} oder über den Workflow \code{train} gestartet. Jeder Lauf
+liegt unter \code{training-runs/<Datum-Commit>/} in Azure Blob Storage mit
+einem Manifest, das Commit, Seed, Bildanzahl, Hardware und Metriken nennt.
+Das veröffentlichte Repository enthält den Endstand des Projekts ohne die
+Entwicklungsgeschichte. Die Manifeste der Trainingsläufe nennen deshalb
+Commits des privaten Entwicklungsrepositorys. Generator, Kartenscans,
+Negativfotos und Trainingsskript der Datenmengenreihe aus
+Kapitel~\ref{sec:experimente} entsprechen dem veröffentlichten Stand.
+\code{src/training/fetch\_run.py
+--list} zeigt alle Läufe, \code{--export} erzeugt daraus die Modelle für
+beide Apps samt \code{models.json}.

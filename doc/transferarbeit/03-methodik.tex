@@ -1,0 +1,155 @@
+\section{Lösungskonzept und Methodik}\label{sec:methodik}
+
+\subsection{Anforderungen}\label{sec:anforderungen}
+
+Tabelle~\ref{tab:anforderungen} fasst die Anforderungen zusammen, die aus der
+Problemstellung und der Themeneingabe abgeleitet wurden.
+
+\begin{table}[H]
+\centering\small
+\begin{tabularx}{\textwidth}{@{}lY@{}}
+\toprule
+\textbf{Bereich} & \textbf{Anforderung} \\
+\midrule
+Erkennung & Die App erkennt Klasse und Position der obersten Karte bei wechselndem Winkel, Abstand, Licht und Hintergrund. Auf Frames ohne gültige Karte darf sie nichts erkennen. Eine falsch gezählte Karte wiegt schwerer als eine übersehene. \\
+Latenz & Die Erkennung läuft direkt auf dem Gerät in Echtzeit. Das Ziel liegt unter 50\,ms pro Bild. \\
+Daten & Aus wenigen Kartenscans lassen sich Trainingsbilder in beliebiger Menge erzeugen. Dieselbe Konfiguration liefert auf jeder Maschine bit-identische Bilder. \\
+Vergleich & Drei Erkennungsansätze werden mit denselben Bildern trainiert und auf realen Aufnahmen verglichen. \\
+Plattform & Datengenerierung und Training sollen möglichst unabhängig vom Betriebssystem laufen. Cloud-Anbieter und Speicherlösungen müssen austauschbar bleiben, damit das Projekt nicht an eine Plattform gebunden ist. \\
+App & Die App erkennt Karten live über die Kamera und zählt ihre Punkte nach den Jass-Regeln. iOS und Android verwenden dasselbe Modell. \\
+Nachvollziehbarkeit & Jeder Trainingslauf lässt sich auf Commit, Seed und Bildanzahl zurückführen. Für jedes in einer App enthaltene Modell ist der zugehörige Lauf dokumentiert. \\
+\bottomrule
+\end{tabularx}
+\caption{Anforderungen an das System.}
+\label{tab:anforderungen}
+\end{table}
+
+\subsection{Systemarchitektur}\label{sec:architektur}
+
+Das System besteht aus einer .NET-10-Lösung für Datenerzeugung und
+Sichtkontrolle, Python-Skripten für Training und Export sowie zwei Apps.
+Abbildung~\ref{fig:architektur} zeigt den Weg vom Kartenscan bis zur App.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{systemarchitecture.drawio.png}
+\caption{Systemarchitektur und Datenfluss. Gelb hinterlegt sind eigene Werkzeuge, blau die Daten.}
+\label{fig:architektur}
+\end{figure}
+
+Das Projekt \code{Cards} legt die 72 Klassen und ihre IDs fest:
+$\mathrm{ID}=9\cdot\mathrm{Farbe}+\mathrm{Wert}$. Das französische Blatt
+belegt die IDs 0--35, das deutsche Blatt die IDs 36--71. Datengenerator,
+Training und Apps verwenden diese Zuordnung. \code{Generation} rendert
+die Bilder mit SkiaSharp \cite{skiasharp2025}. Die \code{Dataset CLI}
+startet die Erzeugung, zeigt den geplanten Winkel- und Blattverlauf an
+und stellt abgeleitete Datensatzteile wieder her. Das Dataset Tool dient
+zur Sichtkontrolle, zum Labeln realer Fotos und zur Analyse
+aufgezeichneter Sessions. Das Training verwendet Ultralytics und
+PyTorch \cite{paszke2019pytorch}.
+
+\subsection{Variantenbildung: drei Erkennungsansätze}\label{sec:varianten}
+
+Verglichen werden drei Ansätze, die sich darin unterscheiden, ob und wie
+sie die oberste Karte lokalisieren (Abbildung~\ref{fig:varianten}). Alle
+müssen für den Einsatz auf dem Smartphone schnell genug sein.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{erkennungsvarianten.drawio.png}
+\caption{Die drei Erkennungsansätze. A klassifiziert das ganze Bild, B lokalisiert die Karte mit einer orientierten Box und klassifiziert den entzerrten Ausschnitt, C erkennt Box und Klasse in einem Schritt.}
+\label{fig:varianten}
+\end{figure}
+
+A klassifiziert das ganze Bild in 72 Kartenklassen und die Klasse
+\code{none}, liefert aber keine Position. B findet zuerst die vier Ecken
+der obersten Karte mit einer orientierten Box. Der entzerrte Ausschnitt
+wird danach separat klassifiziert. Das kostet Zeit. Fehler der ersten
+Stufe wirken sich auf die zweite aus. C erkennt Klasse und
+achsenparallele Box in einem Schritt. Alle drei Ansätze erhalten
+dieselben gerenderten Bilder. Nur ihre Labels unterscheiden sich. So
+werden die Ansätze auf gleicher Datengrundlage verglichen. Für B wurde
+eine orientierte Box gewählt, weil eine achsenparallele Box bei gedrehten
+Karten viel Hintergrund im Ausschnitt lässt.
+
+\subsection{Validierungsstrategie}\label{sec:validierung}
+
+Trainiert wird ausschliesslich auf synthetischen Bildern, geprüft auf
+selbst aufgenommenen realen Fotos. Der aktuelle Validierungsdatensatz
+umfasst 813 Frames. Auf 513 ist eine Karte gelabelt, 300 sind Negative.
+Die realen Aufnahmen stammen aus Videos, einer Fotoserie und
+Negativfotos. Die Ergebnisvergleiche nennen jeweils den verwendeten
+Validierungsstand. Die abschliessende Datenmengenreihe berichtet
+\map{50} für die Detektoren C und B$_1$ sowie die Top-1-Genauigkeit
+für die Klassifikatoren A und B$_2$. B$_2$ erhält dabei Ausschnitte
+aus den von Hand gesetzten Ecken. Viele Frames stammen aus
+denselben Videos und sind deshalb nicht unabhängig. Ein separates
+Testset fehlt (Abschnitt~\ref{sec:grenzen}).
+
+\subsection{Messaufbau und Unsicherheit}\label{sec:setup}
+
+Für die abschliessenden Vergleiche wurden YOLO11n-Modelle mit
+vortrainierten Gewichten, 640 Pixel Bildgrösse und 20 Epochen trainiert.
+Das Trainingsrezept steht in Abschnitt~\ref{sec:rezept}. Seed,
+Bildanzahl und Commit sind für die ausgewerteten Modelle dokumentiert.
+Bei jeder Bildzahl werden alle vier Modelle mit denselben gerenderten
+Bildern trainiert. Die Datenmengenreihe verwendet sechs Bildzahlen bei
+gleichem Generatorstand, Seed und Trainingsplan. Die Modelle wurden
+auf denselben 813 realen Frames ausgewertet. Werte aus unterschiedlichen
+Validierungsständen werden nicht direkt verglichen. Trainiert wurde
+auf einem MacBook Pro M4 Max sowie auf gemieteten NVIDIA A100 und H100 \cite{runpod2025gpu}.
+
+Die Laufzeit der eingereichten Variante~C wurde auf vier Smartphones
+gemessen (Tabelle~\ref{tab:geraete}). Die Datenmengenreihe enthält keinen gemeinsamen
+Latenzvergleich aller Ansätze.
+
+Jede ausgewertete Konfiguration wurde nur mit einem Trainings-Seed
+trainiert. Es gibt daher kein Mass für die Streuung zwischen
+Wiederholungen. Kleine Unterschiede in den Metriken werden nicht
+als gesicherter Effekt gedeutet.
+
+\subsection{Reproduzierbarkeit und kleiner Datenfussabdruck}\label{sec:repro}
+
+Ein Datensatz wird durch den Code und die Quellbilder sowie Seed,
+Bildanzahl und Generatorparameter bestimmt. Jedes Bild nutzt einen
+eigenen Zufallsstrom aus Seed und Bildindex. Die Gesamtzahl legt
+zusätzlich den Kamerawinkel und das Blatt jedes Bildes fest. Darum
+sind kleinere Datensätze keine Ausschnitte grösserer Läufe. Mit
+gleicher Konfiguration werden auf verschiedenen Maschinen
+bit-identische Bilder erzeugt. Das wurde durch zweimaliges Rendern
+und einen byteweisen Vergleich geprüft. Parallelisierung ändert das
+Ergebnis nicht. Auf zwölf Kernen entstehen rund 120 Bilder pro
+Sekunde.
+
+Versioniert werden die 72 Kartenscans, die realen Validierungsframes
+mit ihren Labels und die 25 Fotos für reale Negative. Der
+synthetische Datensatz wird vor jedem Training aus diesen Quellen
+neu erzeugt und muss nicht gespeichert oder zwischen Maschinen
+übertragen werden. Ein Lauf ist über Commit, Seed, Bildanzahl und
+Konfiguration nachvollziehbar. Für 200'000 Bilder dauert die
+Generierung je nach Maschine 20 bis 65 Minuten.
+
+Die CI prüft die Daten mit \code{check\_dataset.py} und
+\code{check\_run\_plan.py}. Das erste Skript sucht widersprüchliche
+Labels, falsche Klassenordner und angeschnittene gelabelte Karten.
+Das zweite prüft die gleichmässige Winkelverteilung und die hälftige
+Aufteilung der Bilder auf beide Blätter.
+
+\subsection{Vorgehen und Werkzeuge}\label{sec:vorgehen}
+
+Die Umsetzung erfolgte in aufeinanderfolgenden Iterationen. Für jede
+Iteration gab der Verfasser Claude Code eine konkrete fachliche
+Anweisung. Danach prüfte er den erzeugten Code, führte Tests aus und
+kontrollierte die Ergebnisse an Bildern, Labels und in den Apps. Fehler,
+unklare Annahmen und Abweichungen wurden in einem Review festgehalten.
+Darauf folgte eine neue und genauer formulierte Anweisung. Der Verfasser
+entschied jeweils, ob ein Ergebnis übernommen oder nochmals überarbeitet
+wurde. Die fachlichen Entscheide und die Abnahme lagen damit bei ihm.
+Der zeitliche Verlauf steht im separaten Arbeitsjournal.
+Die Rolle der KI wird in Abschnitt~\ref{sec:ki-reflexion} reflektiert
+und in Anhang~\ref{app:ki-deklaration} deklariert.
+
+Die Continuous Integration baut die .NET-Lösung, erzeugt einen kleinen
+Datensatz, rekonstruiert das Validierungsset, führt die Prüfskripte
+aus und prüft die Wertungstabelle der App. Das eigentliche Training
+läuft auf gemieteten GPUs (Abschnitt~\ref{sec:pipeline}).

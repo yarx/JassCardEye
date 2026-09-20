@@ -1,0 +1,119 @@
+\section{Diskussion und Reflexion}\label{sec:diskussion}
+
+\subsection{Beantwortung der Forschungsfragen}\label{sec:antworten}
+
+\paragraph{FF1, Erkennungsansatz.} Variante~C ist für die App die am besten
+belegte Wahl. In der letzten Datenmengenreihe erreicht der Detektor bei
+200'000 Trainingsbildern auf dem realen Validierungsset eine \map{50} von
+0.908. Er liefert Kartenklasse und Position mit einem Modell und läuft in
+den eingereichten Apps in Echtzeit. Variante~A liefert keine Position.
+Bei Variante~B sind die Lokalisierung und die Klassifikation ideal
+entzerrter Ausschnitte gemessen, aber nicht die gesamte Erkennungskette.
+Zudem fehlt für die letzte Reihe ein Latenzvergleich aller Ansätze auf
+demselben Gerät. Wie gross der Vorteil von C bei Genauigkeit und
+Rechenaufwand tatsächlich ist, lässt sich daher nicht beziffern.
+
+\paragraph{FF2, Übertragung auf reale Aufnahmen.} Das Modell C wurde nur
+mit synthetischen Bildern trainiert und erkennt Karten auf den eigenen
+realen Aufnahmen. Damit funktioniert die Übertragung für das vorhandene
+Validierungsset. Im Projekt wurden die Trainingsbilder und die reale
+Prüfbasis schrittweise um flachere Perspektiven, andere
+Lichtverhältnisse und schwierigere Negativbeispiele erweitert. Diese
+Änderungen wurden nicht einzeln unter gleichen Bedingungen gemessen.
+Wie gut das Modell auf neuen Aufnahmesessions oder anderen
+Kartendesigns arbeitet, bleibt offen.
+
+\subsection{Grenzen der Ergebnisse}\label{sec:grenzen}
+
+Das Validierungsset enthält 813 Frames, davon 513 mit gelabelter Karte.
+Viele Frames stammen aus denselben Videos und ähneln sich. Ausserdem
+wird die beste Trainingsepoche auf diesem Set ausgewählt und dort auch
+bewertet. Ein unabhängiges Testset und Wiederholungen mit weiteren
+Trainings-Seeds fehlen. Die Kennzahlen können deshalb zu günstig
+ausfallen. Kleine Unterschiede zwischen den Modellen sind nicht als
+gesicherte Effekte zu verstehen.
+
+Die Datenmengenreihe verwendet für jede Bildzahl denselben Generator
+und Trainingsplan. Die Datensätze sind aber keine ineinander
+enthaltenen Teilmengen. Mit der Bildzahl ändert sich auch, welche
+Winkel und Kartenblätter auf die einzelnen Bilder fallen. Der
+beobachtete Verlauf zeigt, was die grösseren Datensätze dieser Reihe
+leisten. Er trennt den Einfluss der reinen Bildanzahl nicht vollständig
+vom Einfluss der gezogenen Bilder.
+
+Die Modelle werden mit unterschiedlichen Kennzahlen beurteilt.
+\map{50} für die Detektoren und Top-1-Genauigkeit für die
+Klassifikatoren dürfen nicht als dieselbe Trefferquote gelesen
+werden. Vor allem sagt keine dieser Kennzahlen direkt, wie oft die
+App einen ganzen Stapel richtig zählt.
+
+Auch die Trainingsbilder haben Grenzen. Die Kartenscans stammen aus je
+einem physischen Deck pro Blatt. Der Generator verändert Perspektive,
+Licht und Hintergrund, aber nicht das Kartendesign. Hände, gekippte
+Karten, harte Schatten und Spiegelungen auf glänzenden Karten fehlen.
+Für solche Situationen und andere Decks braucht es zusätzliche reale
+Prüfaufnahmen.
+
+\subsection{Kurskorrekturen im Projekt}\label{sec:verworfen}
+
+Zuerst sollten die Trainingsbilder fotografiert und von Hand gelabelt
+werden. Für die benötigte Menge war das nicht praktikabel. Der Wechsel
+zu gerenderten Bildern machte grössere Datensätze und automatische
+Labels möglich. Reale Fotos dienen nun als Quellmaterial und zur
+Prüfung, nicht als Trainingsbilder für Kartenhaufen.
+
+Generator und Validierungsset wurden während des Projekts erweitert.
+Besonders Aufnahmen aus flacheren Winkeln und Bilder ohne eindeutig
+lesbare Karte zeigten, welche Situationen noch fehlten. Daraufhin
+wurden die Kamerawinkel und die Negativbeispiele breiter angelegt.
+Diese Schritte gehören zur Entwicklung des Systems. Da sie nicht
+einzeln geprüft wurden, lässt sich ihnen keine bestimmte
+Leistungssteigerung zuordnen. Entscheidend ist, dass die reale
+Prüfbasis nicht nur Fälle zeigt, die der Generator bereits gut
+abbildet.
+
+Auch die Einstellungen der App mussten genauer betrachtet werden.
+Konfidenzschwelle und Stabilitätsregel waren zunächst gesetzt, ohne
+dass ihre Wirkung an mehreren Sessions gemessen worden war. Bei der
+Prüfung zeigte sich zudem, dass die Apps die Konfidenz zeitweise
+unterschiedlich auswerteten. Solche Werte müssen nachvollziehbar
+festgehalten und mit aufgezeichneten Zählvorgängen geprüft werden.
+
+\subsection{Eigene Werkzeuge}\label{sec:eigene-werkzeuge}
+
+Das Dataset Tool verbindet die Sichtkontrolle der gerenderten Bilder,
+das Labeln realer Aufnahmen und die Analyse von Zählsessions. Die
+Dataset-CLI erzeugt und prüft die Daten. Beide Werkzeuge wurden für
+die Fragen dieses Projekts gebaut. Dadurch liess sich eine Änderung
+am Generator rasch an Bildern und Labels kontrollieren. Ein Label
+kann zudem für alle drei Erkennungsansätze verwendet werden. Für
+grössere Teams, die gemeinsam labeln und Ergebnisse gegenseitig
+prüfen, wäre ein etablierter Dienst weiterhin sinnvoll.
+
+\subsection{Rolle der KI und persönlicher Beitrag}\label{sec:ki-reflexion}
+
+Der Code des Projekts wurde überwiegend mit Claude Code erstellt. Der
+Verfasser legte die Aufgabe, die drei Ansätze, die Datenregeln und die
+Architektur fest. Er fotografierte die Karten und die realen
+Prüfaufnahmen, labelte die Daten, kontrollierte die erzeugten Bilder
+und prüfte die Apps. Auch die Auswahl der Auswertungen und die
+Interpretation der Ergebnisse lagen bei ihm. Die genaue Aufteilung
+ist in Anhang~\ref{app:ki-deklaration} dokumentiert.
+
+Die Arbeit mit KI machte die Umsetzung von Generator, Werkzeugen,
+Trainingspipeline und zwei Apps in der verfügbaren Zeit möglich. Sie
+nahm dem Verfasser die Prüfung nicht ab. Verdrehte Scans und Labels
+fielen erst bei der Sichtkontrolle auf. Unterschiede bei der
+Konfidenzauswertung der Apps mussten anhand der tatsächlichen
+Ausgaben geprüft werden. Die Verantwortung für Annahmen, Messungen
+und Schlussfolgerungen bleibt beim Verfasser.
+
+\subsection{Lehren aus der Arbeit}\label{sec:lessons}
+
+Eine reale Prüfbasis muss früh entstehen und mit neuen Fehlerfällen
+wachsen. Die Regeln für lesbare, verdeckte und verwischte Karten
+sollten vor dem Labeln feststehen. Ein reproduzierbarer Generator
+hilft beim Vergleichen, ersetzt aber kein unabhängiges Testset.
+Ebenso wichtig ist die Prüfung der vollständigen Zählung in der App.
+Erst damit lässt sich beurteilen, ob gute Kennzahlen für einzelne
+Frames auch zu einer verlässlichen Nutzung am Spieltisch führen.

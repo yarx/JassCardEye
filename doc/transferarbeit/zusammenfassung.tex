@@ -1,0 +1,47 @@
+\section*{Zusammenfassung}
+\addcontentsline{toc}{section}{Zusammenfassung}
+
+Beim Jassen werden die Karten am Ende einer Runde von Hand gezählt. Das
+kostet Zeit und ist besonders für ungeübte Spielende mühsam. Ziel dieser
+Arbeit ist ein Modell, das in einem Videostream die oberste Karte eines
+Stapels in Echtzeit erkennt und so das Zählen mit dem Smartphone ermöglicht.
+
+Das Training erfolgt ausschliesslich mit synthetisch erzeugten Bildern. Ein
+Generator setzt aus 72 fotografierten Jasskarten Stapel mit unterschiedlichen
+Kameraperspektiven, Beleuchtungen und Tischoberflächen zusammen und erzeugt
+die Labels automatisch. Drei Ansätze auf Basis von YOLO11 werden verglichen:
+
+\begin{itemize}
+  \item Variante~A klassifiziert das gesamte Bild.
+  \item Variante~B lokalisiert zuerst die oberste Karte und klassifiziert
+    anschliessend ihren entzerrten Ausschnitt.
+  \item Variante~C erkennt Klasse und Position der obersten Karte mit einer
+    achsenparallelen Bounding Box in einem Schritt.
+\end{itemize}
+
+Geprüft werden die Modelle auf eigenen, von Hand gelabelten realen Aufnahmen.
+Die letzte Datenmengenreihe vergleicht sechs Bildanzahlen auf demselben
+Validierungsset mit 813 Frames. Variante~C verbessert sich mit mehr
+Trainingsbildern und erreicht bei 200'000 Bildern eine \map{50} von 0.908.
+Ein zusätzlicher Lauf mit 500'000 Bildern bringt keinen weiteren Gewinn.
+Sie liefert Klasse und Position mit einem Modell und läuft in den Apps
+in Echtzeit. Variante~A liefert keine Position. Bei Variante~B ist die
+gesamte zweistufige Erkennung auf diesem Stand nicht verlässlich gemessen.
+
+Dies aufgrund der bereits in der ersten Stufe von Variante~B schlechteren Ergebnisse gegenüber C, daraus würden auch für die Stufe B2 keine Verbsserungen erfolgen.
+
+Die Ergebnisse sprechen deshalb am stärksten für Variante~C.
+
+Das Modell wurde in eine iPhone- und eine Android-App zur Kartenzählung
+integriert. Fehlvorhersagen, insbesondere bei Karten im Wurf, bleiben eine
+Herausforderung. Eine Stabilitätsregel kann kurze Fehlerfolgen abfangen,
+behebt aber nicht alle Fehlalarme. Da viele Validierungsbilder aus denselben
+Videos stammen und ein unabhängiges Testset fehlt, sind die gemessenen
+Trefferquoten vorsichtig einzuordnen.
+
+
+Das Training läuft automatisiert auf
+zeitweise gemieteten Cloud-GPUs und ist über Commit, Seed und Konfiguration
+nachvollziehbar.
+
+\clearpage

@@ -1,0 +1,18 @@
+# LiteRT export environment for the Android app - separate from requirements-export.txt on purpose:
+# Ultralytics exports LiteRT through litert-torch, which needs torchao 0.17+ and with it a far newer
+# torch than the pinned CoreML set can take. The weights are the same best.pt either way.
+#
+# Verified by exporting a detector run (72 classes, both decks) and comparing the .tflite with the
+# PyTorch model on three real validation images: same class, same confidence and the same box to
+# three decimals.
+#
+#   python3.13 -m venv src/training/.venv-export-android
+#   src/training/.venv-export-android/bin/pip install -r src/training/requirements-export-android.txt
+#   src/training/.venv-export-android/bin/python src/training/export.py --format litert --variant c
+torch==2.13.0
+torchvision==0.28.0
+torchao==0.18.0
+ultralytics==8.4.108
+litert-torch==0.9.4
+ai-edge-litert==2.2.0
+numpy==2.3.5

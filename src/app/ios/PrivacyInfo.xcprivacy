@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Privacy manifest. Required since May 2024 for any app that touches a "required reason" API,
+  and the place the App Store reads what the app collects.
+
+  JassCardEye collects nothing. It has no networking code of its own - only StoreKit talks to the
+  App Store, for price, purchase and restore. Camera frames are analysed on the device and
+  discarded; the only things written to disk are the settings and, with the hidden developer tools,
+  the stills and recordings a developer asks for, all inside the app's own container. The one
+  required-reason API it uses is UserDefaults, for the settings: deck, stability (frames and rule),
+  lens, vibration and sound strength, and whether the developer tools are shown.
+
+  Re-check before every upload, with:
+      grep -rnE 'UserDefaults|creationDate|modificationDate|systemUptime|mach_absolute_time|volumeAvailableCapacity|activeInputModes' src/app/ios/Sources
+-->
+<plist version="1.0">
+<dict>
+	<key>NSPrivacyTracking</key>
+	<false/>
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array/>
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array>
+		<dict>
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<!-- CA92.1: read and write only this app's own settings. -->
+				<string>CA92.1</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

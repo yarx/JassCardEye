@@ -1,0 +1,156 @@
+\section{Ergebnisse und Auswertung}\label{sec:experimente}
+
+Dieses Kapitel beantwortet die zwei Forschungsfragen anhand der letzten
+Datenmengenreihe. Die Modelle wurden ausschliesslich auf synthetischen
+Bildern trainiert und auf dem aktuellen realen Validierungsset geprüft.
+Zum Schluss wird die Erkennung in der App eingeordnet.
+
+\subsection{Die gemeinsame Datenmengenreihe}\label{sec:saettigung}
+
+Für die Reihe wurden sechs Datensätze mit 5'000, 10'000, 20'000, 50'000,
+100'000 und 200'000 Bildern erzeugt. Bei jeder Bildanzahl wurden alle vier
+Modelle der Ansätze A, B und C trainiert. Generatorstand, Seed,
+Modellgrösse, Bildauflösung und Trainingsplan blieben gleich. Alle Modelle
+wurden auf denselben 813 realen Frames ausgewertet. Davon zeigen 513
+eine gelabelte Karte und 300 gelten als Negative.
+
+Um zu prüfen, ob noch mehr Bilder weiterhelfen, wurde Variante~C
+zusätzlich mit 500'000 Bildern trainiert. Generator, Seed,
+Trainingsplan und Validierungsset sind dieselben. Der Lauf stammt von
+einem späteren Commit, der nur den Speicherplatz der Trainingsmaschine
+vergrösserte. Für A und B liegt bei dieser Bildanzahl kein Wert vor.
+
+Die Datensätze sind keine ineinander enthaltenen Teilmengen. Die
+Bildanzahl beeinflusst auch den Winkelplan und die Verteilung der
+Kartenblätter (Abschnitt~\ref{sec:repro}). Innerhalb der Reihe lässt sich
+dennoch untersuchen, wie sich die Leistung bei grösseren Datensätzen
+entwickelt. Abbildung~\ref{fig:saettigung} zeigt die Ergebnisse.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth]{saettigung.pdf}
+\caption{Ergebnisse der sechs Datenmengen auf demselben realen
+Validierungsset, für C zusätzlich mit 500'000 Bildern. Für C und B$_1$ wird \map{50} gezeigt, für A und B$_2$
+die Top-1-Genauigkeit. Die Höhen dieser verschiedenen Kennzahlen sind
+nicht direkt vergleichbar. B$_2$ erhält ideal entzerrte Ausschnitte.}
+\label{fig:saettigung}
+\end{figure}
+
+Abbildung~\ref{fig:verlauf} zeigt den Trainingsverlauf von Variante~C.
+Mit 5'000 Bildern verbessert sich das Modell während fast des gesamten
+Trainings und erreicht erst gegen Ende sein bestes Ergebnis von 0.683.
+Bei grösseren Datensätzen steigt der Wert schneller an. Ab 50'000
+Bildern liegt die \map{50} bereits nach wenigen Epochen über 0.7 und
+verändert sich danach nur noch wenig.
+
+Bei den drei grössten Datensätzen wird das beste Ergebnis zwischen
+Epoche 10 und 13 erreicht. Danach nimmt die Leistung wieder leicht ab.
+Beim Lauf mit 200'000 Bildern endet sie bei 0.826 statt beim Höchstwert
+von 0.908. Exportiert wird deshalb \code{best.pt} mit den Gewichten der
+besten Epoche.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth]{trainingsverlauf.pdf}
+\caption{\map{50} der Variante~C auf dem realen Validierungsset je Epoche,
+ein Feld je Datensatzgrösse. Der Punkt markiert die beste Epoche. Ab der
+gestrichelten Linie ist die Mosaic-Augmentierung abgeschaltet.}
+\label{fig:verlauf}
+\end{figure}
+
+\subsection{Vergleich der Erkennungsansätze (FF1)}\label{sec:vergleich}
+
+Der einstufige Detektor C wird mit mehr Trainingsbildern bis 200'000
+Bilder stetig besser und erreicht dort auf den realen Frames eine
+\map{50} von 0.908. Bis hierhin passt der Verlauf zur Beobachtung von
+Sun et al., dass die Leistung von Bildmodellen mit dem Logarithmus der
+Datenmenge steigt \cite{sun2017revisiting}. Mit 500'000 Bildern liegt
+die \map{50} bei 0.889. Mehr Bilder aus demselben Generator bringen
+also keinen weiteren Gewinn. Der Abstand von 0.019 ist bei einem
+einzelnen Seed nicht als Rückgang zu deuten
+(Abschnitt~\ref{sec:setup}). Der Detektor gibt die Kartenklasse und ihre Position mit einem
+Modell aus. Die reine Klassifikation A verbessert sich ebenfalls, liefert
+aber keine Position der Karte.
+
+Beim zweistufigen Ansatz B erkennt B$_1$ zuerst die Position der Karte.
+Seine \map{50} verändert sich mit mehr Bildern nur wenig und liegt am Ende
+der Reihe bei 0.842. B$_2$ klassifiziert einen ideal entzerrten
+Kartenausschnitt fast immer richtig. Diese Ausschnitte stammen aus den von
+Hand gesetzten Ecken. Im Betrieb muss B$_2$ dagegen mit den Vorhersagen von
+B$_1$ arbeiten. Fehler beim Finden oder Entzerren der Karte wirken sich
+dann auf die Klassifikation aus. Die letzte Reihe enthält keine
+verlässliche Messung dieser gesamten Verarbeitungskette. Für B lässt
+sich deshalb keine Trefferquote für die vollständige Erkennung angeben.
+
+Für die mobile Nutzung spricht die vorliegende Evidenz am stärksten für C.
+Ein weiterer Vorteil zeigt sich direkt bei der Bedienung. Die
+achsenparallele Box umschliesst eine schräg liegende Karte zwar nicht
+genau. Sie zeigt beim Zählen dennoch, welche Karte erkannt wurde und wo
+sie sich im Bild befindet. Diese Rückmeldung fehlt bei A. Dadurch wirkt
+eine Erkennung teilweise ungewohnt, weil ihr Bezug zum Kamerabild nicht
+sichtbar ist. B benötigt zwei Modelle und einen zusätzlichen
+Entzerrungsschritt. C übernimmt die Erkennung der Kartenklasse und ihrer
+Position mit einem Modell und läuft in den eingereichten Apps auf
+aktuellen Geräten in Echtzeit (Tabelle~\ref{tab:geraete}).
+Ein neuer, gemeinsamer Latenzvergleich aller Varianten auf demselben Gerät
+liegt für diese Reihe nicht vor. Der genaue Abstand beim Rechenaufwand
+bleibt damit offen.
+
+\subsection{Übertragung auf reale Aufnahmen (FF2)}\label{sec:transfer-real}
+
+Das beste Ergebnis von C in der Datenmengenreihe stammt von einem Modell,
+das keine realen Kartenhaufen als Trainingsbilder gesehen hat. Seine
+\map{50} von 0.908 auf den realen Aufnahmen zeigt, dass die synthetischen
+Bilder für die Erkennung auf diesem Validierungsset geeignet sind. Die
+Kennzahl berücksichtigt die richtige Kartenklasse und die Überlappung
+der erkannten Position mit dem Label. Sie ist nicht gleichbedeutend mit
+dem Anteil richtig gezählter Karten in einer Zählsession.
+
+Im Projektverlauf wurden Generator und reale Prüfbasis erweitert.
+Insbesondere flache Kamerawinkel erhielten mehr Gewicht. Der Generator
+deckt nun Neigungen bis 60\textdegree{} ab. Hinzu kamen Aufnahmen unter
+anderen Lichtverhältnissen, beide Kartenblätter und schwierigere
+Negativbeispiele. Die reale Prüfbasis enthält ebenfalls mehr flache
+Perspektiven und Situationen ohne klar lesbare Karte. Diese Änderungen
+verbessern die Abdeckung der vorgesehenen Einsatzbedingungen. Ihr
+einzelner Beitrag zur Modellleistung wurde nicht getrennt gemessen.
+
+Die Aussage zum Transfer gilt zunächst nur für die vorhandenen
+Aufnahmen. Viele Frames stammen aus denselben Videos und ähneln sich.
+Ausserdem wurde die beste Trainingsepoche anhand dieses
+Validierungssets gewählt. Ein unabhängiges Testset und Wiederholungen
+mit weiteren Trainings-Seeds fehlen. Besonders bei Karten im Wurf oder
+an der Grenze zwischen lesbar und unlesbar bleibt auch die Bewertung
+schwierig (Abschnitt~\ref{sec:grenzfaelle}).
+
+\subsection{Betrieb in der App}\label{sec:betriebspunkt}
+
+Die eingereichten Apps verwenden Variante~C. Eine Karte wird erst
+gezählt, wenn die Erkennung die eingestellte Konfidenz erreicht und über
+mehrere Frames stabil bleibt (Abschnitt~\ref{sec:zaehlung}). Eine
+aufgezeichnete Zählsession wurde im Dataset Tool mit verschiedenen
+Einstellungen erneut ausgewertet. Dabei zeigte sich, dass einzelne
+Fehler auch mit einer hohen Konfidenz auftreten können
+(Abbildung~\ref{fig:frames-nacheinander}). Eine höhere Schwelle allein
+löst dieses Problem daher nicht. Die Stabilitätsregel hilft, solche
+kurzen Ausreisser abzufangen.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.48\textwidth]{detection-difficulties-wrong.png}\hfill
+\includegraphics[width=0.48\textwidth]{detection-difficulties-correct.png}
+\caption{Zwei direkt aufeinanderfolgende Frames derselben Aufnahme. Links
+erkennt das Modell die oberste Karte mit 74\,\% fälschlich als Schellen~9.
+Diese Erkennung wird nicht gezählt. Im nächsten Frame erkennt es die
+Schellen~10 mit 87\,\% korrekt und die App zählt die Karte. Die gelbe
+Markierung zeigt die gezählte Erkennung. Der Kartenhaufen und die Position der
+Kamera haben sich zwischen den beiden Frames kaum verändert.}
+\label{fig:frames-nacheinander}
+\end{figure}
+
+Diese einzelne Session reicht nicht für eine verlässliche Erfolgsquote.
+Sie zeigt jedoch, wie sich die Einstellungen der App anhand einer
+vollständigen Aufnahme prüfen lassen. Für aussagekräftige Ergebnisse
+braucht es weitere Sessions mit unterschiedlichen Geräten und
+Spielsituationen. Dabei sollten ganze Zählvorgänge statt nur einzelne
+Frames ausgewertet werden.

@@ -1,0 +1,149 @@
+name: CI
+
+# A change that touches only documents, the thesis or the website runs none of this: no check below
+# reads those files, and the website has web.yml.
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['**.md', 'context/**', 'doc/**', 'src/web/**', '.github/workflows/web.yml']
+  pull_request:
+    paths-ignore: ['**.md', 'context/**', 'doc/**', 'src/web/**', '.github/workflows/web.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Three cheap checks on every push to main and every pull request, none of which trains anything:
+#
+# - dataset: builds the .NET side, generates a small synthetic dataset, rebuilds the derived parts of
+#   the real one, and checks the run plan, the dataset's consistency, the pod watchdog, when a training
+#   run counts as finished, and how the dataset tool reads a session's recognition log.
+# - scoring: the Jass scoring and the pile, compiled on Linux with nothing but Foundation.
+# - android: the Android unit tests, a debug build and a shrunk release bundle without a key.
+#
+# They usually take about 2, 1 and 6 minutes. Each timeout sits well above that, so a job that hangs
+# costs minutes and not the six hours GitHub would allow.
+jobs:
+  # Runs on Ubuntu only. Adding `strategy.matrix.os` with windows-latest and macos-latest would turn
+  # this into the portability guard for the dataset layout - that is what would catch a regression in
+  # the hard-link handling, which behaves differently on Windows.
+  dataset:
+    name: 🗂️ Dataset
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: 📥 Check out
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: 🧰 Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: 🔨 Build
+        run: dotnet build src/tools/dataset/JassCardEye.Dataset.slnx -c Release
+
+      - name: 🎲 Generate a small synthetic dataset
+        run: dotnet run -c Release --project src/tools/dataset/Cli -- generate --count 300 --seed 1
+
+      - name: ♻️ Rebuild the derived parts of the real dataset
+        run: dotnet run -c Release --project src/tools/dataset/Cli -- rebuild --dataset data/real/val
+
+      # The run plan decides how much of the data shows a flat view - the case the model is worst
+      # at - and which half of it is dealt from which deck. Getting either wrong costs a whole
+      # 200 000-image run to notice, and the generator can be asked for its plan without rendering
+      # anything.
+      - name: 🗺️ Check the run plan
+        run: python src/tools/check_run_plan.py
+
+      - name: 🔍 Check dataset consistency
+        run: python src/tools/check_dataset.py output/dataset data/real/val
+
+      # The pod watchdog decides whether a rented GPU is terminated. It cannot be exercised for real
+      # without renting one and then breaking it, so the judgement is a pure function and this is
+      # what holds it to account.
+      - name: 🐕 Check the pod watchdog
+        run: python src/tools/test_sweep.py
+
+      # Whether a training run counts as finished decides which run a release without a run id takes
+      # its model from. It follows what each variant left behind, not its exit code.
+      - name: 🏁 Check when a training run counts as finished
+        run: python src/tools/test_manifest.py
+
+      # The rules of the dataset tool that need no window. The recognition log of a recorded session is
+      # read strictly - a row that goes missing would put every later detection on the wrong frame -
+      # and the anomalies found in it are heuristics that should not drift unnoticed. The label
+      # proposals are the same kind of thing from the other side: the models cannot run here, but the
+      # corner order and the thresholds that decide what lands in the validation set can.
+      - name: 🎬 Check the session log, its analysis and the label proposals
+        run: dotnet run -c Release --project src/tools/dataset/Checks
+
+  # The Jass scoring, held to account away from the app.
+  #
+  # This is the part of the app that goes wrong without anyone noticing: a discipline that totals
+  # 150 instead of 152, or a German card scored as a plain suit, puts a plausible number on the
+  # screen and a wrong one on the slate. `JassScoring.swift` and `JassDeck.swift` import nothing but
+  # Foundation, which is why this can run on a Linux runner in a Swift container rather than on a
+  # macOS one.
+  #
+  # `src/tools/check_recorder.swift` deliberately stays out of CI: it exercises the real AVFoundation
+  # encoder and so needs macOS. It is run by hand, and says so in its own header.
+  scoring:
+    name: 🃏 Scoring and pile
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container: swift:6.2
+    steps:
+      - name: 📥 Check out
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: 🧮 Check the Jass scoring
+        run: |
+          swiftc -o /tmp/check_scoring \
+              src/app/ios/Sources/JassScoring.swift src/app/ios/Sources/JassDeck.swift src/tools/check_scoring.swift
+          /tmp/check_scoring
+
+      # The stability rules and the corrections - the pile the scoring adds up. Foundation only, too.
+      - name: 📚 Check the pile
+        run: |
+          swiftc -o /tmp/check_pile \
+              src/app/ios/Sources/PileTracker.swift src/app/ios/Sources/StabilityRule.swift src/tools/check_pile.swift
+          /tmp/check_pile
+
+  # The Android app: compiled, and its scoring held to the same account as the Swift one.
+  #
+  # Test and assemble, no emulator. The models are generated and not in the repository, so this builds
+  # the app in the state a fresh checkout has - the one that shows the "no model" hint - which is the
+  # guard that matters: the Android sources compile on a clean machine with nothing but the Gradle
+  # wrapper. `JassScoringTest` is the Kotlin twin of src/tools/check_scoring.swift and checks the same
+  # invariants, so a rule fixed on one platform and not the other fails here.
+  #
+  # The release build too, without a key: R8 and resource shrinking run only there, and a class they
+  # strip that the app needs at runtime would otherwise first show up in the release workflow - or on a
+  # tester's phone. `allowUnsigned` is what lets a release build run without the upload key and a
+  # versionCode; see src/app/android/app/build.gradle.kts.
+  android:
+    name: 🤖 Android
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: 📥 Check out
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: 🧰 Set up the Android build
+        uses: ./.github/actions/setup-android
+
+      - name: 🧪 Test, assemble and shrink
+        working-directory: src/app/android
+        run: ./gradlew --no-daemon :app:testDebugUnitTest :app:assembleDebug :app:bundleRelease -Pjasscardeye.allowUnsigned=true

@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- The icon of the .exe on Windows. The window icon for every platform is set in MainWindow. -->
+    <ApplicationIcon>Assets\AppIcon.ico</ApplicationIcon>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Cards\JassCardEye.Dataset.Cards.csproj" />
+    <ProjectReference Include="..\Generation\JassCardEye.Dataset.Generation.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="12.0.2" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.0.2" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.0.2" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="12.0.2" />
+    <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.1">
+      <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+      <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Svg.Skia" Version="3.0.4" />
+  </ItemGroup>
+
+  <!-- The suit marks. Copies of the drawings in the iOS app's asset catalogue (src/app/ios/Assets.xcassets),
+       kept in the viewer's own folder so the viewer builds from its own tree. A suit redrawn for the
+       app has to be copied over by hand.
+
+       Svg.Skia stays at 3.0.4 on purpose: it is the newest release built against SkiaSharp 3, which
+       both Avalonia 12 and the generator use. The releases after it depend on SkiaSharp 2.88 or 4.148,
+       and two major versions of Skia's native library in one process fail at run time, not at build. -->
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\Suits\*.svg" />
+    <!-- The iOS app's icon (src/app/ios/Assets.xcassets/AppIcon.appiconset), copied as well: the full square,
+         and a rounded, inset version for the macOS Dock. -->
+    <AvaloniaResource Include="Assets\AppIcon.png;Assets\AppIcon-macOS.png" />
+  </ItemGroup>
+</Project>

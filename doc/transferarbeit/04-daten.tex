@@ -1,0 +1,209 @@
+\section{Datengrundlage und synthetische Generierung}\label{sec:daten}
+
+Die ursprüngliche Planung sah rund 2000 fotografierte und von Hand gelabelte
+Kartenhaufen vor. Erste Versuche mit dem Online-Dienst Roboflow zeigten
+schnell, dass weder das Fotografieren noch das Labeln dieser Menge realistisch
+war. 2000 Bilder entsprechen bei 36 Klassen rund 56 Bildern je Klasse, also
+3.7\,\% der von Ultralytics empfohlenen Untergrenze von 1500 Bildern je Klasse
+\cite{ultralytics2025tips}. Der Entscheid fiel deshalb, die Karten einmal
+zu fotografieren und alle Haufen daraus zu rendern. Dieses Kapitel
+stellt die Quellscans und die unabhängige reale Prüfbasis mit ihren Labelregeln vor,
+danach den Generator und seine Datensatzvarianten.
+
+\subsection{Quellmaterial: 72 Kartenscans}\label{sec:scans}
+
+Beide Blätter wurden Karte für Karte mit dem iPhone fotografiert, perspektivisch
+begradigt und auf ein einheitliches Format gebracht: 1710$\times$2670 Pixel,
+JPEG mit Qualität 75, ohne Farbprofil und Metadaten.
+
+Durch wechselnde Lichtverhältnisse, insbesondere Sonneneinstrahlung, wiesen
+einige Scans Farbunterschiede auf. Sie wurden soweit möglich an die übrigen
+Karten angeglichen, damit das Modell den Farbstich nicht als Merkmal einer
+einzelnen Karte lernt. Weitere Korrekturen beschreibt
+Abschnitt~\ref{sec:label-qa}.
+
+\subsection{Reales Validierungsset und Labeling-Werkzeug}\label{sec:labeling}
+
+Das aktuelle Validierungsset umfasst 813 eigene Aufnahmen: 305 Karten des
+französischen Blatts, 208 des deutschen Blatts und 300 Negative. Sie stammen
+aus sieben Videos und einer Fotoserie des französischen Blatts, sechs Videos
+des deutschen Blatts sowie Fotos ohne Karte. Die Aufnahmen zeigen
+unterschiedliche Unterlagen, Lichtverhältnisse und Blickwinkel
+(Abbildung~\ref{fig:realval}). Viele Frames stammen aus denselben Videos
+und sind deshalb nicht unabhängig. Trainiert wird ausschliesslich auf
+synthetischen Bildern.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{real-val-beispiele.jpg}
+\caption{Frames des realen Validierungssets mit ihren Labels: drei Aufnahmequellen, zwei flache Winkel und ein Negativ.}
+\label{fig:realval}
+\end{figure}
+
+Das eigene Dataset Tool zeigt Bilder mit ihren Labels in allen Varianten.
+Beim Labeln werden die vier Ecken der obersten Karte und ihre Klasse
+gesetzt. Ein Frame ohne gültige Karte wird als \enquote{No card}
+gespeichert. Aus einer Annotation entstehen alle vier Label-Formate.
+Die Vorschau des entzerrten Ausschnitts zeigt, ob die Eckreihenfolge
+stimmt (Abbildung~\ref{fig:dataset-tool-labeler}). Nicht quadratische
+Fotos werden durch einen mittigen Ausschnitt auf 640$\times$640 gebracht.
+Das entspricht dem Sucherquadrat der App. Das Werkzeug zerlegt Videos in
+Frames und erlaubt Korrekturen an gespeicherten Labels. Die häufigen
+Schritte lassen sich über die Tastatur bedienen.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{dataset-tool-labeler.png}
+\caption{Das eigene Dataset Tool beim Labeln eines realen Frames. Die vier Ecken markieren die oberste Karte. Rechts ist der entzerrte Ausschnitt zu sehen.}
+\label{fig:dataset-tool-labeler}
+\end{figure}
+
+\subsection{Grenzfälle: was das Modell erkennen muss}\label{sec:grenzfaelle}
+
+Die Grenze zwischen Karte und Negativ ist bei verwischten, teilweise
+verdeckten oder sehr flach aufgenommenen Karten nicht immer eindeutig.
+Für jedes reale Frame wurde entschieden, ob die oberste Karte lesbar ist.
+Lesbare Karten wurden mit Klasse und Ecken gelabelt. Frames ohne lesbare
+Karte wurden als \enquote{No card} gespeichert, unklare Fälle teilweise
+ausgelassen. Das bleibt ein Problem für die Auswertung: Erkennt das Modell
+eine Karte in einem als negativ gelabelten Frame, zählt dies als
+Fehlalarm. Wird
+eine schwierig lesbare, aber gelabelte Karte übersehen, zählt dies als
+Fehler. Die Einteilung ist für das bestehende Set festgelegt. Ihre
+Wirkung auf Fehlalarme muss mit weiteren Aufnahmen geprüft werden.
+Eine eigene Markierung für schwierige Frames und eine getrennte
+Auswertung sind noch nicht umgesetzt (Abschnitt~\ref{sec:ausblick}).
+
+\subsection{Synthetische Szenen}\label{sec:szenen}
+
+Eine Szene wird in drei Ebenen von hinten nach vorn aufgebaut. Zuunterst
+liegt der \emph{Tischhintergrund}: ein prozedural erzeugtes, gleichmässig
+wiederholtes Muster (Uni, Filz, Sprenkel, Karo, Tartan) in zufälliger Farbe.
+Es liegt als Textur auf der Tischebene und wird mit derselben Kamera
+projiziert wie die Karten, damit Fluchtpunkt und Perspektive übereinstimmen.
+Darauf werden 0 bis 35 \emph{Unterkarten} aus dem Rest desselben Blatts
+um die Mitte gestreut und gedreht. Zuoberst liegt die \emph{oberste Karte},
+die allein gelabelt wird. Ihre Position variiert, damit ein Klassifikator
+nicht \enquote{Mitte gleich Antwort} lernt.
+
+Die Kamera ist eine Lochkamera, die aus einer zufälligen Position über dem
+Tisch auf einen Punkt nahe der Mitte blickt. Für jede Karte werden die vier
+Weltecken projiziert und der Kartenscan per Homographie exakt in das
+projizierte Viereck verzerrt \cite{opencv2025calib3d}. Die Kameradistanz
+variiert, die Neigung reicht von 0\textdegree{} bis 60\textdegree{} und
+die Belichtung schwankt um $\pm$20\,\%. Jede Karte liegt 0.3\,mm höher als
+die darunterliegende. Bei einem vollen Blatt wird der Stapel dadurch
+rund einen Zentimeter hoch. Die abgerundeten Kartenecken bleiben
+transparent und folgen der Perspektive.
+
+In rund 65\,\% der Szenen beleuchtet eine Lampe den Tisch. Die übrigen
+zeigen diffuses Raum- oder Tageslicht. Ein Teil der Lampenszenen erhält
+eine zweite, aufhellende Lichtquelle. Das Lichtzentrum kann auch neben
+oder hinter dem Haufen liegen. Die Karten werfen weiche Kontaktschatten,
+und eine Vignette dunkelt die Bildecken ab. Abbildung~\ref{fig:synthetisch}
+zeigt zwölf Beispiele.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{synthetisch-beispiele.jpg}
+\caption{Gerenderte Trainingsbilder beider Blätter mit der Box der obersten Karte (Variante~C). Der Winkel ist die Kameraneigung gegenüber der Senkrechten.}
+\label{fig:synthetisch}
+\end{figure}
+
+\subsection{Kamerawinkel und Blatt aus dem Bildindex}\label{sec:sweep}
+
+Bildindex $i$ und Bildanzahl $n$ legen die Kameraneigung und das
+Kartenblatt fest. Die Neigung von Bild $i$ beträgt
+\[
+  \theta_i = 60^\circ \cdot \frac{p(i) + \tfrac{1}{2}}{n},
+\]
+wobei $p$ die Bildindizes permutiert. Die Bilder decken so den Bereich
+von 0\textdegree{} bis 60\textdegree{} gleichmässig ab, ohne nach Winkel
+sortiert zu sein. Bei grösseren Neigungen kann der Horizont ins Bild
+geraten und die Tischprojektion fehlerhaft werden.
+
+Gerade Positionen von $p(i)$ erhalten das französische Blatt, ungerade
+das deutsche. Bei den verwendeten geraden Bildzahlen bekommt jedes Blatt
+genau die Hälfte der Bilder und einen eigenen gleichmässigen Winkelsweep.
+Ein Kartenhaufen enthält immer nur Karten desselben Blatts.
+
+\subsection{Sichtbarkeitsregel}\label{sec:sichtbarkeit}
+
+Eine Karte wird nur gelabelt, wenn sie vollständig im Bild liegt und
+mindestens drei Pixel Abstand zum Rand hat. Sind höchstens 85\,\% ihres
+projizierten Rechtecks sichtbar, gilt das Bild als Negativ. Szenen
+dazwischen werden erneut gezogen. Bleibt der Fall nach 16 Versuchen
+uneindeutig, entsteht ein Negativ. Die Wiederholung verringert
+widersprüchliche Labels bei fast gleichen Bildern. Bei realen Fotos
+werden klar
+angeschnittene Karten als \enquote{No card} gespeichert. Berührt eine
+fast vollständig sichtbare Karte nur den Rand, wird das Frame
+ausgelassen.
+
+\subsection{Negativbeispiele und Bewegungsunschärfe}\label{sec:negative}
+
+Der Generator sieht für Negative einen Anteil von 30\,\% vor. Das liegt
+bewusst über den 0 bis 10\,\% Hintergrundbildern, die Ultralytics
+empfiehlt \cite{ultralytics2025tips}. Gerenderte
+Negative zeigen einen leeren Tisch, eine stark verwischte geworfene Karte
+oder eine verwischte Karte, die die oberste Karte verdeckt. Im Videostrom
+der App kommen solche Frames häufig vor. Eine fälschlich gezählte Karte
+wiegt dabei schwerer als eine übersehene. Die Detektoren erhalten für
+Negative kein Label, der Klassifikator der Variante~A die Klasse
+\code{none}.
+
+Für Bewegungsunschärfe wird die Karte entlang ihrer Bewegungsrichtung
+mehrfach gezeichnet. Bei 30\,\% der positiven Bilder beträgt die
+Bewegungsstrecke 0.02 bis 0.09 Kartenhöhen. Diese Karten bleiben lesbar.
+Stark verwischte Karten mit 0.25 bis 0.65 Kartenhöhen gehören zu den
+Negativen. Der Bereich dazwischen wird nicht erzeugt. Ein Viertel der
+positiven Bilder zeigt zudem eine verwischte Karte am Bildrand, während
+die oberste Karte klar sichtbar bleibt. In 5\,\% der Szenen liegt statt eines
+gestreuten Haufens ein bündig gestapeltes Deck.
+
+Rund ein Viertel der Negative stammt aus 25 realen Fotos ohne Karte.
+Sie zeigen unter anderem Papier, Kassenbons, Schachteln, Tische und
+Räume. Zufällige Ausschnitte, Drehungen, Spiegelungen und wechselnde
+Belichtung machen daraus viele Trainingsbilder. Diese Fotos ergänzen
+die gerenderten Negative um Alltagsgegenstände, die sonst als Karte
+fehlgedeutet werden könnten.
+
+\subsection{Label-Varianten und Datensatz-Layout}\label{sec:layout}
+
+Aus einem Renderlauf schreibt der Generator alle Label-Formate der drei
+Varianten (Tabelle~\ref{tab:labelvarianten}). Die Bilder werden einmal
+gerendert und von den Varianten gemeinsam genutzt.
+
+\begin{table}[H]
+\centering\small
+\begin{tabularx}{\textwidth}{@{}llYl@{}}
+\toprule
+\textbf{Variante} & \textbf{Ordner} & \textbf{Label} & \textbf{Klassen} \\
+\midrule
+C & \code{detect/} & achsenparallele Box \code{klasse cx cy w h}, eine je Bild & 72 \\
+B$_1$ & \code{locate/} & orientierte Box aus vier Eckpunkten & 1 \\
+B$_2$ & \code{classify\_crop/} & entzerrter Kartenausschnitt in einem Klassenordner & 72 \\
+A & \code{classify\_full/} & ganzes Bild in einem Klassenordner, Negative unter \code{none} & 73 \\
+\bottomrule
+\end{tabularx}
+\caption{Die vier Label-Varianten aus einem Renderlauf.}
+\label{tab:labelvarianten}
+\end{table}
+
+Für Variante~B$_2$ wird die oberste Karte anhand ihrer vier Ecken per
+Homographie zu einem aufrechten Bild von 384 Pixeln Höhe entzerrt. Im
+Betrieb geschieht dies anhand der Vorhersage der ersten Stufe. Innerhalb
+eines Datensatzes bilden Bilder, Detektions- und Lokalisierungslabels
+sowie die Klassenliste die Grundlage. Abgeleitete Klassenordner und
+die \code{data.yaml} werden bei Bedarf mit \code{rebuild} rekonstruiert.
+
+\subsection{Qualitätssicherung der Labels}\label{sec:label-qa}
+
+Automatische Konsistenzprüfungen und die Sichtung aller entzerrten
+Ausschnitte fanden drei falsche Klassenlabels unter 211 geprüften Bildern.
+Sie wurden korrigiert. Bei einigen Kreuz- und Schaufelkarten begann die
+Vier-Ecken-Annotation an der falschen Ecke. Das dreht nur den entzerrten
+Ausschnitt für B$_2$ um 180\textdegree{}. Die Boxen von C und B$_1$ bleiben
+gleich. Automatische Korrekturversuche erzeugten zu viele Fehlmarkierungen,
+daher wurden die Ausschnitte visuell geprüft. Dabei fielen auch zwölf
+verdrehte französische Kartenscans auf, die korrigiert wurden.

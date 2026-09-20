@@ -1,0 +1,92 @@
+\section{Einleitung}\label{sec:einleitung}
+
+\subsection{Ausgangslage}\label{sec:ausgangslage}
+
+Jass ist ein verbreitetes Kartenspiel in der Schweiz. Am Ende einer Runde
+werden die gewonnenen Stiche einer Partei gezählt, indem die Karten
+nacheinander abgelegt und ihre Punktwerte addiert werden. Das kostet Zeit
+und ist besonders für ungeübte Spielende fehleranfällig.
+
+Smartphones haben heute leistungsfähige Kameras und Recheneinheiten für
+maschinelles Lernen. Damit lässt sich ein Kartenstapel direkt am Spieltisch
+filmen und auswerten, ohne einen Server zu benötigen. In dieser Arbeit wird
+ein Modell trainiert, das in einem Videostream jeweils die oberste Karte
+eines Stapels erkennt. Die App soll daraus die Punkte der Runde berechnen.
+
+Ursprünglich war vorgesehen, die Trainingsbilder selbst zu fotografieren
+und von Hand zu labeln. Für die benötigte Menge erwies sich das früh als
+unrealistisch. Deshalb werden die Trainingsbilder synthetisch aus Fotos der
+einzelnen Karten erzeugt. Diese Kurskorrektur ist ein wichtiger Teil der
+Arbeit und wird in Abschnitt~\ref{sec:verworfen} reflektiert.
+
+\subsection{Problemstellung}\label{sec:problemstellung}
+
+Erkannt werden soll nur die oberste Karte eines Stapels überlappender
+Karten. Darunterliegende, teilweise sichtbare Karten dürfen nicht gezählt
+werden. Die Erkennung muss zuverlässig und schnell genug sein, damit die
+App in einer realen Spielsituation genutzt werden kann. Wer die Karten
+zählt, soll das Ergebnis nicht nach jeder Erkennung selbst kontrollieren
+müssen.
+
+Die Aufnahmebedingungen variieren: Die Kamera wird von Hand geführt, der
+Abstand und der Winkel ändern sich, und das Licht kann von einer
+Deckenlampe, vom Tageslicht oder von der Taschenlampe des Smartphones
+kommen. Auch die Unterlage wechselt zwischen Jassteppich, Holz und Stein.
+In vielen Frames ist keine eindeutig lesbare oberste Karte zu sehen, etwa
+wenn eine Karte geworfen wird, verwischt oder den Stapel verdeckt.
+
+Für solche Situationen gilt die Prämisse dieser Arbeit: \emph{Lieber
+nichts als falsch.} Eine übersehene Karte kann erneut vor die Kamera
+gehalten werden. Eine falsch gezählte Karte bleibt dagegen möglicherweise
+unbemerkt und verfälscht das Resultat. Gerade weil ein Videostream mehrere
+Frames derselben Karte liefert, kann die App kurze Lücken überbrücken.
+
+Der Engpass liegt bei den Trainingsdaten. Ultralytics nennt 1500 Bilder je
+Klasse als Richtwert für eigene Datensätze \cite{ultralytics2025tips}.
+Schon für die 36 Karten eines Blatts wären das 54'000 Bilder. Diese Menge
+von Kartenstapeln lässt sich im Rahmen der Transferarbeit weder sinnvoll
+fotografieren noch von Hand labeln.
+
+\subsection{Ziele und Forschungsfragen}\label{sec:ziele}
+
+Ziel ist ein mobiler Prototyp, der die oberste Karte mithilfe eines auf
+synthetischen Bildern trainierten Modells erkennt und die Jasspunkte eines
+Stapels zählt. Daraus ergeben sich zwei Forschungsfragen:
+
+\begin{description}
+  \item[FF1] Welcher Erkennungsansatz (einstufiger Detektor, zweistufige
+    Erkennung mit orientierter Box und Klassifikation oder reine
+    Bildklassifikation) bietet auf dem Smartphone die beste Balance
+    zwischen Genauigkeit und Rechenaufwand?
+  \item[FF2] Wie gut übertragen sich Modelle, die ausschliesslich auf
+    synthetisch erzeugten Bildern trainiert wurden, auf reale Fotos?
+\end{description}
+
+Die ursprüngliche Themeneingabe sah auch einen Vergleich zwischen realen
+und synthetischen Trainingsbildern vor. Da keine ausreichend grosse Menge
+realer Trainingsbilder erstellt werden konnte, wird stattdessen der
+Transfer von synthetischen Trainingsbildern auf reale Aufnahmen geprüft.
+Ebenso entfiel der vorgesehene Vergleich verschiedener Modellgrössen.
+Alle Modelle verwenden die kleinste Grösse n, weil sie auf dem Smartphone
+in Echtzeit läuft. An die Stelle dieses Vergleichs trat der Vergleich der
+drei Erkennungsansätze. Geschwindigkeit und Modellgrösse wurden für den
+gewählten Ansatz auf vier Geräten gemessen
+(Abschnitt~\ref{sec:app}).
+
+\subsection{Abgrenzung}\label{sec:abgrenzung}
+
+Die App erkennt die oberste Karte und zählt den Stapel einer Partei, in der
+Praxis häufig den kleineren der beiden Stapel. Aus der Gesamtpunktzahl
+der Karten und der Angabe zum letzten Stich berechnet sie auch die Punkte
+der anderen Partei. Ein vollständiges Scoring mit Weis und Stöck ist
+nicht Teil der Arbeit.
+
+Die Karten liegen flach auf dem Tisch. Gekippte oder stehende Karten sowie
+Hände im Bild werden im Generator nicht modelliert. Unterstützt werden
+zwei Blätter mit je 36 Karten: ein französisches Standardblatt von
+AGMüller und das deutschschweizerische Blatt \enquote{Schaffhauser
+Spielkarten Opti-Quatro} desselben Herstellers.
+
+Wie gut das Modell leicht abweichende Kartendesigns oder Sondereditionen
+erkennt, wurde nicht untersucht. Diese Grenze wird in
+Abschnitt~\ref{sec:grenzen} erläutert.

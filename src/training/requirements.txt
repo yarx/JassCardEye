@@ -1,0 +1,7 @@
+# Training dependencies. Pinned so a run is reproducible on every machine.
+#
+# torch is pulled in by ultralytics. On Windows/Linux with an NVIDIA GPU install the CUDA build
+# first (see https://pytorch.org); on macOS the default wheel already supports MPS. CI installs none
+# of this, because it trains nothing. The version matches the one docker/Dockerfile installs, so a
+# laptop run and a cloud run stay comparable. See src/training/README.md.
+ultralytics==8.3.155

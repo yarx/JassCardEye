@@ -1,0 +1,139 @@
+\section{Grundlagen und Stand der Technik}\label{sec:grundlagen}
+
+\subsection{Jass und Jasskarten}\label{sec:jass}
+
+Ein Jassblatt hat 36 Karten in vier Farben mit je neun Werten.
+Diese Arbeit verwendet zwei Blätter von AGMüller: ein französisches
+Standardblatt und das deutschschweizerische \enquote{Schaffhauser
+Spielkarten Opti-Quatro}. Eine Partie wird mit einem Blatt gespielt; die
+beiden werden nicht gemischt. Viele Karten sehen nach einer Drehung um
+180\textdegree{} fast gleich aus. Spiegeln verändert dagegen die Anordnung
+der Eckzeichen und eignet sich deshalb nicht als Augmentierung.
+
+Wie viele Punkte eine Karte zählt, hängt von der Spielart und von der
+Trumpffarbe ab. Bei den Spielarten, welche die App unterstützt, ergeben
+alle Karten zusammen 152 Punkte. Für den letzten Stich kommen weitere
+5 Punkte hinzu \cite{swisslos2026grundlagen}. Bei anderen Spielarten
+können auch bestimmte Stiche oder Kartenkombinationen zusätzliche Punkte
+geben. In dieser Arbeit stehen die Erkennung der obersten Karte und die
+Berechnung der Punkte eines Stapels im Mittelpunkt.
+
+\subsection{Objekterkennung mit Deep Learning}\label{sec:objekterkennung}
+
+Bildklassifikation ordnet einem Bild eine Klasse zu. Objektdetektion gibt
+zusätzlich die Position als Bounding Box an. Einstufige Detektoren wie YOLO
+sagen Box und Klasse in einem Durchgang voraus \cite{redmon2016yolo}. Ein
+zweistufiger Ansatz lokalisiert zuerst und klassifiziert danach. In dieser
+Arbeit werden beide Ansätze und die reine Klassifikation verglichen
+(Abschnitt~\ref{sec:varianten}).
+
+\subsection{Die YOLO-Familie und YOLO11}\label{sec:yolo}
+
+Verwendet wird YOLO11 mit Ultralytics \cite{jocher2024ultralytics,
+ultralytics2025yolo11docs,khanam2024yolov11}. Für die drei Ansätze werden verschiedene
+Ausführungen derselben Modellfamilie trainiert: A und B$_2$ klassifizieren,
+B$_1$ lokalisiert mit einer gedrehten Box, und C liefert eine
+achsenparallele Box samt Kartenklasse. Alle nutzen die kleinste
+Modellgrösse n, damit sie auf einem Smartphone laufen. Die
+Mosaic-Augmentierung setzt beim Training vier Bilder zusammen und wird
+in den letzten Epochen abgeschaltet \cite{bochkovskiy2020yolov4,ultralytics2025augment}.
+
+YOLO26 erschien erst im Januar 2026 und war damit zu Beginn der
+Umsetzung noch sehr neu. Das Modell kann Vorhersagen ohne
+nachgelagerte Non-Maximum Suppression ausgeben. Dadurch unterscheidet
+sich sein Ausgabeformat von YOLO11 \cite{ultralytics2026yolo26}. Die
+Unterstützung dieses Formats war in mobilen Anwendungen zu diesem
+Zeitpunkt noch nicht vollständig ausgereift. Ein GitHub-Issue vom
+Mai 2026 zeigt beispielsweise, dass die Verarbeitung dieser Ausgabe
+noch ergänzt werden musste \cite{ultralytics2026flutter487}.
+
+Für diese Arbeit war eine verlässliche Integration auf iOS und Android
+wichtiger als der Einsatz der neuesten Modellversion. YOLO11 liess sich
+bereits stabil trainieren, exportieren und in beiden Apps ausführen.
+Deshalb wurde das Projekt mit YOLO11 ausgeführt.
+
+\subsection{Metriken}\label{sec:metriken}
+
+Die Modelle werden mit verschiedenen Kennzahlen verglichen. Bei einem
+Detektor zählt neben der richtigen Kartenklasse auch die Position. Die
+\emph{Intersection over Union} (IoU) misst, wie stark sich die
+vorhergesagte Box und die von Hand gesetzte Box überlappen: 0 bedeutet
+keine Überlappung, 1 eine deckungsgleiche Box.
+
+Die \emph{Precision} gibt an, wie viele der gemeldeten Karten richtig
+sind. Meldet ein Modell zehn Karten und acht davon sind richtig, beträgt
+die Precision 80\,\%. Der \emph{Recall} beschreibt, wie viele der
+vorhandenen Karten gefunden werden. Sind zehn Karten vorhanden und das
+Modell findet acht davon, beträgt der Recall ebenfalls 80\,\%. Beide
+Werte hängen von der gewählten Konfidenzschwelle ab.
+
+Die \emph{Average Precision} (AP) fasst Precision und Recall für eine
+Kartenklasse zusammen. Die \emph{mean Average Precision} (mAP) bildet
+daraus den Mittelwert über alle Klassen. Bei \map{50} zählt eine
+Vorhersage nur dann als richtig, wenn sie mindestens eine IoU von 0.5
+erreicht \cite{everingham2010pascal}. \map{50--95} verwendet mehrere
+IoU-Schwellen zwischen 0.5 und 0.95. Ungenaue Boxen werden dadurch
+strenger bewertet
+\cite{lin2014coco,coco2015eval,ultralytics2025metrics}. Die mAP ist
+deshalb nicht mit dem Anteil korrekt benannter oberster Karten
+gleichzusetzen.
+
+Für die reine Bildklassifikation wird die \emph{Top-1-Genauigkeit}
+verwendet: Der Klassenname mit dem höchsten Wert muss stimmen. Für die
+App ist zusätzlich die einfachere Zahl \enquote{oberste Karte richtig}
+wichtig. Sie gibt an, auf wie vielen realen Fotos das Modell die oberste
+Karte korrekt benennt. Ob die App sie tatsächlich zählt, hängt
+anschliessend noch von
+Konfidenzschwelle und Stabilitätsregel ab
+(Abschnitt~\ref{sec:betriebspunkt}).
+
+\subsection{Transfer Learning}\label{sec:transfer}
+
+Alle Ansätze starten mit vortrainierten YOLO11n-Gewichten, statt ein Netz
+von Grund auf zu trainieren \cite{pan2010transfer}. Die Startgewichte
+von C stammen aus dem Training auf COCO-Alltagsbildern \cite{lin2014coco}, jene von B$_1$
+aus DOTA-Luftbildern \cite{xia2018dota} und jene der Klassifikatoren A und B$_2$ aus
+ImageNet \cite{russakovsky2015imagenet,ultralytics2025yolo11docs}. So können bereits gelernte
+Bildmerkmale übernommen werden. Die Ausgabe wird für die
+projektspezifischen Kartenklassen neu trainiert; deren Anzahl ist je
+Ansatz verschieden (Abschnitt~\ref{sec:varianten}).
+
+\subsection{Synthetische Trainingsdaten und Domain Randomization}\label{sec:synthdata}
+
+Gerenderte Bilder haben den Vorteil, dass ihre Labels automatisch und
+genau erzeugt werden können. Die Herausforderung liegt bei der
+Übertragung auf reale Fotos. Dieser Unterschied wird als
+Sim-to-Real-Gap bezeichnet.
+
+Domain Randomization soll diese Lücke verkleinern. Dabei werden
+Perspektive, Licht, Textur und Kameraeinstellungen bewusst verändert.
+Das Modell sieht dadurch viele unterschiedliche Situationen und soll
+lernen, welche Merkmale auch auf realen Bildern wichtig sind
+\cite{tobin2017domain}. Dafür muss nicht jedes gerenderte Bild möglichst
+echt aussehen. Auch einfache synthetische Bilder können für das Training
+geeignet sein, wenn die Objekte plausibel in die Szene eingefügt werden
+\cite{dwibedi2017cut}.
+
+Tremblay et al. trainierten einen Detektor nur mit synthetischen Bildern
+und konnten damit Autos auf realen Aufnahmen erkennen. Wenige zusätzliche
+reale Trainingsbilder verbesserten das Ergebnis weiter
+\cite{tremblay2018training}. Ein ähnlicher Ansatz wurde bereits für
+Spielkarten verwendet. Das Projekt von geaxgx erzeugt aus fotografierten
+Pokerkarten einen synthetischen Datensatz und trainiert damit YOLOv3.
+Erkannt werden dort die Eckzeichen der Karten. Eine Auswertung auf realen
+Fotos wird jedoch nicht ausgewiesen \cite{geaxgx2018cards}.
+
+Ultralytics empfiehlt mindestens 1500 Bilder je Klasse
+\cite{ultralytics2025tips}. Bereits für ein Blatt mit 36 Karten ist diese
+Menge von Hand kaum zu erstellen und zu labeln. In dieser Arbeit werden
+die Trainingsbilder deshalb gerendert. Die Prüfung erfolgt auf eigenen
+realen Aufnahmen (Abschnitt~\ref{sec:validierung}).
+
+\subsection{On-Device-Inferenz}\label{sec:ondevice}
+
+Core ML und Vision führen das exportierte Modell auf iOS aus
+\cite{apple2025coreml,apple2025vision}. Auf Android übernimmt LiteRT diese
+Aufgabe \cite{google2026litert}. Die beiden Exporte stammen aus denselben Gewichten. Die
+Laufzeiten unterscheiden sich bei der Verarbeitung der Boxen und
+Konfidenzen, was für den Vergleich der App-Ausgaben geprüft werden muss
+(Abschnitt~\ref{sec:betriebspunkt}).

@@ -1,0 +1,81 @@
+name: Fetch the model
+description: >
+  Downloads the weights of one variant of a training run from Azure and exports them in the pinned
+  environment of a platform - Core ML for iOS, LiteRT for Android - into the folder the app bundles.
+  Used by both platform jobs of release.yml, which ship the same best.pt in two formats.
+
+inputs:
+  format:
+    description: coreml (into src/app/ios/Models) or litert (into src/app/android/app/src/main/assets/models)
+    required: true
+  run-id:
+    description: Training run whose model ships (blank = the newest finished one)
+    required: false
+    default: ''
+  variant:
+    description: Model variant to bundle
+    required: false
+    default: c
+  azure-storage-account:
+    required: true
+  azure-storage-container:
+    required: true
+  azure-storage-sas-token:
+    required: true
+
+runs:
+  using: composite
+  steps:
+    # 3.13, the version both pinned export sets are verified against - see
+    # src/training/requirements-export.txt and src/training/requirements-export-android.txt.
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v7
+      with:
+        python-version: '3.13'
+
+    # Only the weights of one variant come down (a few megabytes), and the pinned export environment
+    # turns them into what the app bundles. As everywhere in release.yml, the inputs reach the script
+    # through the environment and never through `${{ }}` inside it.
+    - name: 🧠 Fetch the weights and export them
+      shell: bash
+      env:
+        FORMAT: ${{ inputs.format }}
+        RUN_ID: ${{ inputs.run-id }}
+        VARIANT: ${{ inputs.variant }}
+        AZURE_STORAGE_ACCOUNT: ${{ inputs.azure-storage-account }}
+        AZURE_STORAGE_CONTAINER: ${{ inputs.azure-storage-container }}
+        AZURE_STORAGE_SAS_TOKEN: ${{ inputs.azure-storage-sas-token }}
+      run: |
+        case "$FORMAT" in
+          coreml)
+            VENV=src/training/.venv-export
+            REQUIREMENTS=src/training/requirements-export.txt
+            MODELS=src/app/ios/Models
+            LITERT="" ;;
+          litert)
+            VENV=src/training/.venv-export-android
+            REQUIREMENTS=src/training/requirements-export-android.txt
+            MODELS=src/app/android/app/src/main/assets/models
+            LITERT=1 ;;
+          *)
+            echo "::error::Unknown model format '$FORMAT' - coreml or litert."
+            exit 1 ;;
+        esac
+        python3 -m venv "$VENV"
+        # For LiteRT the CPU wheels of torch: the runner has no GPU, and the CUDA build is gigabytes of
+        # nothing here.
+        "$VENV/bin/pip" install -q ${LITERT:+--extra-index-url https://download.pytorch.org/whl/cpu} -r "$REQUIREMENTS"
+        # A blank run id takes the newest run whose manifest says finished, among the 20 newest
+        # that --list shows - whatever that run was for. A release started from a GitHub release
+        # always gets here. A run without the requested variant exports nothing and fails below.
+        # A store release names its run instead; see "How a release takes its model" in
+        # src/training/pipeline.md.
+        if [ -z "$RUN_ID" ]; then
+          RUN_ID=$("$VENV/bin/python" src/training/fetch_run.py --list | awk '$2 == "finished" { print $1; exit }')
+          echo "Newest finished run: $RUN_ID"
+        fi
+        [ -n "$RUN_ID" ] || { echo "::error::No finished training run to take a model from."; exit 1; }
+        "$VENV/bin/python" src/training/fetch_run.py \
+            --run-id "$RUN_ID" --variant "$VARIANT" --weights-only --export ${LITERT:+--format litert}
+        ls -la "$MODELS"
+        cat "$MODELS/models.json"

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  How the archive becomes an .ipa for App Store Connect. Used by src/scripts/release_ios.sh.
+
+  What stands here is the automatic case, which is what an archive on a developer Mac uses: it
+  holds a development and a distribution certificate, so Xcode can pick.
+
+  A build machine holds only the distribution certificate, and automatic signing archives with the
+  *development* identity and re-signs for distribution at export - so it stops before it starts.
+  src/scripts/release_ios.sh therefore copies this file and writes signingStyle=manual plus a
+  provisioningProfiles entry into the copy whenever a profile is named (--profile, or
+  PROVISIONING_PROFILE_NAME). This one stays as the template.
+
+  manageAppVersionAndBuildNumber is false because the version and the build number are decided by
+  the release script and written into the archive. Letting Xcode raise them would mean the number
+  in the upload no longer matches the one the script reported.
+-->
+<plist version="1.0">
+<dict>
+	<key>method</key>
+	<string>app-store-connect</string>
+	<key>destination</key>
+	<string>export</string>
+	<key>teamID</key>
+	<string>5TV46KLX3W</string>
+	<key>signingStyle</key>
+	<string>automatic</string>
+	<key>manageAppVersionAndBuildNumber</key>
+	<false/>
+	<key>uploadSymbols</key>
+	<true/>
+	<key>stripSwiftSymbols</key>
+	<true/>
+	<key>generateAppStoreInformation</key>
+	<false/>
+</dict>
+</plist>

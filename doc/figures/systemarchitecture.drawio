@@ -1,0 +1,85 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Systemarchitektur" id="Systemarchitektur">
+    <mxGraphModel dx="1414" dy="1202" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="scans" parent="1" style="rounded=0;arcSize=6;whiteSpace=wrap;html=1;fontSize=11;verticalAlign=middle;strokeWidth=2;strokeColor=light-dark(#000000,#6666FF);fillColor=light-dark(#000000,#FFFFFF);fontColor=light-dark(#000000,#000000);" value="72 Kartenscans&lt;br&gt;data/cards/" vertex="1">
+          <mxGeometry height="64" width="150" x="40" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="synth" parent="1" style="rounded=0;arcSize=6;whiteSpace=wrap;html=1;fillColor=light-dark(#000000,#FFFFFF);strokeColor=light-dark(#000000,#FFFF00);fontSize=11;verticalAlign=middle;strokeWidth=2;fontColor=light-dark(#000000,#000000);" value="Generation&lt;br&gt;Render-Engine (SkiaSharp)" vertex="1">
+          <mxGeometry height="64" width="150" x="230" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ds" parent="1" style="rounded=0;arcSize=6;whiteSpace=wrap;html=1;fillColor=light-dark(#000000,#FFFFFF);strokeColor=light-dark(#000000,#6666FF);fontSize=11;verticalAlign=middle;strokeWidth=2;fontColor=light-dark(#000000,#000000);" value="Synthetischer Datensatz&lt;br&gt;Bilder + 4 Label-Varianten" vertex="1">
+          <mxGeometry height="64" width="150" x="420" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="train" parent="1" style="rounded=0;arcSize=6;whiteSpace=wrap;html=1;fillColor=light-dark(#000000,#FFFFFF);strokeColor=light-dark(#000000,#FFFF00);fontSize=11;verticalAlign=middle;strokeWidth=2;fontColor=light-dark(#000000,#000000);" value="src/training/&lt;br&gt;Ultralytics YOLO11" vertex="1">
+          <mxGeometry height="64" width="150" x="610" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="pt" parent="1" style="rounded=0;arcSize=6;whiteSpace=wrap;html=1;fillColor=light-dark(#000000,#FFFFFF);strokeColor=light-dark(#000000,#6666FF);fontSize=11;verticalAlign=middle;strokeWidth=2;fontColor=light-dark(#000000,#000000);" value="best.pt&lt;br&gt;je Variante" vertex="1">
+          <mxGeometry height="64" width="150" x="800" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cards" parent="1" style="rounded=0;arcSize=6;whiteSpace=wrap;html=1;fillColor=light-dark(#000000,#FFFFFF);strokeColor=light-dark(#000000,#FFFF00);fontSize=11;verticalAlign=middle;strokeWidth=2;fontColor=light-dark(#000000,#000000);" value="Cards&lt;br&gt;Klassenvertrag&lt;br&gt;72 Klassen" vertex="1">
+          <mxGeometry height="64" width="150" x="230" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="real" parent="1" style="rounded=0;arcSize=6;whiteSpace=wrap;html=1;fillColor=light-dark(#000000,#FFFFFF);strokeColor=light-dark(#000000,#6666FF);fontSize=11;verticalAlign=middle;strokeWidth=2;fontColor=light-dark(#000000,#000000);" value="Reales Validierungsset&lt;br&gt;813 Frames" vertex="1">
+          <mxGeometry height="64" width="150" x="610" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="app" parent="1" style="rounded=0;arcSize=6;whiteSpace=wrap;html=1;fillColor=light-dark(#000000,#FFFFFF);strokeColor=light-dark(#000000,#FFFF00);fontSize=11;verticalAlign=middle;strokeWidth=2;fontColor=light-dark(#000000,#000000);" value="Apps&lt;br&gt;iOS (Vision, Core ML)&lt;br&gt;Android (LiteRT)" vertex="1">
+          <mxGeometry height="64" width="150" x="800" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="export" parent="1" style="rounded=0;arcSize=6;whiteSpace=wrap;html=1;fillColor=light-dark(#000000,#FFFFFF);strokeColor=light-dark(#000000,#FFFF00);fontSize=11;verticalAlign=middle;strokeWidth=2;fontColor=light-dark(#000000,#000000);" value="export.py&lt;br&gt;Core ML, LiteRT" vertex="1">
+          <mxGeometry height="64" width="150" x="800" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="cli" parent="1" style="rounded=0;arcSize=6;whiteSpace=wrap;html=1;fillColor=light-dark(#000000,#FFFFFF);strokeColor=light-dark(#000000,#FFFF00);fontSize=11;verticalAlign=middle;strokeWidth=2;fontColor=light-dark(#000000,#000000);" value="Dataset CLI&lt;br&gt;generate, plan, rebuild" vertex="1">
+          <mxGeometry height="64" width="150" x="230" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="viewer" parent="1" style="rounded=0;arcSize=6;whiteSpace=wrap;html=1;fillColor=light-dark(#000000,#FFFFFF);strokeColor=light-dark(#000000,#FFFF00);fontSize=11;verticalAlign=middle;strokeWidth=2;fontColor=light-dark(#000000,#000000);" value="Dataset Tool&lt;br&gt;Sichtkontrolle, Labeling,&lt;br&gt;Session-Analyse" vertex="1">
+          <mxGeometry height="64" width="150" x="420" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="photos" parent="1" style="rounded=0;arcSize=6;whiteSpace=wrap;html=1;fillColor=light-dark(#000000,#FFFFFF);strokeColor=light-dark(#000000,#6666FF);fontSize=11;verticalAlign=middle;strokeWidth=2;fontColor=light-dark(#000000,#000000);" value="Eigene Fotos, Videos&lt;br&gt;und Sessions" vertex="1">
+          <mxGeometry height="64" width="150" x="610" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="scans" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;endSize=6;strokeColor=#4d4d4d;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;fontColor=light-dark(#000000,#000000);" target="synth">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="synth" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;endSize=6;strokeColor=#4d4d4d;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;fontColor=light-dark(#000000,#000000);" target="ds">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="ds" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;endSize=6;strokeColor=#4d4d4d;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;fontColor=light-dark(#000000,#000000);" target="train">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="train" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;endSize=6;strokeColor=#4d4d4d;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;fontColor=light-dark(#000000,#000000);" target="pt">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="pt" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;endSize=6;strokeColor=#4d4d4d;strokeWidth=1.5;exitX=0.5;exitY=1;entryX=0.5;entryY=0;fontColor=light-dark(#000000,#000000);" target="export">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="export" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;endSize=6;strokeColor=#4d4d4d;strokeWidth=1.5;exitX=0.5;exitY=1;entryX=0.5;entryY=0;exitDx=0;exitDy=0;entryDx=0;entryDy=0;fontColor=light-dark(#000000,#000000);" target="app">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="cards" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;endSize=6;strokeColor=#4d4d4d;strokeWidth=1.5;exitX=0.5;exitY=0;entryX=0.5;entryY=1;fontColor=light-dark(#000000,#000000);" target="synth">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="cards" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;endSize=6;strokeColor=#4d4d4d;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitDx=0;exitDy=0;fontColor=light-dark(#000000,#000000);" target="viewer">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="cli" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;endSize=6;strokeColor=#4d4d4d;strokeWidth=1.5;exitX=0.5;exitY=0;entryX=0.5;entryY=1;fontColor=light-dark(#000000,#000000);" target="cards">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="real" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;endSize=6;strokeColor=#4d4d4d;strokeWidth=1.5;exitX=0.5;exitY=0;entryX=0.5;entryY=1;fontColor=light-dark(#000000,#000000);" target="train">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="viewer" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;endSize=6;strokeColor=#4d4d4d;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;exitDx=0;exitDy=0;entryDx=0;entryDy=0;fontColor=light-dark(#000000,#000000);" target="real">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="photos" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;endSize=6;strokeColor=#4d4d4d;strokeWidth=1.5;exitX=0;exitY=0.5;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fontColor=light-dark(#000000,#000000);" target="viewer">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="app" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;endSize=6;strokeColor=#4d4d4d;strokeWidth=1.5;exitX=0;exitY=0.5;entryX=1;entryY=0.5;exitDx=0;exitDy=0;entryDx=0;entryDy=0;fontColor=light-dark(#000000,#000000);" target="photos">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

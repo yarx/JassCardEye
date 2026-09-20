@@ -1,0 +1,6 @@
+# latexmk configuration: pdflatex + bibtex, builds both documents.
+#   latexmk            -> transferarbeit.pdf and arbeitsjournal.pdf
+#   latexmk -pvc       -> watch mode while writing
+$pdf_mode = 1;
+@default_files = ('transferarbeit.tex', 'arbeitsjournal.tex');
+$out_dir = 'build';

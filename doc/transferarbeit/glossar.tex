@@ -1,0 +1,68 @@
+\section*{Glossar}
+\addcontentsline{toc}{section}{Glossar}
+
+\small
+\begin{description}[style=unboxed, leftmargin=0pt, itemsep=1pt]
+  \item[Augmentierung] Veränderung von Trainingsbildern. Bei der Mosaic-Augmentierung werden vier Bilder zusammengesetzt.
+
+  \item[Bounding Box] Rechteck, das die Position eines Objekts im Bild beschreibt. Variante~C verwendet eine achsenparallele Box.
+
+  \item[Core ML] Apples Laufzeit für Modelle auf iPhone und Mac.
+
+  \item[Domain Randomization] Variation von Perspektive, Licht und Hintergrund beim Erzeugen synthetischer Trainingsbilder.
+
+  \item[Epoche] Ein vollständiger Durchlauf des Modells durch die Trainingsbilder.
+
+  \item[Fehlalarm] Vorhersage einer Karte in einem Frame, auf dem keine gültige oberste Karte erkannt werden soll. Eine falsch benannte vorhandene Karte ist ebenfalls ein Fehler, aber kein solcher Negativfall.
+
+  \item[FP16 und FP32] Zahlenformate mit 16 beziehungsweise 32 Bit für Modellgewichte und Berechnungen.
+
+  \item[Frame] Einzelbild eines Videos.
+
+  \item[Homographie] Perspektivische Abbildung, die einen Kartenscan in die Szene verzerrt oder einen Kartenausschnitt aufrichtet.
+
+  \item[Inferenz] Anwendung eines trainierten Modells auf ein neues Bild, um eine Vorhersage zu erhalten.
+
+  \item[Intersection over Union (IoU)] Fläche, die sich vorhergesagte und gelabelte Box teilen, geteilt durch die Fläche, die beide Boxen zusammen bedecken. Der Wert liegt zwischen 0 und 1.
+
+  \item[Konfidenzschwelle] Mindestwert, den eine Modellvorhersage erreichen muss, damit die App sie weiter berücksichtigt.
+
+  \item[Label] Vorgegebene richtige Antwort zu einem Bild. Hier sind das die Kartenklasse und ihre Position oder die Markierung \enquote{No card}.
+
+  \item[Latenz] Zeit, die das Modell und die zugehörige Verarbeitung für eine Vorhersage benötigen.
+
+  \item[LiteRT] Googles Laufzeit für Modelle auf Android.
+
+  \item[mAP] \emph{Mean Average Precision} ist der Mittelwert der Average Precision über die Kartenklassen. \map{50} verlangt eine IoU von 0.5. \map{50--95} mittelt über mehrere IoU-Schwellen.
+
+  \item[Negativ] Bild oder Frame ohne gültige, lesbare oberste Karte. Auch eine stark verwischte Karte kann deshalb zu den Negativen gehören.
+
+  \item[Non-Maximum Suppression (NMS)] Verarbeitungsschritt, der mehrere stark überlappende Vorhersagen für dasselbe Objekt auf eine Auswahl reduziert.
+
+  \item[Orientierte Box (OBB)] Gedrehte Box, die hier durch die vier Ecken der Karte beschrieben wird. Variante~B nutzt sie für das Entzerren des Kartenausschnitts.
+
+  \item[Precision und Recall] Precision ist der Anteil richtiger Meldungen an allen Meldungen des Modells. Recall ist der Anteil gefundener Karten an allen vorhandenen Karten.
+
+  \item[Quantisierung] Darstellung von Modellwerten mit weniger Bits. Das kann die Ausführung beschleunigen, muss aber auf mögliche Änderungen der Erkennung geprüft werden.
+
+  \item[Seed] Startwert für Zufallsentscheidungen bei Datenerzeugung oder Training. Ein festgelegter Seed macht die erzeugten Bildvarianten nachvollziehbar.
+
+  \item[Session] Zusammenhängender Zählvorgang mit der App. Für die Auswertung kann er als Video mit Erkennungsprotokoll aufgezeichnet werden.
+
+  \item[Sim-to-Real-Gap] Unterschied zwischen der Leistung auf synthetischen Bildern und auf realen Aufnahmen.
+
+  \item[Stabilitätsregel] Regel der App, nach der dieselbe Karte erst über mehrere Frames hinweg erkannt werden muss, bevor sie gezählt wird.
+
+  \item[Stich] Die Karten, die in einem Spielzug von einer Partei gewonnen werden. Die gewonnenen Stiche bilden den zu zählenden Stapel.
+
+  \item[Testset] Aufnahmen für eine abschliessende Prüfung, die nicht zur Wahl des Modells oder seiner Einstellungen verwendet wurden.
+
+  \item[Top-1-Genauigkeit] Anteil der Bilder, bei denen die Klasse mit dem höchsten Modellwert richtig ist.
+
+  \item[Transfer Learning] Weiterverwendung vortrainierter Modellgewichte als Ausgangspunkt für eine neue Aufgabe.
+
+  \item[Validierungsset] Bilder, mit denen während der Entwicklung Modelle verglichen und die beste Trainingsepoche ausgewählt werden. Es ist deshalb kein unabhängiges Testset.
+
+  \item[YOLO] \emph{You Only Look Once}, eine Familie schneller Objektdetektoren. Hier wird YOLO11 verwendet.
+\end{description}
+\normalsize

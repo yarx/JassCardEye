@@ -1,0 +1,144 @@
+\section{Training und mobile Umsetzung}\label{sec:training}
+
+\subsection{Trainingsrezept}\label{sec:rezept}
+
+Ein Python-Skript trainiert die vier Modelle der drei Ansätze mit
+Ultralytics 8.3.155 \cite{jocher2024ultralytics}. Es läuft auf
+NVIDIA-GPUs mit CUDA, auf dem Mac mit Apple MPS oder auf der CPU.
+Als Ausgangspunkt dienen
+vortrainierte Gewichte von YOLO11n für die Detektion, YOLO11n-obb für
+orientierte Boxen und YOLO11n-cls für die Klassifikation.
+
+Ein Lauf umfasst normalerweise 20 Epochen mit einer Bildgrösse von
+640 Pixeln. Auf dem Mac werden 16 Bilder pro Batch verarbeitet, auf der
+Cloud-GPU 64. Ultralytics erhöht die Lernrate während der ersten drei
+Epochen schrittweise. Bei den Detektoren wird die Mosaic-Augmentierung
+in den letzten zehn Epochen abgeschaltet. Die Voreinstellung für einen
+vorzeitigen Abbruch liegt bei 100 Epochen und greift bei diesen Läufen
+nicht \cite{ultralytics2026cfg}.
+
+Horizontale und vertikale Spiegelungen sind deaktiviert, weil eine
+gespiegelte Karte eine andere Karte ergibt. Die Klassennamen stammen
+aus der gemeinsamen Kartenliste. Bei den Klassifikatoren ordnet
+Ultralytics die Klassen intern alphabetisch. Deshalb lesen die Apps
+die zum Modell gehörenden Klassennamen, statt sich auf die
+Klassenindizes zu verlassen.
+
+Trainiert wird auf synthetischen Bildern. Nach jeder Epoche wird auf
+realen Fotos validiert. Die Gewichte der besten Epoche werden als
+\code{best.pt} gespeichert. Weil diese Epoche anhand desselben
+Validierungssets gewählt wird, auf dem die Ergebnisse berichtet
+werden, können die Kennzahlen etwas zu hoch ausfallen
+(Abschnitt~\ref{sec:grenzen}).
+
+\subsection{Reproduzierbare Trainingspipeline}\label{sec:pipeline}
+
+Die ersten Modelle wurden auf einem MacBook trainiert. Für grössere
+Datensätze und den Vergleich aller Varianten kamen gemietete
+Cloud-GPUs zum Einsatz. Ein GitHub-Actions-Workflow startet dafür
+einen RunPod-Pod. Dieser lädt den festgelegten Commit, erzeugt den
+Datensatz aus Seed und Bildanzahl und trainiert die Varianten
+nacheinander. Während des Laufs werden Manifest, Log, Gewichte und
+Metriken in Azure Blob Storage gespeichert. Ein lokales Werkzeug
+holt die Ergebnisse zurück und exportiert das gewählte Modell für
+beide Apps.
+
+Die Trainingsbilder werden für jeden Lauf neu erzeugt. Grundlage sind
+der versionierte Code, die Kartenscans und die festgelegten
+Generatorparameter (Abschnitt~\ref{sec:repro}). Das Manifest hält
+Commit, Seed, Bildanzahl und Konfiguration fest. Ein Wächter prüft
+halbstündlich, ob die Läufe noch Fortschritte melden, und beendet
+verwaiste Pods. Die Pipeline ist in
+\code{src/training/pipeline.md} dokumentiert.
+
+\subsection{Export und mobile Inferenz}\label{sec:app}
+
+Aus \code{best.pt} entstehen zwei Modelle mit denselben trainierten
+Gewichten. Für die eingereichten Apps wird Variante~C verwendet.
+Ihr Core-ML-Modell enthält die Non-Maximum Suppression, sodass Vision
+fertige Boxen liefert. Ultralytics speichert dieses Modell in halber Genauigkeit
+(FP16) \cite{ultralytics2026coreml}. Für Android entsteht ein LiteRT-Modell in voller Genauigkeit
+(FP32) ohne diesen Schritt. Die App wertet dessen Ausgabe selbst
+aus. Bei der Berechnung auf einer Android-GPU kann LiteRT
+trotzdem mit FP16 rechnen \cite{google2026litertgpu}.
+
+Eine zusätzliche Quantisierung auf 8 Bit wurde nicht vorgenommen.
+Das Core-ML-Modell ist 5.3\,MB gross. Das LiteRT-Modell benötigt aufgrund
+der vollen Genauigkeit 10.7\,MB. Um die Geschwindigkeit in der App
+einzuschätzen, wurde die Laufzeit pro Bild auf vier verfügbaren
+Smartphones gemessen (Tabelle~\ref{tab:geraete}). Auf den beiden iPhones
+dauert die Erkennung 15 beziehungsweise 30\,ms. Das Pixel~7a erreicht mit
+50\,ms genau den festgelegten Zielwert. Auf dem Nexus~5X benötigt die
+Verarbeitung dagegen rund drei Sekunden pro Bild. Damit lässt sich die
+App auf diesem Gerät nicht sinnvoll bedienen.
+
+Die Werte sind gerundete Einzelmessungen und dienen nur als grobe
+Einordnung. Sie erlauben keinen allgemeinen Vergleich zwischen iOS und
+Android. Arbeitsspeicher und Energieverbrauch wurden nicht gemessen. Für
+schwächere Android-Geräte bleibt eine Quantisierung auf 8 Bit eine
+mögliche Erweiterung (Abschnitt~\ref{sec:ausblick}).
+
+\begin{table}[H]
+\centering\small
+\begin{tabular}{@{}lclr@{}}
+\toprule
+\textbf{Gerät} & \textbf{Jahr} & \textbf{Laufzeitumgebung} & \textbf{Zeit pro Bild} \\
+\midrule
+iPhone 17 Pro Max & 2025 & Core ML & 15\,ms \\
+iPhone 14 Pro & 2022 & Core ML & 30\,ms \\
+Google Pixel 7a & 2022 & LiteRT & 50\,ms \\
+Nexus 5X & 2015 & LiteRT & 3000\,ms \\
+\bottomrule
+\end{tabular}
+\caption{Gerundete Laufzeit der Variante~C pro Bild. Die Werte stammen aus
+einer Einzelmessung in der jeweiligen App.}
+\label{tab:geraete}
+\end{table}
+
+Die Klassennamen sind Teil des Exports. Die Datei \code{models.json}
+nennt für jedes gebündelte Modell den Trainingslauf und den Commit.
+
+Die App wurde mit SwiftUI für iOS und mit Kotlin und Jetpack Compose
+für Android umgesetzt. Beide verwenden im Kamerabild das grösste
+mittige Quadrat und skalieren es auf 640 Pixel. Damit entspricht
+der Bildausschnitt dem Format der Trainingsbilder. Für den
+Variantenvergleich konnte die iOS-Implementierung auch A und B
+verarbeiten. Bei B entzerrt sie den von der ersten Stufe gefundenen
+Ausschnitt und klassifiziert ihn danach. Die eingereichten Apps
+enthalten Variante~C.
+
+\subsection{Von der Erkennung zur gezählten Karte}\label{sec:zaehlung}
+
+Aus dem geplanten Proof of Concept ist eine fertig implementierte
+Zähl-App für iOS und Android geworden. Beide Versionen wurden am
+14.\,September als Version 1.0.0 im App Store und bei Google Play
+eingereicht. Sie sind als Gratis-Demo mit einmaligem Kauf angelegt.
+Die Kaufabwicklung, Store-Texte und Screenshots gingen über den
+geplanten Proof of Concept und den Untersuchungsrahmen dieser Arbeit
+hinaus. Ziel ist, die App interessierten Personen am Tag der
+Präsentation zugänglich zu machen. Die guten Erkennungsresultate
+sprechen dafür, die App danach weiterzuentwickeln und zu pflegen.
+
+Eine Erkennung wird noch nicht sofort gezählt. Die App verwirft
+Vorhersagen mit einer Konfidenz unter 0.6. Danach prüft sie, ob
+dieselbe Karte in mehreren Frames erscheint. Standardmässig muss
+sie in drei aufeinanderfolgenden Frames die beste Erkennung sein
+(\enquote{Serie}). Als Alternative reichen drei von fünf Frames,
+solange keine andere noch ungezählte Karte mehr als einmal
+erscheint (\enquote{Mehrheit}). Die benötigte Anzahl lässt sich
+von 1 bis 10 einstellen. Schwelle und Standardeinstellung der
+Stabilitätsregel wurden zunächst ohne Messung gewählt. Ihre
+Wirkung wurde später an einer aufgezeichneten Session geprüft
+(Abschnitt~\ref{sec:betriebspunkt}).
+
+Vor der Zählung werden das Kartenblatt und die Spielart gewählt. Danach
+öffnet sich die Kamera. Die App
+berücksichtigt nur die 36 Karten dieses Blatts und verhindert
+Doppelzählungen. Der Stapel lässt sich durch Antippen korrigieren.
+Die Punkte werden nach neun Spielarten aus drei Wertetabellen
+berechnet. Ein Prüfskript kontrolliert diese Tabellen in der
+Continuous Integration.
+Für jede gezählte Karte gibt die App ein Signal. Ein verborgener
+Entwicklermodus kann die Zählung als Video und als
+Erkennungsprotokoll je Frame aufzeichnen. Diese Aufnahmen dienen
+der Auswertung in Abschnitt~\ref{sec:betriebspunkt}.

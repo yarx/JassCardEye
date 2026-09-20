@@ -1,0 +1,113 @@
+# XcodeGen definition - the .xcodeproj is generated, not versioned:
+#   brew install xcodegen && cd src/app/ios && xcodegen generate
+#
+# One multiplatform SwiftUI target covers iOS and macOS from the same sources. iOS is what ships;
+# the macOS build is the compile guard, built by hand. The Core ML model
+# (src/app/ios/Models/*.mlpackage, with models.json) comes from src/training/fetch_run.py --export or
+# src/training/export.py and is generated, not versioned - the app builds and runs without one.
+name: JassCardEye
+options:
+  bundleIdPrefix: ch.yarx
+  deploymentTarget:
+    iOS: "17.0"
+    macOS: "14.0"
+  minimumXcodeGenVersion: "2.38.0"
+
+settings:
+  base:
+    # The version both apps ship under - src/scripts/lib/release.sh reads it for iOS and Android. A
+    # release passes version and build number into the archive from the outside, so the build number
+    # 1 below only ever shows in a local build.
+    MARKETING_VERSION: "1.0.1"
+    CURRENT_PROJECT_VERSION: "1"
+
+targets:
+  JassCardEye:
+    type: application
+    supportedDestinations: [iOS, macOS]
+    sources:
+      - path: Sources
+      - path: Assets.xcassets
+      - path: Sounds            # the tick for a counted card, made by src/tools/make_card_sound.py
+      - path: PrivacyInfo.xcprivacy
+      - path: Models
+        optional: true          # present after the first export
+    settings:
+      base:
+        SWIFT_VERSION: "5.9"
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_NAME: JassCardEye
+        CODE_SIGN_STYLE: Automatic
+        # The YARX team. Set here rather than clicked in Xcode, because `xcodegen generate`
+        # rewrites the project and would drop it again - and because an archive from the command
+        # line has nobody to ask.
+        #
+        # Signing stays automatic here, which is what running on a device from Xcode wants. A
+        # release archive overrides it: see src/scripts/release_ios.sh, which switches to manual and
+        # names a profile, because a build machine holds a distribution certificate and no
+        # development one - and automatic signing archives with the development identity.
+        DEVELOPMENT_TEAM: 5TV46KLX3W
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        INFOPLIST_KEY_CFBundleDisplayName: JassCardEye
+        INFOPLIST_KEY_NSCameraUsageDescription: >-
+          JassCardEye erkennt die oberste Jasskarte live über die Kamera.
+        # No networking code of its own - only StoreKit talks to the App Store, for price, purchase
+        # and restore - so the app uses no encryption beyond what iOS itself provides. Declared here
+        # once instead of answering the export-compliance question in App Store Connect per build.
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        # Without a launch screen iOS runs the app letterboxed in compatibility
+        # mode (scaled UI, not edge-to-edge) - generate the default one.
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        # Both of these are needed for the Documents folder to show up in the Files app, which is
+        # the only way a tester gets a saved frame or a recorded session off the phone. Only this
+        # one has a build setting - Xcode's plist generator translates a fixed set of keys - so
+        # UIFileSharingEnabled comes through the base plist below.
+        #
+        # Without them the app saves frames and recordings nobody can reach. Delete them only
+        # together with the buttons.
+        INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace: YES
+        # Live overlay geometry assumes portrait buffers - lock the orientation.
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        # iPhone only. The viewfinder is built for a phone held over a table, and shipping for iPad
+        # would mean iPad screenshots and a layout nobody has tried. A deliberate decision, not the
+        # default - raise it to "1,2" once the iPad case has actually been designed.
+        TARGETED_DEVICE_FAMILY: "1"
+        ENABLE_HARDENED_RUNTIME: YES
+    # Base plist for the keys Xcode cannot generate; the INFOPLIST_KEY_* settings above are merged
+    # on top of it. Written by XcodeGen, like the project itself - not hand-maintained, and
+    # therefore gitignored.
+    info:
+      path: Generated-Info.plist
+      properties:
+        # Lists the app's Documents folder in the Files app and in Finder. See the comment on
+        # LSSupportsOpeningDocumentsInPlace above - one without the other does nothing.
+        UIFileSharingEnabled: true
+    # Local StoreKit testing: run from Xcode, the app buys from JassCardEye.storekit instead of the
+    # App Store, so the demo, a purchase, a refund and Ask to Buy all work in the simulator without
+    # an account. Only the run action uses it; an archive talks to the real App Store.
+    scheme:
+      storeKitConfiguration: JassCardEye.storekit
+      testTargets: [JassCardEyeTests]
+    entitlements:
+      path: JassCardEye.entitlements
+      properties:
+        # macOS: camera access under App Sandbox / hardened runtime.
+        com.apple.security.device.camera: true
+
+  # The purchase against the same StoreKit file, run inside the app on the simulator: buying,
+  # refunds, Ask to Buy, an interrupted purchase and a start without the App Store.
+  JassCardEyeTests:
+    type: bundle.unit-test
+    supportedDestinations: [iOS]
+    sources:
+      - path: Tests
+      - path: JassCardEye.storekit
+        buildPhase: resources
+    dependencies:
+      - target: JassCardEye
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        SWIFT_VERSION: "5.9"
+        DEVELOPMENT_TEAM: 5TV46KLX3W
+        CODE_SIGN_STYLE: Automatic

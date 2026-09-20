@@ -1,0 +1,289 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sessions="clr-namespace:JassCardEye.Dataset.Viewer.Sessions"
+        x:Class="JassCardEye.Dataset.Viewer.MainWindow"
+        Title="JassCardEye Dataset Tool" Width="1240" Height="820" MinWidth="900" MinHeight="600"
+        Background="#141414"
+        KeyDown="OnKeyDown">
+
+    <!-- A sidebar with the four sections, and the section on the right. Browse and Label share the
+         image area and the status bar; Extract and Analyse sessions have pages of their own. -->
+    <Grid ColumnDefinitions="210,*" Background="#141414">
+
+        <!-- Sidebar -->
+        <Border Grid.Column="0" Classes="sidebar">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top" Margin="18,20,18,18" Spacing="2">
+                    <TextBlock Text="JassCardEye" FontSize="17" FontWeight="SemiBold"/>
+                    <TextBlock Text="Dataset tool" Classes="subtitle"/>
+                </StackPanel>
+                <ListBox Name="NavList" Classes="nav" SelectedIndex="0" SelectionChanged="OnSectionChanged">
+                    <ListBoxItem ToolTip.Tip="Look through a dataset variant and correct its labels">
+                        <StackPanel Orientation="Horizontal" Spacing="11">
+                            <PathIcon Width="15" Height="15"
+                                      Data="M3,3 H10 V10 H3 Z M14,3 H21 V10 H14 Z M3,14 H10 V21 H3 Z M14,14 H21 V21 H14 Z"/>
+                            <TextBlock Text="Browse dataset" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </ListBoxItem>
+                    <ListBoxItem ToolTip.Tip="Label new photos into a dataset: four corners and a class">
+                        <StackPanel Orientation="Horizontal" Spacing="11">
+                            <PathIcon Width="15" Height="15"
+                                      Data="M3,3 H9 V5 H5 V9 H3 Z M15,3 H21 V9 H19 V5 H15 Z M3,15 H5 V19 H9 V21 H3 Z M19,15 H21 V21 H15 V19 H19 Z M9,8 H15 V16 H9 Z"/>
+                            <TextBlock Text="Label photos" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </ListBoxItem>
+                    <ListBoxItem ToolTip.Tip="Turn a video into photos to label">
+                        <StackPanel Orientation="Horizontal" Spacing="11">
+                            <PathIcon Width="15" Height="15"
+                                      Data="F0 M4,2 H20 V22 H4 Z M6,4 V6 H8 V4 Z M6,9 V11 H8 V9 Z M6,13 V15 H8 V13 Z M6,18 V20 H8 V18 Z M16,4 V6 H18 V4 Z M16,9 V11 H18 V9 Z M16,13 V15 H18 V13 Z M16,18 V20 H18 V18 Z M10,4 V11 H14 V4 Z M10,13 V20 H14 V13 Z"/>
+                            <TextBlock Text="Extract frames" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </ListBoxItem>
+                    <ListBoxItem ToolTip.Tip="A session recorded in the app on a timeline: what the model said on every frame">
+                        <StackPanel Orientation="Horizontal" Spacing="11">
+                            <PathIcon Width="15" Height="15"
+                                      Data="M2,6 H15 V18 H2 Z M17,10 L22,6 V18 L17,14 Z"/>
+                            <TextBlock Text="Analyse sessions" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </ListBoxItem>
+                </ListBox>
+            </DockPanel>
+        </Border>
+
+        <Grid Grid.Column="1" RowDefinitions="Auto,Auto,*,Auto">
+
+            <!-- Analyse sessions: a page of its own, over the whole column -->
+            <sessions:SessionsPage Name="SessionsPage" Grid.Row="0" Grid.RowSpan="4" IsVisible="False"/>
+
+            <!-- Browse: header and toolbar -->
+            <StackPanel Grid.Row="0" Name="BrowseHeader" Classes="header">
+                <TextBlock Text="Browse dataset" Classes="title"/>
+                <TextBlock Text="Look through a dataset variant and correct the label of a sample." Classes="subtitle"/>
+                <WrapPanel Classes="toolbar">
+                    <Button Content="Open folder…" Click="OnOpenFolderClick"/>
+                    <Button Content="Open image…" Click="OnOpenClick"/>
+                    <Rectangle Classes="sep"/>
+                    <TextBlock Text="Variant" Classes="field"/>
+                    <ComboBox Name="VariantSelector" MinWidth="240" SelectionChanged="OnVariantChanged"/>
+                    <Rectangle Classes="sep"/>
+                    <ToggleButton Name="EditToggle" Content="Edit label (E)" IsCheckedChanged="OnEditToggled"
+                                  ToolTip.Tip="Correct the label of the sample on screen – writes the dataset's source labels and rebuilds every variant from them"/>
+                </WrapPanel>
+            </StackPanel>
+
+            <!-- Label: header, and where the photos come from and go to -->
+            <StackPanel Grid.Row="0" Name="LabelHeader" Classes="header" IsVisible="False">
+                <TextBlock Text="Label photos" Classes="title"/>
+                <TextBlock Text="Four corners and one class per photo, written straight into the dataset." Classes="subtitle"/>
+                <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto,Auto" Margin="0,12,0,0">
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Dataset" Classes="field" Width="70"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" Name="DatasetPathText" Classes="path"/>
+                    <Button Grid.Row="0" Grid.Column="2" Content="Change…" Click="OnChooseDataset" Margin="8,0,0,4"/>
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Photos" Classes="field" Width="70"/>
+                    <TextBlock Grid.Row="1" Grid.Column="1" Name="PhotosPathText" Classes="path" Text="No folder chosen"/>
+                    <Button Grid.Row="1" Grid.Column="2" Content="Choose photos…" Click="OnChoosePhotos" Margin="8,0,0,0"/>
+                    <!-- Where the proposals come from, or why there are none – looked up once at start,
+                         like ffmpeg on the extraction page. -->
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Propose" Classes="field" Width="70" Margin="0,4,0,0"/>
+                    <TextBlock Grid.Row="2" Grid.Column="1" Name="ProposeStatusText" Classes="path" Margin="0,4,0,0"/>
+                </Grid>
+            </StackPanel>
+
+            <!-- Extract, reviewing: going through extracted frames and throwing out the ones not worth
+                 labelling -->
+            <StackPanel Grid.Row="0" Name="ReviewHeader" Classes="header" IsVisible="False">
+                <TextBlock Text="Review frames" Classes="title"/>
+                <TextBlock Classes="subtitle" TextWrapping="Wrap"
+                           Text="Browse with ← and →. Space or X marks the frame on screen for deletion and moves on to the next; the marked ones are deleted together."/>
+                <Grid ColumnDefinitions="Auto,*" Margin="0,12,0,0">
+                    <TextBlock Text="Folder" Classes="field" Width="70"/>
+                    <TextBlock Grid.Column="1" Name="ReviewFolderText" Classes="path"/>
+                </Grid>
+                <!-- Not focusable: Space marks a frame, and must not also press whichever button was clicked last. -->
+                <WrapPanel Classes="toolbar">
+                    <ToggleButton Name="MarkButton" Content="Mark for deletion (Space)" Click="OnToggleMark" Focusable="False"/>
+                    <Button Name="DeleteMarkedButton" Content="Delete marked" Click="OnDeleteMarked" Classes="danger" Focusable="False"/>
+                    <Button Name="UnmarkAllButton" Content="Unmark all" Click="OnUnmarkAll" Focusable="False"/>
+                    <TextBlock Name="ReviewStatusText" Classes="subtitle" VerticalAlignment="Center" Margin="4,0"/>
+                    <Rectangle Classes="sep"/>
+                    <Button Content="Label these frames →" Click="OnLabelReviewed" Focusable="False"/>
+                    <Button Content="Close review" Click="OnCloseReview" Focusable="False"/>
+                </WrapPanel>
+            </StackPanel>
+
+            <!-- Annotation card: four corners and one class - the same whether a photo is being labelled
+                 for the first time or an existing label is being corrected. -->
+            <Border Grid.Row="1" Name="AnnotateBar" Classes="card" Margin="20,0,20,12" IsVisible="False">
+                <StackPanel Spacing="10">
+
+                    <!-- The class, as deck, suit and rank: one click (or key) each. The suit buttons carry
+                         the same drawings the app shows. -->
+                    <!-- Each label stays with its buttons when the line wraps. -->
+                    <WrapPanel ItemSpacing="16" LineSpacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="Deck" Classes="field"/>
+                            <ToggleButton Name="FrenchDeckButton" Content="French" Click="OnDeckClick"
+                                          ToolTip.Tip="Kreuz, Ecken, Herz, Schaufel - D switches the deck"/>
+                            <ToggleButton Name="GermanDeckButton" Content="German" Click="OnDeckClick"
+                                          ToolTip.Tip="Eichel, Rosen, Schellen, Schilten - D switches the deck"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="Suit" Classes="field"/>
+                            <StackPanel Name="SuitButtons" Orientation="Horizontal" Spacing="4"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="Rank" Classes="field"/>
+                            <StackPanel Name="RankButtons" Orientation="Horizontal" Spacing="3"/>
+                        </StackPanel>
+                        <TextBlock Name="ClassText" VerticalAlignment="Center" Foreground="#8cf"/>
+                    </WrapPanel>
+
+                    <!-- Wrapping, because the status text carries the sample name and must stay readable at
+                         any window width. -->
+                    <WrapPanel ItemSpacing="6" LineSpacing="6">
+                        <Button Name="SaveButton" Content="Save (Enter)" Click="OnSaveLabel" Classes="accent"/>
+                        <Button Name="RotateButton" Content="Turn ↻ (R)" Click="OnRotateCorners"
+                                ToolTip.Tip="Move the corner order round by one – twice turns the card by 180°"/>
+                        <Button Name="ClearButton" Content="Clear points (Esc)" Click="OnClearPoints"/>
+                        <Button Name="NegativeButton" Content="No card (N)" Click="OnNoCard"
+                                ToolTip.Tip="Save this frame as a negative (no recognisable card)"/>
+                        <Button Name="DeleteButton" Content="Delete sample" Click="OnDeleteSample" Foreground="#f88"
+                                ToolTip.Tip="Remove this frame and its labels from the dataset – for a frame that cannot be annotated at all. Asks once more before it does."/>
+                        <Button Name="ProposeButton" Content="Propose (⇧→)" Click="OnPropose"
+                                ToolTip.Tip="Place corners and class from variant B – a proposal to check and correct, never saved on its own. ⇧→ goes to the next photo and proposes there."/>
+                        <Button Name="NextUnlabelledButton" Content="Next unlabelled" Click="OnNextUnlabelled"
+                                ToolTip.Tip="Jump to the next photo that has not been labelled yet"/>
+                        <Button Name="NextFlaggedButton" Content="Next flagged (F)" Click="OnNextFlagged"
+                                ToolTip.Tip="Jump to the next label that touches the image border – the fault that stops a training run"/>
+                        <TextBlock Name="LabelStatus" VerticalAlignment="Center" Foreground="#8f8" Margin="8,0,0,0"/>
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Image area, shared by Browse and Label -->
+            <Grid Grid.Row="2" Name="ImageArea">
+                <Border Background="#1b1b1b">
+                    <ScrollViewer Name="ScrollArea" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                        <Canvas Name="ImageCanvas"
+                                PointerPressed="OnCanvasPointerPressed"
+                                PointerMoved="OnCanvasPointerMoved"
+                                PointerReleased="OnCanvasPointerReleased"/>
+                    </ScrollViewer>
+                </Border>
+
+                <!-- A frame marked for deletion, unmistakable at a glance while flicking through -->
+                <Border Name="MarkedOverlay" IsVisible="False" IsHitTestVisible="False"
+                        BorderBrush="#e5484d" BorderThickness="4">
+                    <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="14"
+                            Background="#e5484d" CornerRadius="6" Padding="10,5">
+                        <TextBlock Text="Marked for deletion" FontWeight="SemiBold"/>
+                    </Border>
+                </Border>
+
+                <!-- Live preview of the rectified card: shows at a glance whether the corner order is right -->
+                <Border Name="CropPreviewPanel" IsVisible="False"
+                        HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="14"
+                        Background="#D0000000" BorderBrush="#7CFC00" BorderThickness="1"
+                        CornerRadius="6" Padding="6">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Rectified card" Foreground="#8f8" FontSize="11"
+                                   HorizontalAlignment="Center"/>
+                        <Image Name="CropPreview" Width="124" Height="194" Stretch="Uniform"/>
+                        <TextBlock Name="CropHint" Text="upright = corner order OK" Foreground="#888"
+                                   FontSize="10" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Extract: a page of its own -->
+            <ScrollViewer Grid.Row="2" Name="ExtractPage" IsVisible="False">
+                <StackPanel Margin="20,18,20,20" Spacing="14">
+                    <StackPanel>
+                        <TextBlock Text="Extract frames" Classes="title"/>
+                        <TextBlock Classes="subtitle" TextWrapping="Wrap"
+                                   Text="Turns a video into photos to label: every n-th frame as a JPEG, in a folder named after the video, right next to it. Each frame is named after the video and its frame number."/>
+                    </StackPanel>
+
+                    <!-- Side by side: two short notes do not need a line of the window each. -->
+                    <Grid ColumnDefinitions="*,*">
+                        <Border Grid.Column="0" Classes="card" Margin="0,0,7,0">
+                            <TextBlock Name="FfmpegStatusText" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                        </Border>
+                        <Border Grid.Column="1" Classes="card" Margin="7,0,0,0">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Classes="subtitle" VerticalAlignment="Center" TextWrapping="Wrap"
+                                           Text="Frames extracted earlier can be reviewed and thinned out without extracting again."/>
+                                <Button Grid.Column="1" Content="Review a folder…" Click="OnReviewFolder" Margin="12,0,0,0"
+                                        VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+
+                    <Border Classes="card">
+                        <StackPanel Spacing="16">
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="Video" Classes="field"/>
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Name="VideoPathText" Classes="path" Text="No video chosen"/>
+                                    <Button Grid.Column="1" Name="ChooseVideoButton" Content="Choose video…"
+                                            Click="OnChooseVideo" Margin="8,0,0,0"/>
+                                </Grid>
+                            </StackPanel>
+
+                            <!-- Side by side: the step on the left, and where the frames go taking the rest of the width. -->
+                            <Grid ColumnDefinitions="Auto,*">
+                                <StackPanel Grid.Column="0" Spacing="6" Margin="0,0,40,0">
+                                    <TextBlock Text="Frame step" Classes="field"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="12">
+                                        <NumericUpDown Name="FrameStepBox" Minimum="1" Maximum="600" Increment="1"
+                                                       FormatString="0" Width="130" ValueChanged="OnFrameStepChanged"/>
+                                        <TextBlock Name="FrameStepHint" Classes="subtitle" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Spacing="6">
+                                    <TextBlock Text="Frames go to" Classes="field"/>
+                                    <TextBlock Name="TargetFolderText" Classes="path" Text="–"/>
+                                    <TextBlock Name="TargetWarning" Foreground="#f88" TextWrapping="Wrap" IsVisible="False"
+                                               Text="This folder already exists and is not empty. Remove or rename it first, so frames of two extractions cannot mix."/>
+                                </StackPanel>
+                            </Grid>
+
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <Button Name="ExtractButton" Content="Extract frames" Click="OnExtractFrames" Classes="accent"/>
+                                <ProgressBar Name="ExtractProgress" IsIndeterminate="True" Width="160"
+                                             VerticalAlignment="Center" IsVisible="False"/>
+                                <TextBlock Name="ExtractProgressText" Classes="subtitle" VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <StackPanel Name="ExtractResultRow" Orientation="Horizontal" Spacing="12" IsVisible="False">
+                                <TextBlock Name="ExtractResultText" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                                <Button Name="ReviewExtractedButton" Content="Review frames →" Click="OnReviewExtracted"
+                                        Classes="accent" IsVisible="False"/>
+                                <Button Name="LabelExtractedButton" Content="Label these frames →" Click="OnLabelExtracted"
+                                        IsVisible="False"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Status bar: what is on screen, navigation and zoom -->
+            <Border Grid.Row="3" Name="StatusBar" Classes="statusbar">
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Name="StatusText" Classes="subtitle" VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis"/>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" Margin="12,0,0,0">
+                        <Button Name="PrevButton" Content="←" Click="OnPrevClick" ToolTip.Tip="Previous image (←)"/>
+                        <TextBlock Name="IndexText" VerticalAlignment="Center" MinWidth="72" TextAlignment="Center"/>
+                        <Button Name="NextButton" Content="→" Click="OnNextClick" ToolTip.Tip="Next image (→)"/>
+                        <Rectangle Classes="sep"/>
+                        <Button Name="ZoomOutButton" Content="−" Click="OnZoomOut" ToolTip.Tip="Zoom out"/>
+                        <Button Name="ResetButton" Content="Fit" Click="OnReset" ToolTip.Tip="Fit the image to the window"/>
+                        <Button Name="ZoomInButton" Content="+" Click="OnZoomIn" ToolTip.Tip="Zoom in"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

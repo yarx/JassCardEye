@@ -1,0 +1,97 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sessions="clr-namespace:JassCardEye.Dataset.Viewer.Sessions"
+             x:Class="JassCardEye.Dataset.Viewer.Sessions.SessionsPage">
+
+    <!-- Analyse sessions: the frame on the left; on the right what looks wrong, how each card fared, and the
+         settings the open sessions can be replayed with; the session as a timeline below, and the way to Label
+         photos in the bar at the bottom. -->
+    <Grid RowDefinitions="Auto,*,Auto,Auto">
+
+        <StackPanel Grid.Row="0" Classes="header">
+            <TextBlock Text="Analyse sessions" Classes="title"/>
+            <TextBlock Classes="subtitle" TextWrapping="Wrap"
+                       Text="A session recorded in the app: its video and its recognition log on one timeline – what the model said on every frame, and where that looks wrong."/>
+            <WrapPanel Classes="toolbar">
+                <Button Name="OpenButton" Content="Open sessions…" Click="OnOpen"
+                        ToolTip.Tip="Choose the session ZIPs the apps write, or session videos – the recognition log of the same name has to lie next to each video"/>
+                <ComboBox Name="SessionList" MinWidth="300" SelectionChanged="OnSessionChanged"/>
+                <Button Name="CloseButton" Content="Close session" Click="OnCloseSession"/>
+                <TextBlock Name="OpenStatus" Classes="subtitle" VerticalAlignment="Center" TextWrapping="Wrap"/>
+            </WrapPanel>
+        </StackPanel>
+
+        <Grid Grid.Row="1" ColumnDefinitions="*,520" Margin="20,0,20,12">
+            <Border Background="#1b1b1b" CornerRadius="8">
+                <sessions:SessionFrameView Name="FrameView"/>
+            </Border>
+
+            <TabControl Grid.Column="1" Name="SideTabs" Margin="12,-8,0,0" Padding="0,8,0,0">
+                <TabItem Header="Anomalies">
+                    <Grid RowDefinitions="*,Auto,*">
+                        <ListBox Grid.Row="0" Name="AnomalyList" SelectionChanged="OnAnomalyChanged" Background="#1c1c1c"/>
+                        <TextBlock Grid.Row="1" Name="TotalsTitle" Text="Over all open sessions" Classes="field" Margin="0,12,0,6"/>
+                        <Border Grid.Row="2" Classes="card">
+                            <ScrollViewer>
+                                <SelectableTextBlock Name="TotalsText" TextWrapping="Wrap"/>
+                            </ScrollViewer>
+                        </Border>
+                    </Grid>
+                </TabItem>
+
+                <TabItem Header="Cards">
+                    <Border Classes="card">
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto">
+                            <SelectableTextBlock Name="CardsText" FontFamily="Menlo, Consolas, DejaVu Sans Mono, monospace" FontSize="12"/>
+                        </ScrollViewer>
+                    </Border>
+                </TabItem>
+
+                <TabItem Header="Settings">
+                    <Grid RowDefinitions="Auto,*">
+                        <StackPanel Grid.Row="0" Spacing="8" Margin="0,0,0,10">
+                            <TextBlock Classes="subtitle" TextWrapping="Wrap"
+                                       Text="Replays every open session with another threshold and stability rule. On the timeline, frames below the threshold are dimmed and a green tick marks where a card would be counted."/>
+                            <WrapPanel ItemSpacing="8" LineSpacing="6">
+                                <TextBlock Text="Threshold" Classes="field"/>
+                                <NumericUpDown Name="ThresholdBox" Minimum="0" Maximum="1" Increment="0.01" FormatString="0.00"
+                                               Width="120" ValueChanged="OnThresholdOrFramesChanged"/>
+                                <TextBlock Text="Rule" Classes="field"/>
+                                <ComboBox Name="RuleBox" MinWidth="110" SelectionChanged="OnRuleChanged">
+                                    <ComboBoxItem Content="Run"/>
+                                    <ComboBoxItem Content="Majority"/>
+                                </ComboBox>
+                                <TextBlock Text="Frames" Classes="field"/>
+                                <NumericUpDown Name="FramesBox" Minimum="1" Maximum="10" Increment="1" FormatString="0"
+                                               Width="100" ValueChanged="OnThresholdOrFramesChanged"/>
+                                <Button Name="RecordedButton" Content="As recorded" Click="OnRecordedSettings"
+                                        ToolTip.Tip="The threshold and rule the selected session was counted with"/>
+                            </WrapPanel>
+                        </StackPanel>
+                        <Border Grid.Row="1" Classes="card">
+                            <ScrollViewer HorizontalScrollBarVisibility="Auto">
+                                <SelectableTextBlock Name="SettingsText" FontFamily="Menlo, Consolas, DejaVu Sans Mono, monospace" FontSize="12"/>
+                            </ScrollViewer>
+                        </Border>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+        </Grid>
+
+        <sessions:SessionTimeline Grid.Row="2" Name="Timeline" Margin="20,0,20,12"
+                                  ToolTip.Tip="Colour: the card the model named, dimmed below the threshold in Settings · orange: anomaly · white tick: counted in the app · green tick: counted with the settings in Settings"/>
+
+        <Border Grid.Row="3" Classes="statusbar">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Name="FrameText" Classes="subtitle" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" Margin="12,0,0,0">
+                    <Button Name="PrevButton" Content="←" Click="OnPrevious" ToolTip.Tip="Previous frame (←)"/>
+                    <Button Name="NextButton" Content="→" Click="OnNext" ToolTip.Tip="Next frame (→)"/>
+                    <Rectangle Classes="sep"/>
+                    <Button Name="LabelButton" Content="Label this frame →" Click="OnLabelFrame" Classes="accent"
+                            ToolTip.Tip="Writes the frame next to the video, like an extracted frame, and opens it in Label photos – as a card or as No card"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

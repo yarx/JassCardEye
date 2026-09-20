@@ -1,0 +1,88 @@
+% ============================================================================
+% JassCardEye -- CAS-Transferarbeit (HSLU Informatik)
+% Build: cd doc && tectonic transferarbeit.tex (führt BibTeX selbst aus)
+% ============================================================================
+\documentclass[11pt,a4paper,parskip=half]{scrartcl}
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[nswissgerman]{babel}
+\usepackage{csquotes}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\usepackage{longtable}
+\usepackage{xcolor}
+\usepackage{microtype}
+\usepackage{amsmath}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes.geometric,fit,calc}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage[hidelinks]{hyperref}
+\hypersetup{
+  pdftitle={JassCardEye: Erkennung der obersten Jasskarte auf einem Kartenstapel mit YOLO und synthetischen Trainingsdaten},
+  pdfauthor={Raphael Bolliger},
+}
+
+\graphicspath{{figures/}}
+\captionsetup{font=small,labelfont=bf}
+\setlist{nosep}
+\setcounter{tocdepth}{2}
+
+% Angaben, die nur der Autor kennt.
+
+% Kurzschreibweisen
+\newcommand{\map}[1]{mAP@#1}
+\newcommand{\code}[1]{\texttt{#1}}
+
+% TikZ-Stile für die Diagramme
+\tikzset{
+  box/.style={draw=black!70, rounded corners=2pt, align=center, font=\small,
+              inner sep=5pt, minimum height=9mm, fill=white},
+  data/.style={box, fill=blue!6},
+  tool/.style={box, fill=orange!8},
+  ext/.style={box, fill=black!4, draw=black!40},
+  arrow/.style={-{Latex[length=2.2mm]}, thick, black!70},
+  lbl/.style={font=\scriptsize, text=black!70, align=center},
+}
+
+\begin{document}
+
+\input{transferarbeit/titelblatt}
+\input{transferarbeit/erklaerung}
+\input{transferarbeit/zusammenfassung}
+
+{\small\tableofcontents}
+\clearpage
+\listoffigures
+\listoftables
+\clearpage
+
+\input{transferarbeit/01-einleitung}
+\input{transferarbeit/02-grundlagen}
+\input{transferarbeit/03-methodik}
+\input{transferarbeit/04-daten}
+\input{transferarbeit/05-training}
+\input{transferarbeit/06-experimente}
+\input{transferarbeit/07-diskussion}
+\input{transferarbeit/08-schluss}
+
+\clearpage
+\input{transferarbeit/glossar}
+
+\clearpage
+\renewcommand{\refname}{Literaturverzeichnis}
+\addcontentsline{toc}{section}{Literaturverzeichnis}
+\bibliographystyle{alphadin}
+\bibliography{literatur}
+
+\clearpage
+\appendix
+\input{transferarbeit/anhang-a-ki-deklaration}
+\input{transferarbeit/anhang-b-reproduzierbarkeit}
+\end{document}

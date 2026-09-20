@@ -1,0 +1,72 @@
+<div class="flex min-h-screen flex-col bg-ground text-zinc-100">
+  <header class="sticky top-0 z-50 border-b border-line bg-ground/90 backdrop-blur">
+    <div class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
+      <a routerLink="/" (click)="closeMenu()" class="flex items-center gap-3">
+        <img src="icon-512.png" alt="" width="36" height="36" class="h-9 w-9 rounded-lg" />
+        <span class="text-lg font-bold tracking-tight">JassCardEye</span>
+      </a>
+
+      <nav class="hidden items-center gap-1 sm:flex">
+        @for (link of navLinks; track link.path) {
+          <a
+            [routerLink]="link.path"
+            routerLinkActive="bg-panel text-jass"
+            class="rounded-full px-3 py-1.5 text-sm font-medium text-zinc-300 transition hover:text-white"
+          >
+            {{ link.label }}
+          </a>
+        }
+      </nav>
+
+      <button
+        type="button"
+        (click)="toggleMenu()"
+        class="rounded-lg p-2 text-zinc-200 hover:bg-panel sm:hidden"
+        aria-label="Menü öffnen oder schliessen"
+        [attr.aria-expanded]="menuOpen()"
+      >
+        @if (menuOpen()) {
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        } @else {
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        }
+      </button>
+    </div>
+
+    @if (menuOpen()) {
+      <nav class="border-t border-line px-4 pb-4 pt-2 sm:hidden">
+        @for (link of navLinks; track link.path) {
+          <a
+            [routerLink]="link.path"
+            routerLinkActive="text-jass"
+            (click)="closeMenu()"
+            class="block rounded-lg px-3 py-2.5 font-medium text-zinc-200 hover:bg-panel"
+          >
+            {{ link.label }}
+          </a>
+        }
+      </nav>
+    }
+  </header>
+
+  <main class="flex-1">
+    <router-outlet />
+  </main>
+
+  <footer class="mt-16 border-t border-line">
+    <div class="mx-auto flex max-w-5xl flex-col gap-4 px-4 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
+      <p>© {{ year }} YARX GmbH</p>
+      <nav class="flex flex-wrap gap-x-5 gap-y-2">
+        <a routerLink="/anleitung" class="hover:text-white">Anleitung</a>
+        <a routerLink="/support" class="hover:text-white">Support</a>
+        <a routerLink="/datenschutz" class="hover:text-white">Datenschutz</a>
+        <a routerLink="/impressum" class="hover:text-white">Impressum</a>
+        <a routerLink="/lizenzen" class="hover:text-white">Lizenzen</a>
+      </nav>
+    </div>
+  </footer>
+</div>

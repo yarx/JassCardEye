@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- The one permission the app asks for at runtime: it recognises the top card through the camera. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <!-- The tap for a counted card. A normal permission, granted at install. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Brought in by androidx.media3 (through CameraX), which watches the network type for streaming, and by
+         Google's datatransport libraries (through Play Billing). The app's own code never asks for the network
+         type, so the permission is removed rather than carried along unused. INTERNET, which Play Billing brings
+         in through the same datatransport library, stays: the purchase talks to Google Play, while the app's own
+         code opens no connection. See "Releasing to Google Play" in src/app/android/README.md. -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" tools:node="remove" />
+
+    <!-- A phone held over a table. Play only filters on some camera (camera.any, which a front camera satisfies
+         too); without a back camera the app says so when a count starts. -->
+    <uses-feature android:name="android.hardware.camera.any" android:required="true" />
+    <uses-feature android:name="android.hardware.camera.flash" android:required="false" />
+
+    <application
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="JassCardEye"
+        android:supportsRtl="false"
+        android:theme="@style/Theme.JassCardEye">
+        <!-- Android 16 ignores the portrait lock below on large screens (600 dp and wider: tablets, unfolded
+             foldables) for apps targeting API 36, and lets the activity be resized freely. The scan screen
+             is laid out for a portrait phone, so the app opts out. The opt-out only exists while
+             targeting 36: before raising targetSdk to 37 the layout has to hold in landscape. -->
+        <property
+            android:name="android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY"
+            android:value="true" />
+        <!-- Portrait only, like iOS: the overlay geometry assumes a portrait frame. -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

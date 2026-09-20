@@ -1,0 +1,30 @@
+{
+  "name": "jasscardeye-web",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build"
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/common": "^22.1.6",
+    "@angular/compiler": "^22.1.6",
+    "@angular/core": "^22.1.6",
+    "@angular/platform-browser": "^22.1.6",
+    "@angular/platform-server": "^22.1.6",
+    "@angular/router": "^22.1.6",
+    "@angular/ssr": "^22.1.8",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^22.1.8",
+    "@angular/cli": "^22.1.8",
+    "@angular/compiler-cli": "^22.1.6",
+    "@tailwindcss/postcss": "^4.3.2",
+    "postcss": "^8.5.16",
+    "tailwindcss": "^4.3.2",
+    "typescript": "~6.0.2"
+  }
+}

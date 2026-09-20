@@ -1,0 +1,153 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="JassCardEye.Dataset.Viewer.App"
+             Name="JassCardEye Dataset Tool"
+             RequestedThemeVariant="Dark">
+    <!-- Name is what macOS shows as the application in the menu bar; Avalonia's default is "Avalonia
+         Application". -->
+
+    <!-- The macOS app menu. Without one of its own the app gets Avalonia's, whose "About Avalonia" shows
+         Avalonia's about box. Hide, Quit and the other standard entries are added by macOS. -->
+    <NativeMenu.Menu>
+        <NativeMenu>
+            <NativeMenuItem Header="About JassCardEye Dataset Tool" Click="OnAboutClick"/>
+        </NativeMenu>
+    </NativeMenu.Menu>
+
+    <Application.Styles>
+        <FluentTheme />
+        <!-- The window is dark by design (black toolbars, grey labels, #1e1e1e canvas), so the
+             application asks for the dark variant above and the controls say so explicitly rather
+             than borrowing the desktop's: with the Mac in light mode the toolbars would turn white,
+             and the white text below would vanish on them. Explicit brushes are also what makes the
+             scripted snapshot (see MainWindow.OnOpened) look like the live window: an offscreen
+             render resolves dynamic theme brushes against the application, not the window, and
+             buttons would come out without their text. -->
+        <!-- Buttons never take the keyboard focus. The viewer is driven by shortcuts on the window, and a
+             focused button would take them first: after browsing with "→", Space would press that
+             button as well as marking the frame, and the review would jump two frames; after clicking
+             "Turn", Enter would turn the corners again instead of saving. -->
+        <Style Selector="Button, ToggleButton">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#3A3A3A"/>
+            <Setter Property="Focusable" Value="False"/>
+        </Style>
+        <Style Selector="RadioButton">
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style Selector="TextBlock">
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <!-- Disabled buttons need their own pair: the theme's disabled background is light, and the
+             white text above would vanish on it - Save would look like an empty white box until
+             corners and a class are set. Dimmed on dark instead, like every other inactive control. -->
+        <Style Selector="Button:disabled /template/ ContentPresenter#PART_ContentPresenter, ToggleButton:disabled /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#2A2A2A"/>
+            <Setter Property="BorderBrush" Value="#3A3A3A"/>
+        </Style>
+        <Style Selector="Button:disabled TextBlock, ToggleButton:disabled TextBlock">
+            <Setter Property="Foreground" Value="#777"/>
+        </Style>
+
+        <!-- Layout classes of the main window: sidebar, section headers, cards and the status bar. -->
+        <Style Selector="Border.sidebar">
+            <Setter Property="Background" Value="#0f0f0f"/>
+            <Setter Property="BorderBrush" Value="#262626"/>
+            <Setter Property="BorderThickness" Value="0,0,1,0"/>
+        </Style>
+        <Style Selector="Border.statusbar">
+            <Setter Property="Background" Value="#0f0f0f"/>
+            <Setter Property="BorderBrush" Value="#262626"/>
+            <Setter Property="BorderThickness" Value="0,1,0,0"/>
+            <Setter Property="Padding" Value="16,6"/>
+        </Style>
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="#1c1c1c"/>
+            <Setter Property="BorderBrush" Value="#2c2c2c"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="14,12"/>
+        </Style>
+        <Style Selector="StackPanel.header">
+            <Setter Property="Margin" Value="20,18,20,14"/>
+        </Style>
+        <Style Selector="WrapPanel.toolbar">
+            <Setter Property="Margin" Value="0,12,0,0"/>
+            <Setter Property="ItemSpacing" Value="8"/>
+            <Setter Property="LineSpacing" Value="6"/>
+        </Style>
+        <Style Selector="TextBlock.title">
+            <Setter Property="FontSize" Value="22"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style Selector="TextBlock.subtitle">
+            <Setter Property="Foreground" Value="#9a9a9a"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+        <Style Selector="TextBlock.field">
+            <Setter Property="Foreground" Value="#9a9a9a"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,6,0"/>
+        </Style>
+        <Style Selector="TextBlock.path">
+            <Setter Property="Foreground" Value="#8cc4ff"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+        </Style>
+        <Style Selector="Rectangle.sep">
+            <Setter Property="Width" Value="1"/>
+            <Setter Property="Height" Value="22"/>
+            <Setter Property="Fill" Value="#3a3a3a"/>
+            <Setter Property="Margin" Value="4,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <!-- The one button per screen that does the main thing. -->
+        <Style Selector="Button.accent">
+            <Setter Property="Background" Value="#2f6feb"/>
+        </Style>
+        <Style Selector="Button.accent:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#3f7ff5"/>
+        </Style>
+
+        <!-- The button that removes something. -->
+        <Style Selector="Button.danger">
+            <Setter Property="Background" Value="#b42318"/>
+        </Style>
+        <Style Selector="Button.danger:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#c93424"/>
+        </Style>
+
+        <!-- Sidebar navigation: a list whose selected entry is the section on screen. -->
+        <Style Selector="ListBox.nav">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Margin" Value="8,0"/>
+        </Style>
+        <Style Selector="ListBox.nav ListBoxItem">
+            <Setter Property="Padding" Value="12,9"/>
+            <Setter Property="Margin" Value="0,1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+        </Style>
+        <Style Selector="ListBox.nav ListBoxItem PathIcon">
+            <Setter Property="Foreground" Value="#a8a8a8"/>
+        </Style>
+        <Style Selector="ListBox.nav ListBoxItem TextBlock">
+            <Setter Property="Foreground" Value="#d0d0d0"/>
+        </Style>
+        <Style Selector="ListBox.nav ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#1f1f1f"/>
+        </Style>
+        <Style Selector="ListBox.nav ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#1d3557"/>
+        </Style>
+        <Style Selector="ListBox.nav ListBoxItem:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#234069"/>
+        </Style>
+        <Style Selector="ListBox.nav ListBoxItem:selected PathIcon">
+            <Setter Property="Foreground" Value="#8cc4ff"/>
+        </Style>
+        <Style Selector="ListBox.nav ListBoxItem:selected TextBlock">
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+    </Application.Styles>
+</Application>

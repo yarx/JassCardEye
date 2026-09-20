@@ -1,0 +1,40 @@
+name: Set up the Android build
+description: >
+  JDK, the Android platform the app compiles against, the NDK that extracts the native symbol tables,
+  and Gradle with its cache. Shared by the CI
+  check and the release, so both build with the same toolchain and it is written down once.
+
+runs:
+  using: composite
+  steps:
+    - name: ☕ Set up Java
+      uses: actions/setup-java@v6
+      with:
+        distribution: temurin
+        java-version: '21'
+
+    # compileSdk is 37.2, which the Compose BOM asks for and the runner image does not carry.
+    # Without pipefail: `yes` only ever ends on SIGPIPE once sdkmanager is done, and a composite step
+    # runs bash with pipefail, which would count that as the step failing.
+    - name: 📱 Install the Android platform
+      shell: bash
+      run: |
+        set +o pipefail
+        yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37.2" > /dev/null
+
+    # The release bundle carries the symbol tables of LiteRT's native libraries, and AGP extracts them
+    # with this NDK's tools. The version is read from the version catalogue, where Gradle reads it too,
+    # so the runner never builds with an NDK the build did not ask for.
+    - name: 🧩 Install the NDK
+      shell: bash
+      run: |
+        set +o pipefail
+        NDK=$(sed -n 's/^ndk = "\(.*\)"$/\1/p' src/app/android/gradle/libs.versions.toml)
+        [ -n "$NDK" ] || { echo "::error::No ndk version in src/app/android/gradle/libs.versions.toml"; exit 1; }
+        yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;$NDK" > /dev/null
+        echo "NDK $NDK"
+
+    # Pinned to a commit: it hooks into every Gradle build that follows, the release's signing among
+    # them. See "GitHub workflows" in context/conventions.md.
+    - name: 🐘 Set up Gradle
+      uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0

@@ -1,0 +1,24 @@
+# CoreML export environment - separate from src/training/.venv on purpose, because the export needs an
+# older torch than the training does and a coremltools that matches it.
+#
+# Verified by exporting a detector run (72 classes, both decks) and compiling the result with
+# Apple's own `xcrun coremlcompiler`, which is the only check that says the .mlpackage is really
+# loadable rather than merely written.
+#
+# Two observations, both from this project rather than from a changelog:
+#
+#   coremltools 8.3.0 + numpy 2  fails, in coremltools' own `_cast`, with
+#                                "only 0-dimensional arrays can be converted to Python scalars"
+#   coremltools 9.0   + numpy 2  exports and compiles
+#
+# So numpy is pinned too. It is the library that breaks the export, and leaving it to the resolver
+# is what lets the failure in.
+#
+#   python3.13 -m venv src/training/.venv-export
+#   src/training/.venv-export/bin/pip install -r src/training/requirements-export.txt
+#   src/training/.venv-export/bin/python src/training/export.py --variant c
+torch==2.7.0
+torchvision==0.22.0
+ultralytics==8.4.108
+coremltools==9.0
+numpy==2.3.5

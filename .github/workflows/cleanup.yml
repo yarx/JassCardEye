@@ -1,0 +1,61 @@
+name: cleanup-orphan-pods
+
+# Runs the watchdog. The judgement itself lives in src/scripts/sweep_pods.py, where it can be read,
+# run from a laptop, and tested - src/tools/test_sweep.py holds it to account in CI, on every pull
+# request and every push to main.
+#
+# It is a script and not shell inside this file because it is the most expensive decision in the
+# project: terminating a healthy pod throws away hours of training, and failing to terminate a dead
+# one bills until somebody notices. Inside a workflow neither could be exercised.
+
+on:
+  # Every half hour. There is no completion event to catch an orphan the moment it appears, so this
+  # interval plus the stale threshold is the worst case a dead pod can bill for. GitHub's scheduler
+  # is also known to run late, which is another reason not to stretch it.
+  schedule:
+    - cron: "13,43 * * * *"
+  workflow_dispatch:
+    inputs:
+      stale_minutes:
+        description: 'Terminate when the run has not reported for this long'
+        default: '60'
+      hard_max_hours:
+        description: 'Terminate any pod older than this, whatever its run says'
+        default: '26'
+      dry_run:
+        description: 'Only report, do not terminate'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 📥 Check out
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: 🧹 Sweep
+        env:
+          RUNPOD_API_KEY: ${{ secrets.RUNPOD_API_KEY }}
+          AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
+          AZURE_STORAGE_CONTAINER: ${{ vars.AZURE_STORAGE_CONTAINER }}
+          AZURE_STORAGE_SAS_TOKEN: ${{ secrets.AZURE_STORAGE_SAS_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          # The dispatch inputs through the environment too, never as `${{ }}` in the script - this step
+          # holds the key that terminates pods. A scheduled run has no inputs and takes the defaults;
+          # sweep_pods.py refuses a number that is not whole.
+          STALE_MINUTES: ${{ inputs.stale_minutes || '60' }}
+          HARD_MAX_HOURS: ${{ inputs.hard_max_hours || '26' }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          ARGS=(--stale-minutes "$STALE_MINUTES" --hard-max-hours "$HARD_MAX_HOURS")
+          if [ "$DRY_RUN" = "true" ]; then ARGS+=(--dry-run); fi
+          python3 src/scripts/sweep_pods.py "${ARGS[@]}"

@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <!-- The rules of the dataset tool that can be decided without a window: how a recognition log is
+       read and judged, and what turns a model's answer into a label proposal. They are compiled in
+       from the Viewer rather than referenced, so this stays a plain console app with no Avalonia and
+       no SkiaSharp behind it - which is also why no file here may reach for either. -->
+  <ItemGroup>
+    <ProjectReference Include="../Cards/JassCardEye.Dataset.Cards.csproj" />
+    <Compile Include="../Viewer/Sessions/SessionLog.cs" Link="SessionLog.cs" />
+    <Compile Include="../Viewer/Sessions/SessionAnalysis.cs" Link="SessionAnalysis.cs" />
+    <Compile Include="../Viewer/Sessions/SessionReplay.cs" Link="SessionReplay.cs" />
+    <Compile Include="../Viewer/Sessions/SessionInfo.cs" Link="SessionInfo.cs" />
+    <Compile Include="../Viewer/Sessions/SessionReport.cs" Link="SessionReport.cs" />
+    <Compile Include="../Viewer/Sessions/SessionArchive.cs" Link="SessionArchive.cs" />
+    <Compile Include="../Viewer/Predict/ObbCorners.cs" Link="ObbCorners.cs" />
+    <Compile Include="../Viewer/Predict/PhotoSquare.cs" Link="PhotoSquare.cs" />
+    <Compile Include="../Viewer/Predict/Proposal.cs" Link="Proposal.cs" />
+  </ItemGroup>
+</Project>

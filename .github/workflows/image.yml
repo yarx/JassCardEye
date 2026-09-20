@@ -1,0 +1,90 @@
+name: image
+
+# Builds the training container and pushes it to GHCR. Runs only when the container itself changes,
+# not on every training: a fresh pod pulls this image on every run, so it should be built rarely and
+# stay small.
+#
+# The image carries no project code apart from docker/start.sh, which clones the repository into the
+# running pod. So a change to the generator or to train.py needs no rebuild here.
+#
+# Built from main only, once a change to docker/ is merged - never for a pull request or another
+# branch. Every build is tagged `:latest` and with its commit. train.yml uses
+# `:latest` unless its image_tag input names a commit, which is the way back to the previous image when
+# a change broke the pod. A docker/ change is tried on the desk first - see "Rehearsing a change" in
+# src/training/pipeline.md.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docker/**'
+      - '.github/workflows/image.yml'
+  # A rebuild of main by hand. Started on another branch it builds nothing.
+  workflow_dispatch:
+
+jobs:
+  image:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: 📥 Check out
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # The Docker actions are pinned to commits: this job can overwrite the image every training pod
+      # runs with its secrets. See "GitHub workflows" in context/conventions.md.
+      - name: 🔐 Log in to the GitHub container registry
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🧰 Set up Docker Buildx
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+
+      # Registry names must be lowercase, and github.repository keeps the repository's own casing.
+      # Folding it here rather than hard-coding the name keeps this correct if the repository is
+      # ever renamed or moved.
+      - name: 🏷️ Build the image name
+        id: name
+        env:
+          REPO: ${{ github.repository }}
+          COMMIT: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          IMAGE="ghcr.io/$(printf '%s' "$REPO" | tr '[:upper:]' '[:lower:]')/trainer"
+          {
+            echo "tags<<EOF"
+            echo "${IMAGE}:latest"
+            echo "${IMAGE}:${COMMIT}"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: 🐳 Build and push the image
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: true
+          tags: ${{ steps.name.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: 📝 Note
+        env:
+          TAGS: ${{ steps.name.outputs.tags }}
+        run: |
+          {
+            echo "Built:"
+            echo '```'
+            echo "$TAGS"
+            echo '```'
+            echo ""
+            echo "For RunPod to pull it, the package has to be **public**: the owner's profile -> Packages -> trainer ->"
+            echo "Package settings -> Change visibility (not in the repository settings) - otherwise the pod needs credentials."
+          } >> "$GITHUB_STEP_SUMMARY"

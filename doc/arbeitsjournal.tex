@@ -1,0 +1,89 @@
+% Arbeitsjournal -- separates Abgabedokument.
+% Build: tectonic arbeitsjournal.tex
+\documentclass[11pt,a4paper]{scrartcl}
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[nswissgerman]{babel}
+\usepackage{csquotes}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage[margin=2.2cm]{geometry}
+
+\begin{document}
+
+\begin{center}
+  {\LARGE\bfseries Arbeitsjournal}\\[4pt]
+  {\large Transferarbeit - Raphael Bolliger}\\[2pt]
+  CAS Machine Learning, Hochschule Luzern -- Informatik
+\end{center}
+
+\vspace{0.5em}
+
+\begin{longtable}{@{}l r >{\raggedright\arraybackslash}p{\dimexpr\textwidth-6.4cm\relax}@{}}
+\toprule
+\textbf{Datum} & \textbf{Dauer (h)} & \textbf{Tätigkeit} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Datum} & \textbf{Dauer (h)} & \textbf{Tätigkeit} \\
+\midrule
+\endhead
+
+Sa, 25.07.2026 & 5.0 &
+Recherche zu Objekterkennung und YOLO, Versuche mit Roboflow, Entscheid für
+synthetische Trainingsdaten. \\
+So, 26.07.2026 & 7.0 &
+Französisches Kartenblatt fotografiert, Erkennungsziel festgelegt und
+Grundlagen des Datengenerators umgesetzt. \\
+Mo, 27.07.2026 & 8.0 &
+Datengenerator und Labelvarianten A, B und C erweitert, Dataset Tool begonnen
+und reale Aufnahmen gelabelt. \\
+Di, 28.07.2026 & 8.0 &
+Datensatzstruktur, Trainingsskripte und CI umgesetzt, erste Modelle trainiert
+und iOS-Prototyp getestet. \\
+Mi, 29.07.2026 & 8.0 &
+Datengenerator erweitert, reale Negativbilder ergänzt, Cloud-Pipeline
+aufgebaut und weitere Modelle trainiert. \\
+Do, 30.07.2026 & 8.0 &
+Scans und Labels korrigiert, flache Aufnahmen gelabelt sowie
+Variantenvergleich und Modellexport weitergeführt. \\
+Fr, 31.07.2026 & 6.0 &
+Variantenvergleich abgeschlossen, vollständige Verarbeitung von B geprüft
+und Konzept der Zählsession erstellt. \\
+So, 02.08.2026 & 3.0 &
+Kernablauf der Zählsession umgesetzt und auf dem iPhone geprüft. \\
+Sa, 08.08.2026 & 5.0 &
+Erkennung unter realen Bedingungen getestet, Fehlerfälle aufgenommen und
+Stabilitätsregel geprüft. \\
+So, 09.08.2026 & 2.0 &
+Alternative Stabilitätsregel umgesetzt und Aufzeichnung einer Zählsession
+vorbereitet. \\
+So, 06.09.2026 & 8.0 &
+Cloud-Pipeline überarbeitet, Winkelverteilung festgelegt, Azure eingerichtet
+und Trainingsläufe gestartet. \\
+Mi, 09.09.2026 & 5.0 &
+Beide Kartenblätter in Generator und App ergänzt, Trainingsläufe geprüft. \\
+Do, 10.09.2026 & 3.0 &
+Training mit 200'000 Bildern ausgewertet, Farbfehler und Fehlalarme untersucht. \\
+Fr, 11.09.2026 & 3.0 & Dokumentation erweitert. \\
+Sa, 12.09.2026 & 6.0 &
+Deutsches Kartenblatt aufgenommen und gelabelt, Dataset Tool erweitert und
+Android-Prototyp getestet. \\
+So, 13.09.2026 & 4.0 &
+Android-Umsetzung finalisiert, finaler Trainingslauf durchgeführt. \\
+Mo, 14.09.2026 & 6.0 &
+Session-Analyse umgesetzt, Konfidenzfehler korrigiert, Schlussmodelle
+ausgewertet und Dokumentation. \\
+So, 20.09.2026 & 6.0 & Finalisieren der Arbeit. \\
+\midrule
+\textbf{Total} & \textbf{101.0} &  \\
+\bottomrule
+\end{longtable}
+
+\vspace{2em}
+\noindent
+Ort, Datum: \rule{5cm}{0.4pt} \hfill Unterschrift: \rule{5cm}{0.4pt}
+
+\end{document}

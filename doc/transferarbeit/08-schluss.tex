@@ -1,0 +1,93 @@
+\section{Schlussfolgerungen und Ausblick}\label{sec:schluss}
+
+\subsection{Fazit}\label{sec:fazit}
+
+Diese Arbeit zeigt, dass ein kleines Modell die oberste Karte eines
+Jassstapels auf dem Smartphone in Echtzeit erkennen kann. Das Modell
+wurde mit synthetischen Bildern aus den Scans zweier Kartenblätter
+trainiert. In der letzten Datenmengenreihe erreicht der einstufige
+Detektor C bei 200'000 Trainingsbildern auf dem realen
+Validierungsset eine \map{50} von 0.908. Seine Leistung steigt bis
+dorthin mit jeder Vergrösserung des Datensatzes. Ein zusätzlicher Lauf
+mit 500'000 Bildern brachte keinen weiteren Gewinn. Die Menge der Bilder
+aus diesem Generator ist damit ausgereizt.
+
+Für die App ist C die am besten belegte Wahl. Es erkennt Klasse und
+Position in einem Schritt. Die reine Klassifikation A liefert keine
+Kartenposition. Für die vollständige zweistufige Erkennung B und
+einen gemeinsamen Latenzvergleich liegen keine verlässlichen
+Messungen aus der letzten Reihe vor. Deshalb lässt sich kein genauer
+Leistungsabstand zwischen C und B angeben.
+
+Der Transfer von synthetischen Trainingsbildern auf reale Aufnahmen
+funktioniert auf dem vorhandenen Validierungsset. Wie zuverlässig
+die App einen ganzen Stapel in neuen Spielsituationen zählt, ist
+damit noch nicht gezeigt. Neben dem Modell sind ein Datengenerator,
+eine reale Prüfbasis, eine Trainingspipeline und Zähl-Apps für iOS
+und Android entstanden. Die Apps wurden in den Stores eingereicht.
+
+\subsection{Ausblick}\label{sec:ausblick}
+
+Als Nächstes soll das System mit neuen, unabhängigen Aufnahmesessions
+geprüft werden. Dafür sollen ganze Zählvorgänge direkt in der App als
+Video aufgezeichnet werden. Das Dataset Tool kann diese Sessions bereits
+erneut abspielen und auswerten (Abbildung~\ref{fig:analyzer}). Künftig
+soll diese Auswertung stärker automatisiert werden. Auffällige Frames
+können direkt ins Validierungsset übernommen werden. Dadurch wird
+sichtbar, welche Situationen in den Trainingsdaten noch fehlen und
+gezielt ergänzt werden müssen.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{analyzer.png}
+\caption{Auswertung einer aufgezeichneten Zählsession im Dataset Tool. Links
+ist die Vorhersage für das ausgewählte Frame zu sehen. Rechts werden
+auffällige Erkennungen und häufige Verwechslungen zusammengefasst. Über die
+Zeitachse am unteren Rand lässt sich die gesamte Aufnahme prüfen. Das
+ausgewählte Frame zeigt dieselbe falsche Erkennung wie das linke Bild in
+Abbildung~\ref{fig:frames-nacheinander} und kann direkt ins Validierungsset
+übernommen werden.}
+\label{fig:analyzer}
+\end{figure}
+
+Auch die Labels des Validierungssets müssen möglicherweise genauer
+unterteilt werden. Beim Labeln stellte sich immer wieder die Frage, ob
+eine schwierige Karte noch erkannt werden muss oder bereits als
+unlesbar gilt. Diese Entscheidung beeinflusst die Auswertung direkt.
+Bei einigen Grenzfällen sind sowohl eine Erkennung als auch keine
+Erkennung nachvollziehbar. Solche Aufnahmen könnten künftig gesondert
+markiert und getrennt ausgewertet werden.
+
+Für solche Grenzfälle gibt es ein etabliertes Vorbild. Die
+PASCAL-VOC-Challenge markiert Objekte, die wegen ihrer Grösse, der
+Beleuchtung, der Bildqualität oder des nötigen Kontextwissens besonders
+schwer zu erkennen sind, mit einem eigenen Attribut. In der Auswertung
+werden diese Objekte verworfen, und wer sie dennoch erkennt, wird dafür
+nicht bestraft \cite{everingham2010pascal}.
+
+YOLO kennt ein solches Attribut nicht. Das Labelformat sieht es nicht vor,
+und Ultralytics verweist bei dieser Frage auf einen Eingriff in die
+Verlustfunktion \cite{ultralytics2025ignore}. Die Markierung müsste
+deshalb neben dem Validierungsset geführt und in einer eigenen Auswertung
+berücksichtigt werden.
+
+Aktuell werden beide Kartenblätter mit demselben Modell erkannt. Für
+weitere Kartensets könnten stattdessen eigene Modelle pro Blatt
+trainiert werden. Die App kennt das gewählte Kartenblatt bereits und
+könnte das passende Modell laden. Dadurch liessen sich zusätzliche
+Kartensets unabhängig voneinander ergänzen, ohne dass jedes Modell
+immer mehr Klassen lernen muss.
+
+Die Beschränkung auf die oberste Karte stellt zudem Anforderungen an
+das Ablegen der Karten. Eine mögliche Erweiterung wäre, mehrere
+vollständig sichtbare Karten gleichzeitig zu erkennen. YOLO kann
+mehrere Objekte in einem Bild ausgeben. Die App müsste dabei
+sicherstellen, dass jede Karte nur einmal gezählt wird.
+
+Beim Testen zeigte sich ausserdem, dass das gleichzeitige Halten des
+Smartphones und Ablegen der Karten umständlich sein kann. Zwei Personen
+können diese Aufgabe aufteilen. Für eine einzelne Person wäre eine
+einfache Halterung hilfreich. Sie könnte das Smartphone im richtigen
+Winkel über dem Tisch halten und darunter eine Ablage für die gezählten
+Karten bieten. Eine solche Vorrichtung würde die Bedienung vereinfachen
+und für gleichmässigere Aufnahmen sorgen.

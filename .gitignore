@@ -1,0 +1,83 @@
+.DS_Store
+
+# Generated training data and artefacts – never committed (see context/architecture/data-pipeline.md).
+# Filled by JassCardEye.Dataset.Cli (generate / backgrounds).
+/output/
+
+# What one training run collects: weights, figures, run.json, the manifest and the log. The run
+# folder in object storage is where these are kept - see src/training/pipeline.md.
+/artifacts/
+
+# Derived parts of a dataset – rebuilt with the dataset CLI: Cli rebuild --dataset <dir>
+# They are kept out of version control: the classification folders and the per-variant images and val
+# folders are hard links, which Git would store as full copies, and data.yaml carries a
+# machine-specific absolute path. The source of truth that IS committed is
+# images/ + detect/labels/ + locate/labels/ + classes.txt.
+classify_full/
+classify_crop/
+**/detect/images
+**/locate/images
+**/detect/data.yaml
+**/locate/data.yaml
+
+# Python training environment and caches
+src/training/.venv/
+__pycache__/
+*.pyc
+
+# Ultralytics side effects: pretrained weights land in the working directory, and every dataset scan
+# leaves a label cache next to the images.
+yolo*.pt
+labels.cache
+
+# LaTeX build artifacts (doc/)
+doc/build/
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+doc/arbeitsjournal.pdf
+doc/transferarbeit.pdf
+
+# Ultralytics default dump when a run has no explicit project=; train.py writes to
+# output/training instead, so anything landing here is a duplicate.
+runs/
+
+# Scratch folder for material handed over by hand (photos, videos). Not part of the project.
+temp/
+
+# App: generated Xcode project and exported CoreML models (both reproducible)
+src/app/ios/JassCardEye.xcodeproj/
+# Written by XcodeGen from project.yml, like the Xcode project itself - not by hand.
+src/app/ios/Generated-Info.plist
+src/app/ios/JassCardEye.entitlements
+src/app/ios/build/
+src/app/ios/Models/*.mlpackage
+# Written next to the weights by `fetch_run.py --export`, and rewritten by every release build -
+# so a copy in here is never the one that ships, and only goes stale.
+src/app/ios/Models/models.json
+src/training/.venv-export/
+# The LiteRT export goes through litert-torch, which needs a far newer torch than the pinned CoreML set
+# can take - its own environment.
+src/training/.venv-export-android/
+
+# Android: Gradle state, build output and the exported LiteRT models (reproducible, like src/app/ios/Models).
+src/app/android/.gradle/
+src/app/android/.kotlin/
+src/app/android/build/
+src/app/android/app/build/
+src/app/android/local.properties
+src/app/android/app/src/main/assets/models/*.tflite
+src/app/android/app/src/main/assets/models/*.labels.txt
+src/app/android/app/src/main/assets/models/models.json
+# Upload keys never live in the repository; release builds read them from the environment.
+src/app/android/*.jks
+src/app/android/*.keystore
+src/app/android/keystore.properties

@@ -1,0 +1,66 @@
+\section{Deklaration des KI-Einsatzes}\label{app:ki-deklaration}
+
+Im Rahmen dieser Arbeit wurden Claude Code von Anthropic und GPT-5.6 Sol
+von OpenAI eingesetzt. Claude Code wurde als Agent für Agentic Coding
+verwendet. Der Agent erhielt konkrete Arbeitsaufträge und konnte Dateien
+im Repository erstellen oder ändern, Befehle ausführen und Tests starten.
+Auf diese Weise entstand der grösste Teil der Dateien im Repository. Dazu
+gehören der Datengenerator, das Dataset Tool, die Trainingspipeline, die
+mobilen Apps sowie Skripte, Tests und Teile der projektbegleitenden
+Dokumentation.
+
+Die Arbeit mit Claude Code erfolgte in eng begleiteten Sitzungen. Der Verfasser
+definierte jeweils die Anforderungen, Ziele und Randbedingungen. Danach
+prüfte er die Änderungen im Code, führte Tests aus und kontrollierte die
+erzeugten Ergebnisse. Jeder Commit wurde durch den Verfasser in einem
+Review geprüft. Fehler, unklare Annahmen oder Abweichungen führten zu
+einem neuen und genauer formulierten Arbeitsauftrag. Alle Entscheide zur
+Architektur, zu den Daten, zum Training, zur Bedienung der Apps und zum
+weiteren Vorgehen wurden durch den Verfasser getroffen.
+
+Die vorliegende Transferarbeit wurde vom Verfasser selbst geschrieben.
+Für die sprachliche Überarbeitung einzelner Textstellen wurde GPT-5.6 Sol
+eingesetzt. Das Modell unterstützte bei der Korrektur von Grammatik und
+Satzstellung, bei der stilistischen Verbesserung sowie bei der Prüfung
+auf Richtigkeit. Alle vorgeschlagenen Änderungen wurden vom Verfasser
+geprüft und bei Bedarf angepasst.
+
+KI-Ausgaben werden in dieser Arbeit nirgends als Quelle zitiert. Aussagen,
+die einen Beleg benötigen, verweisen auf die im Literaturverzeichnis
+aufgeführten Quellen. Die Verantwortung für den Inhalt, die Entscheide,
+die Ergebnisse und die Schlussfolgerungen liegt beim Verfasser.
+
+\begin{table}[H]
+\centering\small
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{3.0cm}YY@{}}
+\toprule
+\textbf{Bereich} & \textbf{Art des KI-Einsatzes} & \textbf{Beitrag des Verfassers} \\
+\midrule
+Software und Repository &
+Claude Code erstellte und bearbeitete nach konkreten Arbeitsaufträgen Code,
+Skripte, Tests, Workflows und technische Dokumentation. &
+Definition der Anforderungen und der Architektur. Vorgabe der Schnittstellen
+und des gewünschten Verhaltens. Prüfung und Freigabe jedes Commits. \\
+\addlinespace
+Daten, Training und Auswertung &
+Claude Code unterstützte bei der Umsetzung des Datengenerators, der
+Trainingspipeline, der Auswertungsskripte und der Abbildungen. &
+Erhebung und Labeling der realen Daten. Festlegung der Parameter und des
+Versuchsaufbaus. Durchführung der Läufe sowie Interpretation der Ergebnisse. \\
+\addlinespace
+Prüfung und Qualitätssicherung &
+Claude Code erstellte Tests und automatisierte Prüfungen. Der Agent
+unterstützte zudem bei der Suche nach Fehlern und bei möglichen Korrekturen. &
+Festlegung der Prüfkriterien. Ausführung der Tests und visuelle Kontrolle der
+Ergebnisse. Beurteilung der Befunde und Entscheid über jede Korrektur. \\
+\addlinespace
+Schriftliche Arbeit &
+GPT-5.6 Sol wurde zur Korrektur von Grammatik und Satzstellung sowie zur
+Prüfung auf Richtigkeit eingesetzt. &
+Verfassen des gesamten Textes. Festlegung von Aufbau, Inhalt,
+Argumentation und Schlussfolgerungen. Prüfung und Übernahme der Korrekturen. \\
+\bottomrule
+\end{tabularx}
+\caption{Deklaration des KI-Einsatzes nach Bereichen.}
+\label{tab:ki-deklaration}
+\end{table}

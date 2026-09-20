@@ -1,0 +1,36 @@
+{
+  "identifier" : "4B9D2E61",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "5.00",
+      "familyShareable" : true,
+      "internalID" : "4B9D2E62",
+      "localizations" : [
+        {
+          "description" : "Schaltet die gezählten Punkte für immer frei.",
+          "displayName" : "Punkte zählen",
+          "locale" : "de"
+        }
+      ],
+      "productID" : "ch.yarx.jasscardeye.counting",
+      "referenceName" : "Punkte zählen",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "6810358416",
+    "_developerTeamID" : "5TV46KLX3W",
+    "_locale" : "de_CH",
+    "_storefront" : "CHE"
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}
