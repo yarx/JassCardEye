@@ -37,6 +37,11 @@ zeigen die Einstellungen den Abschnitt *Erkennungsmodell*, den die veröffentlic
 Modell nicht hat. Der Zählbildschirm zeigt die Bildrate des Emulators (2 FPS). Sie neu aufzunehmen ist
 offen.
 
+Die Sätze `fr/`, `it/` und `en/` sind neuer: aufgenommen mit dem Modell von Version 1.0.1 (Lauf
+`20260917-0000-75d6401`) und dem Testvideo aus `src/tools/make_test_video.py`, mit der Demo wie in der
+veröffentlichten App - verwischte Punkte, «Punkte freischalten», kein *Erkennungsmodell*. Der
+Zählbildschirm zeigt auch hier die Bildrate des Emulators (1 FPS).
+
 **Beschreibung (max. 4000):**
 
 > JassCardEye zählt nach dem Jass die Punkte. Karten der Reihe nach vor die Kamera legen, die App
@@ -47,6 +52,71 @@ offen.
 > • Letzter Stich und Faktor ×1 bis ×8
 > • Falsch erkannte Karte antippen und entfernen
 > • Erkennung direkt auf dem Telefon, ohne Internet
+
+## Weitere Sprachen
+
+Die App spricht Deutsch, Französisch, Italienisch und Englisch (`l10n/`). Der Store-Eintrag ist heute nur
+auf Deutsch eingetragen; jede weitere Sprache kommt unter *Store-Präsenz → Store-Einträge → Übersetzungen
+verwalten* dazu, mit den Texten unten. App-Name, Grafiken, Kontakt und URLs bleiben gleich. Die
+Jassbegriffe folgen `l10n/<Sprache>.json`; welche davon ein jassender Mensch schon geprüft hat, steht in
+`l10n/README.md`.
+
+### Französisch
+
+| Feld | Inhalt |
+|---|---|
+| Sprache | Französisch – fr-FR |
+| Kurzbeschreibung (max. 80) | Compte les cartes après le Jass avec la caméra, carte après carte. |
+| In-App-Produkt: Name / Beschreibung | Compter les points / Rend lisibles les points comptés. |
+| Screenshots Telefon | `store/screenshots/fr/*.png` (1080 × 2160), aufgenommen mit der App auf `fr-CH` - siehe «Zu den Screenshots» |
+
+**Beschreibung:**
+
+> JassCardEye compte les points après le Jass. Pose les cartes l’une après l’autre devant la caméra, l’app reconnaît la carte du dessus et fait le total au fur et à mesure.
+>
+> • Jeu français et jeu suisse allemand
+> • Atout dans chaque couleur, Obenabe, Undenufe, Slalom et Guschti
+> • Dernier pli et facteur ×1 à ×8
+> • Toucher une carte mal reconnue pour la retirer
+> • Reconnaissance directement sur le téléphone, sans Internet
+
+### Italienisch
+
+| Feld | Inhalt |
+|---|---|
+| Sprache | Italienisch – it-IT |
+| Kurzbeschreibung (max. 80) | Conta le carte dopo il Jass con la fotocamera, carta dopo carta. |
+| In-App-Produkt: Name / Beschreibung | Contare i punti / Rende leggibili i punti contati. |
+| Screenshots Telefon | `store/screenshots/it/*.png` (1080 × 2160), aufgenommen mit der App auf `it-CH` - siehe «Zu den Screenshots» |
+
+**Beschreibung:**
+
+> JassCardEye conta i punti dopo il Jass. Posa le carte una dopo l’altra davanti alla fotocamera, l’app riconosce la carta in cima e fa il totale man mano.
+>
+> • Mazzo francese e mazzo svizzero tedesco
+> • Briscola in ogni seme, Obenabe, Undenufe, Slalom e Guschti
+> • Ultima presa e fattore da ×1 a ×8
+> • Toccare una carta riconosciuta male per toglierla
+> • Riconoscimento direttamente sul telefono, senza Internet
+
+### Englisch
+
+| Feld | Inhalt |
+|---|---|
+| Sprache | Englisch (Vereinigtes Königreich) – en-GB |
+| Kurzbeschreibung (max. 80) | Counts the cards after a game of Jass with the camera, card by card. |
+| In-App-Produkt: Name / Beschreibung | Count points / Makes the counted points readable. |
+| Screenshots Telefon | `store/screenshots/en/*.png` (1080 × 2160), aufgenommen mit der App auf `en-GB` - siehe «Zu den Screenshots» |
+
+**Beschreibung:**
+
+> JassCardEye counts the points after a game of Jass. Lay the cards down one by one in front of the camera, the app recognises the top card and keeps adding up.
+>
+> • French and Swiss German deck
+> • Trump in every suit, Obenabe, Undenufe, Slalom and Guschti
+> • Last trick and factor ×1 to ×8
+> • Tap a wrongly recognised card to remove it
+> • Recognition right on the phone, without internet
 
 ## App-Inhalte
 

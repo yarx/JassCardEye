@@ -1,18 +1,47 @@
 import { Routes } from '@angular/router';
 
-import { Anleitung } from './pages/anleitung';
-import { Datenschutz } from './pages/datenschutz';
-import { Home } from './pages/home';
-import { Impressum } from './pages/impressum';
-import { Lizenzen } from './pages/lizenzen';
-import { Support } from './pages/support';
+// Every language is a build of its own (see "Languages" in src/web/README.md), and its pages are prose written
+// for that language: pages/<language>/. The routes load the pages of the language being built, as one chunk;
+// a development build without a language is German.
+const pagesByLanguage = {
+  de: () => import('./pages/de'),
+  fr: () => import('./pages/fr'),
+  it: () => import('./pages/it'),
+  en: () => import('./pages/en'),
+};
+const pages = pagesByLanguage[($localize.locale ?? 'de') as keyof typeof pagesByLanguage] ?? pagesByLanguage.de;
 
+// The addresses are the same in every language, so a page and its translations differ only in the language path.
 export const routes: Routes = [
-  { path: '', component: Home, title: 'JassCardEye – Jasspunkte zählen per Kamera' },
-  { path: 'anleitung', component: Anleitung, title: 'Anleitung – JassCardEye' },
-  { path: 'support', component: Support, title: 'Support und Kontakt – JassCardEye' },
-  { path: 'datenschutz', component: Datenschutz, title: 'Datenschutz – JassCardEye' },
-  { path: 'impressum', component: Impressum, title: 'Impressum – JassCardEye' },
-  { path: 'lizenzen', component: Lizenzen, title: 'Lizenzen und Bildnachweis – JassCardEye' },
+  {
+    path: '',
+    loadComponent: () => pages().then((m) => m.Home),
+    title: $localize`:@@title.home:JassCardEye – Jasspunkte zählen per Kamera`,
+  },
+  {
+    path: 'anleitung',
+    loadComponent: () => pages().then((m) => m.Anleitung),
+    title: $localize`:@@title.guide:Anleitung – JassCardEye`,
+  },
+  {
+    path: 'support',
+    loadComponent: () => pages().then((m) => m.Support),
+    title: $localize`:@@title.support:Support und Kontakt – JassCardEye`,
+  },
+  {
+    path: 'datenschutz',
+    loadComponent: () => pages().then((m) => m.Datenschutz),
+    title: $localize`:@@title.privacy:Datenschutz – JassCardEye`,
+  },
+  {
+    path: 'impressum',
+    loadComponent: () => pages().then((m) => m.Impressum),
+    title: $localize`:@@title.imprint:Impressum – JassCardEye`,
+  },
+  {
+    path: 'lizenzen',
+    loadComponent: () => pages().then((m) => m.Lizenzen),
+    title: $localize`:@@title.licences:Lizenzen und Bildnachweis – JassCardEye`,
+  },
   { path: '**', redirectTo: '' },
 ];

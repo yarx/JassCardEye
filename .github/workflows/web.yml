@@ -42,8 +42,21 @@ jobs:
       - name: 📦 Install
         run: npm ci
 
-      - name: 🏗️ Build and prerender
+      # Every language is built and prerendered: a message missing in one of them, a language without all
+      # of its pages, or a translation that still carries a message the site dropped stops the build.
+      - name: 🏗️ Build and prerender every language
         run: npm run build
+
+      # The German messages the translations follow have to be the ones in the code. Extracted again and
+      # compared, so a new or changed message cannot reach main without its translations being asked for.
+      - name: 🔤 Check the extracted messages
+        run: |
+          set -euo pipefail
+          npx ng extract-i18n --format json --output-path src/locale
+          git diff --exit-code -- src/locale/messages.json || {
+            echo "::error file=src/web/src/locale/messages.json::Out of date - run npx ng extract-i18n --format json --output-path src/locale in src/web and translate the change."
+            exit 1
+          }
 
       # main only: a pull request's ref is refs/pull/<n>/merge, and a run by hand carries its branch.
       # Pinned to a commit, because this step holds the site's deployment token: a tag or a branch can

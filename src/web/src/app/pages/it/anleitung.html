@@ -1,0 +1,43 @@
+<article class="mx-auto max-w-3xl px-4 py-12">
+  <h1 class="text-4xl font-extrabold tracking-tight">Istruzioni</h1>
+  <p class="mt-4 text-lg leading-relaxed text-zinc-300">
+    Si conta dopo la partita: le carte vinte da una squadra vengono posate una dopo l’altra su un mazzetto
+    davanti alla fotocamera. L’app riconosce ogni volta la carta in cima e fa il conto.
+  </p>
+
+  <h2 class="mt-12 text-2xl font-bold">Un conteggio</h2>
+  <ol class="mt-4 list-decimal space-y-3 pl-6 leading-relaxed text-zinc-300 marker:text-jass">
+    <li>Toccare <strong class="text-white">Inizia a contare</strong>.</li>
+    <li>Scegliere mazzo, variante, ultima presa e fattore – dopo la partita ogni squadra li conosce – e toccare di nuovo <strong class="text-white">Inizia a contare</strong>.</li>
+    <li>Posare le carte una dopo l’altra in cima al mazzetto. L’app conferma ogni carta contata con un breve suono e una vibrazione. Suono e vibrazione si regolano o si spengono nelle impostazioni, sotto «Feedback».</li>
+    <li>I tuoi punti sono a sinistra, quelli degli avversari a destra. <strong class="text-white">Fine</strong> chiude il conteggio, e il risultato resta nella schermata iniziale fino al conteggio successivo.</li>
+  </ol>
+
+  <h2 class="mt-12 text-2xl font-bold">Perché la scansione riesca</h2>
+  <div class="mt-4 grid gap-4 sm:grid-cols-2">
+    @for (rule of rules; track rule.title) {
+      <div class="rounded-2xl bg-panel p-5 ring-1 ring-line">
+        <h3 class="font-semibold text-jass">{{ rule.title }}</h3>
+        <p class="mt-2 text-sm leading-relaxed text-zinc-300">{{ rule.text }}</p>
+      </div>
+    }
+  </div>
+
+  <h2 class="mt-12 text-2xl font-bold">Correggere</h2>
+  <ul class="mt-4 list-disc space-y-3 pl-6 leading-relaxed text-zinc-300 marker:text-jass">
+    <li>Riconosciuta male? Toccare la carta nell’elenco in basso – viene tolta dal conteggio.</li>
+    <li><strong class="text-white">Manca una carta?</strong> Con questo pulsante si aggiunge una carta a mano, per esempio una posata molto piatta.</li>
+    <li><strong class="text-white">Reset</strong> svuota il mazzetto e ricomincia da capo.</li>
+  </ul>
+
+  <h2 class="mt-12 text-2xl font-bold">Le carte che l’app conosce</h2>
+  <ul class="mt-4 space-y-3 leading-relaxed text-zinc-300">
+    <li><strong class="text-white">Francese:</strong> le carte da Jass svizzere con i semi francesi di AGMüller (Neuhausen) – Fiori, Quadri, Cuori, Picche.</li>
+    <li><strong class="text-white">Tedesco:</strong> le carte di Sciaffusa «Opti-Quatro» di AGMüller – Ghiande, Campanelle, Rose, Scudi.</li>
+  </ul>
+  <p class="mt-4 leading-relaxed text-zinc-300">
+    Altri disegni – anche di altri produttori con gli stessi semi – non vengono riconosciuti in modo
+    affidabile. Giocate con un altro mazzo? <a routerLink="/support" class="font-semibold text-jass underline">Scriveteci</a>:
+    con le foto delle 36 carte si può addestrare il riconoscimento.
+  </p>
+</article>

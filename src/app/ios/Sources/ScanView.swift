@@ -132,13 +132,13 @@ private struct CardPicker: View {
                 }
                 .padding()
             }
-            .navigationTitle("Karte hinzufügen")
+            .navigationTitle(String(localized: "scan.add_card", defaultValue: "Karte hinzufügen"))
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             #endif
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Abbrechen") { dismiss() }
+                    Button(String(localized: "common.cancel", defaultValue: "Abbrechen")) { dismiss() }
                 }
             }
         }
@@ -288,14 +288,14 @@ private struct StatusMessage: View {
             Image(systemName: "video.slash")
                 .font(.largeTitle)
                 .foregroundStyle(.secondary)
-            Text("Kein Kamerazugriff")
+            Text(String(localized: "scan.camera_denied", defaultValue: "Kein Kamerazugriff"))
                 .font(.headline)
-            Text("JassCardEye erkennt die oberste Karte über die Kamera. Ohne Zugriff kann nicht gezählt werden.")
+            Text(String(localized: "scan.camera_denied_text", defaultValue: "JassCardEye erkennt die oberste Karte über die Kamera. Ohne Zugriff kann nicht gezählt werden."))
                 .font(.footnote)
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
             #if os(iOS)
-            Button("Einstellungen öffnen") {
+            Button(String(localized: "scan.open_settings", defaultValue: "Einstellungen öffnen")) {
                 guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
                 UIApplication.shared.open(url)
             }
@@ -350,7 +350,7 @@ private struct ScoreBar: View {
                 Button {
                     showPicker = true
                 } label: {
-                    Text("Karte fehlt?")
+                    Text(String(localized: "scan.missing_card", defaultValue: "Karte fehlt?"))
                         .padding(.horizontal, 12)
                         .padding(.vertical, 10)
                         .background(.white.opacity(0.18), in: Capsule())
@@ -394,12 +394,13 @@ private struct ScoreBar: View {
                             .contentShape(Capsule())
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel(model.torchOn ? "Licht ausschalten" : "Licht einschalten")
+                    .accessibilityLabel(model.torchOn ? String(localized: "scan.torch_off", defaultValue: "Licht ausschalten")
+                                                      : String(localized: "scan.torch_on", defaultValue: "Licht einschalten"))
                     .accessibilityAddTraits(model.torchOn ? [.isSelected] : [])
                 }
 
                 Spacer()
-                Button("Reset", role: .destructive) { model.reset() }
+                Button(String(localized: "scan.reset", defaultValue: "Reset"), role: .destructive) { model.reset() }
                     .buttonStyle(.bordered)
                     .disabled(model.pile.isEmpty)
             }
@@ -411,7 +412,7 @@ private struct ScoreBar: View {
             // one moment the eye is on the card and not on the layout.
             Group {
                 if model.pile.isEmpty {
-                    Text("Erkannte Karten erscheinen hier.")
+                    Text(String(localized: "scan.empty", defaultValue: "Erkannte Karten erscheinen hier."))
                         .font(.callout)
                         .foregroundStyle(.white.opacity(0.45))
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -460,7 +461,7 @@ private struct ScoreBar: View {
             .frame(minHeight: ScanMetrics.stripHeight)
 
             Button(action: onFinish) {
-                Text("Fertig")
+                Text(String(localized: "common.done", defaultValue: "Fertig"))
                     .font(.headline)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
@@ -478,11 +479,14 @@ private struct ScoreBar: View {
     private var myCaption: String {
         // In the demo the breakdown would give the points away. The factor stays: it was chosen at
         // the start, not counted.
+        let mine = String(localized: "score.mine", defaultValue: "meine Punkte")
         guard store.unlocked else {
-            return model.multiplier > 1 ? "meine Punkte ×\(model.multiplier)" : "meine Punkte"
+            return model.multiplier > 1
+                ? String(localized: "score.mine_factor", defaultValue: "meine Punkte ×\(model.multiplier)")
+                : mine
         }
-        guard model.bonusPoints > 0 || model.multiplier > 1 else { return "meine Punkte" }
-        var parts = ["\(model.cardPoints) Karten"]
+        guard model.bonusPoints > 0 || model.multiplier > 1 else { return mine }
+        var parts = [String(localized: "score.card_points", defaultValue: "\(model.cardPoints) Karten")]
         if model.bonusPoints > 0 { parts.append("+\(model.bonusPoints)") }
         if model.multiplier > 1 { parts.append("×\(model.multiplier)") }
         return parts.joined(separator: " ")

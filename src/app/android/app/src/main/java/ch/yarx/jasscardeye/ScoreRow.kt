@@ -14,6 +14,8 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -49,7 +51,7 @@ fun ScoreRow(
             Caption(pointsCaption)
         }
         Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(1.dp)) {
-            Text(if (cards == 1) "1 Karte" else "$cards Karten", style = JassType.callout.copy(fontFeatureSettings = "tnum"), color = JassColors.Secondary, maxLines = 1)
+            Text(pluralStringResource(R.plurals.score_cards, cards, cards), style = JassType.callout.copy(fontFeatureSettings = "tnum"), color = JassColors.Secondary, maxLines = 1)
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
                 if (modeSuit != null) SuitMark(modeSuit, 17.dp)
                 Caption(modeName)
@@ -58,7 +60,7 @@ fun ScoreRow(
         }
         Column(Modifier.weight(1f), horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(1.dp)) {
             Value(opponentPoints, digits, JassColors.Orange, locked)
-            Caption("Gegner")
+            Caption(stringResource(R.string.score_opponents))
         }
     }
 }
@@ -75,6 +77,7 @@ private fun Value(number: Int, style: TextStyle, color: Color, locked: Boolean) 
         return
     }
     val blurs = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    val lockedLabel = stringResource(R.string.score_locked)
     Text(
         if (blurs) "$number" else "$number".replace(Regex("\\d"), "•"),
         style = style,
@@ -82,7 +85,7 @@ private fun Value(number: Int, style: TextStyle, color: Color, locked: Boolean) 
         maxLines = 1,
         modifier = Modifier
             .then(if (blurs) Modifier.blur(10.dp, BlurredEdgeTreatment.Unbounded) else Modifier)
-            .clearAndSetSemantics { contentDescription = "Punkte, freischalten" },
+            .clearAndSetSemantics { contentDescription = lockedLabel },
     )
 }
 

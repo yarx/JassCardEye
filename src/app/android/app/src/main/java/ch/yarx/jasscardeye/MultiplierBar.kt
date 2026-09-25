@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
@@ -34,13 +35,14 @@ fun MultiplierBar(multiplier: Int, onChange: (Int) -> Unit, modifier: Modifier =
     Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         for (factor in JassRules.multipliers) {
             val chosen = factor == multiplier
+            val label = stringResource(R.string.start_factor_value, factor)
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .clip(RoundedCornerShape(8.dp))
                     .background(if (chosen) JassColors.Green else Color.White.copy(alpha = 0.14f))
                     .clickable { onChange(factor) }
-                    .semantics { contentDescription = "Faktor $factor"; selected = chosen }
+                    .semantics { contentDescription = label; selected = chosen }
                     .padding(vertical = 8.dp),
                 contentAlignment = Alignment.Center,
             ) {

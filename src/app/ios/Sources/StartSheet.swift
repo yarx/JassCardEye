@@ -46,8 +46,8 @@ struct StartSheet: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    group("Blatt") {
-                        Picker("Kartenblatt", selection: $model.deck) {
+                    group(String(localized: "start.deck", defaultValue: "Blatt")) {
+                        Picker(String(localized: "start.deck_picker.ios", defaultValue: "Kartenblatt"), selection: $model.deck) {
                             ForEach(JassDeck.allCases) { deck in
                                 Text(deck.name).tag(deck)
                             }
@@ -67,24 +67,24 @@ struct StartSheet: View {
                         .accessibilityHidden(true)
                     }
 
-                    group("Trumpf") {
+                    group(String(localized: "start.trump", defaultValue: "Trumpf")) {
                         row(trumpModes)
                     }
 
-                    group("Ohne Trumpf") {
+                    group(String(localized: "start.no_trump", defaultValue: "Ohne Trumpf")) {
                         row(openModes)
                     }
 
                     // One line, in the place a line always is, so the layout never jumps between
                     // a chosen and an unchosen state.
-                    Text(mode?.hint ?? "Wähle, was gespielt wurde.")
+                    Text(mode?.hint ?? String(localized: "start.choose", defaultValue: "Wähle, was gespielt wurde."))
                         .font(.footnote)
                         .foregroundStyle(mode == nil ? .secondary : .primary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .lineLimit(2, reservesSpace: true)
 
-                    group("Letzter Stich") {
-                        Picker("Letzter Stich", selection: $lastTrick) {
+                    group(String(localized: "start.last_trick", defaultValue: "Letzter Stich")) {
+                        Picker(String(localized: "start.last_trick", defaultValue: "Letzter Stich"), selection: $lastTrick) {
                             ForEach(LastTrick.allCases) { choice in
                                 Text(choice.shortName).tag(choice)
                             }
@@ -92,7 +92,7 @@ struct StartSheet: View {
                         .pickerStyle(.segmented)
                     }
 
-                    group("Faktor") {
+                    group(String(localized: "start.factor", defaultValue: "Faktor")) {
                         MultiplierBar(multiplier: $multiplier)
                     }
                 }
@@ -106,7 +106,7 @@ struct StartSheet: View {
                     guard let mode else { return }
                     onStart(mode, lastTrick, multiplier)
                 } label: {
-                    Text("Zählen starten")
+                    Text(String(localized: "count.start", defaultValue: "Zählen starten"))
                         .font(.headline)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
@@ -124,14 +124,14 @@ struct StartSheet: View {
                 // millimetres fall back to whatever the sheet paints underneath.
                 .background(Self.ground.ignoresSafeArea(edges: .bottom))
             }
-            .navigationTitle("Neue Zählung")
+            .navigationTitle(String(localized: "start.title", defaultValue: "Neue Zählung"))
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             #endif
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     // The way out. Nothing runs behind the questions, so leaving costs nothing.
-                    Button("Abbrechen") { dismiss() }
+                    Button(String(localized: "common.cancel", defaultValue: "Abbrechen")) { dismiss() }
                 }
             }
         }

@@ -194,8 +194,8 @@ final class LiveDetectionModel {
         CardSound.prepare()
         capturedCount = 0
         captureNote = nil
-        let name = chosen.displayName(deck: deck)
-        settings.withLock { $0.counting = true; $0.modeName = name }
+        let name = chosen.token(deck: deck)
+        settings.withLock { $0.counting = true; $0.discipline = name }
 
         // Only with the developer tools on: a switch nobody can see must not record.
         if developerTools && recordSession {
@@ -348,10 +348,10 @@ final class LiveDetectionModel {
 
     /// Hands the UI-owned settings to the camera queue without touching the main actor per frame.
     /// `counting` gates committing: a frame that arrives after the session has closed must not land
-    /// on the pile. `modeName` rides along so a saved frame can record what was being counted.
+    /// on the pile. `discipline` rides along so a saved frame can record what was being counted.
     private nonisolated let settings = OSAllocatedUnfairLock(
         initialState: (confidence: Float(0.6), frames: LiveDetectionModel.defaultFrames,
-                       counting: false, modeName: "", rule: StabilityRule.run,
+                       counting: false, discipline: "", rule: StabilityRule.run,
                        deck: JassDeck.french, variant: RecognitionVariant.c))
 
     /// Whether *Bild* and *Session aufzeichnen* are on screen. They are for looking into a wrong
@@ -592,7 +592,7 @@ final class LiveDetectionModel {
             activeRecognizer.withLock { $0 = LoadedRecognizer(variant: target, recognizer: recognizer) }
             return true
         } catch {
-            statusMessage = "Modell (\(target.displayName)) konnte nicht geladen werden: \(error.localizedDescription)"
+            statusMessage = String(localized: "scan.model_failed", defaultValue: "Modell (\(target.displayName)) konnte nicht geladen werden: \(error.localizedDescription)")
             return false
         }
     }
@@ -629,8 +629,8 @@ final class LiveDetectionModel {
         let aspect = width / height
         let region = Self.region(forAspect: aspect)
 
-        let (confidence, framesNeeded, counting, modeName, rule, deck, variant) = settings.withLock {
-            ($0.confidence, $0.frames, $0.counting, $0.modeName, $0.rule, $0.deck, $0.variant)
+        let (confidence, framesNeeded, counting, discipline, rule, deck, variant) = settings.withLock {
+            ($0.confidence, $0.frames, $0.counting, $0.discipline, $0.rule, $0.deck, $0.variant)
         }
 
         // The recogniser of the variant the picker selected - not one still in place from before a
@@ -669,7 +669,7 @@ final class LiveDetectionModel {
             var saved = false
             do {
                 let name = try FrameCapture.save(buffer, region: region, label: top?.label,
-                                                 confidence: top?.confidence ?? 0, mode: modeName)
+                                                 confidence: top?.confidence ?? 0, mode: discipline)
                 note = "Gesichert: \(name)"
                 saved = true
             } catch {

@@ -2,7 +2,7 @@
 
 The Android app: Kotlin, Jetpack Compose, Material 3, CameraX and LiteRT, laid out for a phone in
 portrait. It is the same app as the iOS one in `src/app/ios/` - the same flow, the same screens, the
-same German wording, translated into Android idioms. **Both apps move together**: every feature, text
+same wording in each of its languages, translated into Android idioms. **Both apps move together**: every feature, text
 and design change lands on iOS and Android in the same change, and the Kotlin sources mirror
 `src/app/ios/Sources/` file for file, which stays the reference for names and structure.
 
@@ -224,6 +224,16 @@ An emulator without a Google account runs the demo, so the points come out blurr
 screenshots differ from that: they show readable points and, with all four models bundled, the
 *Erkennungsmodell* section; taking them again is open (`store/listing.md`).
 
+**Another language** is the same run with the app set to it first, and the images in a folder of that
+language (`store/screenshots/fr/`), the German ones staying where they are. Without a filmed pile,
+`python3 src/tools/make_test_video.py test-video.mp4` renders one from the card scans that counts the
+same way every time:
+
+```bash
+adb shell cmd locale set-app-locales ch.yarx.jasscardeye --locales fr-CH   # it-CH, en-GB
+adb shell cmd locale set-app-locales ch.yarx.jasscardeye --locales ""       # back to the system's language
+```
+
 ## Demo and purchase
 
 The demo shows the counted points blurred; one purchase makes them readable. On Android:
@@ -262,7 +272,7 @@ lapsing. There is no automated counterpart of iOS's `StoreTests.swift`.
 | `app/src/main/AndroidManifest.xml` | permissions, the camera feature, portrait lock, backup off, the large-screen opt-out |
 | `app/src/main/java/ch/yarx/jasscardeye/` | the sources - see "Where the sources meet" |
 | `app/src/main/assets/models/` | `JassCardEye-<variant>.tflite` + `.labels.txt` + `models.json` (generated, not versioned) |
-| `app/src/main/res/` | suit marks, the tick sound, the launcher icon, the dark window theme |
+| `app/src/main/res/` | suit marks, the tick sound, the launcher icon, the dark window theme - the strings are generated, see "Texts" |
 | `app/src/test/` | `JassScoringTest`, `PileTrackerTest`, `TensorDecodingTest`, `SuitMarkTest`, `SessionRecorderTest`, `SessionInfoTest`, `SessionArchiveTest` - plain JVM tests |
 | `app/proguard-rules.pro` | no rules of our own: LiteRT's AARs bring the ones its native code needs |
 | `store/` | Play Store icon, feature graphic, screenshots, and `listing.md` - what is entered in the Play Console |
@@ -326,6 +336,27 @@ debug build.
 - Play Billing 9.1.0, for the purchase.
 - JUnit 4.13.2 for the JVM tests.
 - NDK 28.2.13676358, only to extract the native symbol tables for Play.
+
+## Texts
+
+Every text a user reads is a key in `l10n/de.json`, with a line of context in `l10n/keys.md`; the iOS
+app is built from the same file. The `generateStrings` task in `app/build.gradle.kts` runs
+`src/tools/l10n.py --android` into `app/build/generated/res/generateStrings/` and adds that folder to
+the resources of every variant, so there is no `strings.xml` in `src/main/res` and nothing to commit.
+It needs `python3` on the path. A key becomes a resource name with underscores for dots:
+`scan.missing_card` is `R.string.scan_missing_card`, read with `stringResource`, and a plural such as
+`score.cards` is `R.plurals.score_cards`, read with `pluralStringResource`.
+
+The classes the JVM tests compile - `JassScoring`, `JassDeck`, `StabilityRule`, `CameraLens` - hold
+`@StringRes` ids rather than text and stay free of Android types; the screen resolves them, and the view
+models, which have the application, do so for their messages. `python3 src/tools/l10n.py` from the
+repository root checks that every key is used and that every `R.string` exists; CI runs it.
+`localeFilters` lists the languages the app ships - one per file in `l10n/`, read by the build - which
+also keeps the libraries' own texts to them, and `generateLocaleConfig` offers them in the system
+settings, where Android 13 and later let each app have a language of its own. German is the unqualified
+`values/` (`src/main/res/resources.properties` says so), so any other language shows German. The
+developer tools (*Bild*, *Session aufzeichnen*), the model picker a release never shows and the notes of
+a build without a model stay inline German: no user sees them.
 
 ## Checking on a phone
 

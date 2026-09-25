@@ -2,8 +2,9 @@
 
 *Stand: 14. September 2026*
 
-Veröffentlicht auf https://jasscardeye.yarx.ch/datenschutz (`src/web/src/app/pages/datenschutz.html`).
-Beide Fassungen sagen dasselbe - wer die eine ändert, ändert die andere mit.
+Veröffentlicht auf https://jasscardeye.yarx.ch/de/datenschutz (`src/web/src/app/pages/de/datenschutz.html`).
+Beide Fassungen sagen dasselbe, ebenso die übrigen Sprachen (`privacy.en.md`, `privacy.fr.md`,
+`privacy.it.md`) - wer eine ändert, ändert alle mit.
 
 ## Kurz gefasst
 

@@ -33,7 +33,7 @@ struct ScoreRow: View {
             }
 
             column(alignment: .center) {
-                Text(cards == 1 ? "1 Karte" : "\(cards) Karten")
+                Text(String(localized: "score.cards", defaultValue: "\(cards) Karten"))
                     .font(.callout.monospacedDigit())
                     .foregroundStyle(.secondary)
                 HStack(spacing: 4) {
@@ -49,7 +49,7 @@ struct ScoreRow: View {
 
             column(alignment: .trailing) {
                 value(opponentPoints, color: .orange)
-                caption("Gegner")
+                caption(String(localized: "score.opponents", defaultValue: "Gegner"))
             }
         }
     }
@@ -61,7 +61,7 @@ struct ScoreRow: View {
             .font(valueFont.weight(.bold).monospacedDigit())
             .foregroundStyle(color)
             .blur(radius: locked ? 9 : 0)
-            .accessibilityLabel(locked ? "Punkte, freischalten" : "\(number)")
+            .accessibilityLabel(locked ? String(localized: "score.locked", defaultValue: "Punkte, freischalten") : "\(number)")
     }
 
     private func column<Content: View>(alignment: HorizontalAlignment,

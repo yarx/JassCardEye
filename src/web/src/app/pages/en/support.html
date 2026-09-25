@@ -1,0 +1,34 @@
+<article class="mx-auto max-w-3xl px-4 py-12">
+  <h1 class="text-4xl font-extrabold tracking-tight">Support and contact</h1>
+
+  <div class="mt-8 rounded-2xl bg-panel p-6 ring-1 ring-line sm:p-8">
+    <h2 class="text-xl font-bold">Write to us</h2>
+    <p class="mt-3 leading-relaxed text-zinc-300">
+      Questions, bugs, a deck the app does not know yet: an email to
+      <a href="mailto:support@yarx.ch" class="font-semibold text-jass underline">support&#64;yarx.ch</a>
+      is all it takes. The version of the app (under <em>About</em> in the app) and the device help.
+    </p>
+    <p class="mt-3 leading-relaxed text-zinc-300">
+      For a new set of cards: photos of all 36 cards, one by one, flat from above and in good light. They are
+      used only to train the recognition and are not published.
+    </p>
+  </div>
+
+  <h2 class="mt-12 text-2xl font-bold">Frequent questions</h2>
+  <div class="mt-4 space-y-4">
+    @for (entry of faq; track entry.question) {
+      <details class="group rounded-2xl bg-panel p-5 ring-1 ring-line">
+        <summary class="cursor-pointer list-none font-semibold text-white marker:hidden">
+          <span class="text-jass group-open:hidden">+ </span>
+          <span class="hidden text-jass group-open:inline">– </span>
+          {{ entry.question }}
+        </summary>
+        <p class="mt-3 leading-relaxed text-zinc-300">{{ entry.answer }}</p>
+      </details>
+    }
+  </div>
+
+  <p class="mt-8 leading-relaxed text-zinc-300">
+    More about scanning in the <a routerLink="/anleitung" class="font-semibold text-jass underline">guide</a>.
+  </p>
+</article>

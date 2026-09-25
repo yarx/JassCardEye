@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -49,11 +50,12 @@ internal fun suitDrawable(suit: JassSuit): Int = when (suit.token) {
  */
 @Composable
 fun SuitMark(suit: JassSuit, size: Dp = 26.dp, modifier: Modifier = Modifier) {
+    val name = stringResource(suit.name)
     Box(
         modifier = modifier
             .size(size)
             .background(Color.White, RoundedCornerShape(size * 0.2f))
-            .semantics { contentDescription = suit.name },
+            .semantics { contentDescription = name },
         contentAlignment = Alignment.Center,
     ) {
         Image(
@@ -85,13 +87,15 @@ fun CardChip(
         Text(label, color = rankColor, style = style, modifier = modifier)
         return
     }
+    val suitName = stringResource(card.suit.name)
+    val rankName = card.rankName?.let { stringResource(it) } ?: card.rank
     Row(
-        modifier = modifier.clearAndSetSemantics { contentDescription = "${card.suit.name} ${card.rankName}" },
+        modifier = modifier.clearAndSetSemantics { contentDescription = "$suitName $rankName" },
         horizontalArrangement = Arrangement.spacedBy(5.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (markSide == MarkSide.LEADING) SuitMark(card.suit, markSize)
-        Text(card.rankName, color = rankColor, style = style)
+        Text(rankName, color = rankColor, style = style)
         if (markSide == MarkSide.TRAILING) SuitMark(card.suit, markSize)
     }
 }

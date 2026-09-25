@@ -8,6 +8,11 @@
 name: JassCardEye
 options:
   bundleIdPrefix: ch.yarx
+  # The texts: German is the development language, and the String Catalogs are written from
+  # l10n/*.json before every generation, one language per file - see l10n/README.md. Generated, like
+  # the project.
+  developmentLanguage: de
+  preGenCommand: python3 ../../tools/l10n.py --ios .
   deploymentTarget:
     iOS: "17.0"
     macOS: "14.0"
@@ -30,6 +35,8 @@ targets:
       - path: Assets.xcassets
       - path: Sounds            # the tick for a counted card, made by src/tools/make_card_sound.py
       - path: PrivacyInfo.xcprivacy
+      - path: Localizable.xcstrings   # written by src/tools/l10n.py, see preGenCommand
+      - path: InfoPlist.xcstrings
       - path: Models
         optional: true          # present after the first export
     settings:
@@ -48,6 +55,8 @@ targets:
         # development one - and automatic signing archives with the development identity.
         DEVELOPMENT_TEAM: 5TV46KLX3W
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        # The German values of l10n/de.json, which the Info.plist needs even though InfoPlist.xcstrings
+        # carries them per language; src/tools/l10n.py checks that the two agree.
         INFOPLIST_KEY_CFBundleDisplayName: JassCardEye
         INFOPLIST_KEY_NSCameraUsageDescription: >-
           JassCardEye erkennt die oberste Jasskarte live über die Kamera.
@@ -73,6 +82,9 @@ targets:
         # default - raise it to "1,2" once the iPad case has actually been designed.
         TARGETED_DEVICE_FAMILY: "1"
         ENABLE_HARDENED_RUNTIME: YES
+        # The catalogs are generated from l10n/, so Xcode must not add the literals it finds in the
+        # code to them - it would write into a file the next generation overwrites.
+        SWIFT_EMIT_LOC_STRINGS: NO
     # Base plist for the keys Xcode cannot generate; the INFOPLIST_KEY_* settings above are merged
     # on top of it. Written by XcodeGen, like the project itself - not hand-maintained, and
     # therefore gitignored.

@@ -9,7 +9,12 @@ enum JassDeck: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 
     /// What it is called: "Französisch", "Deutsch".
-    var name: String { self == .french ? "Französisch" : "Deutsch" }
+    var name: String {
+        switch self {
+        case .french: return String(localized: "deck.french", defaultValue: "Französisch")
+        case .german: return String(localized: "deck.german", defaultValue: "Deutsch")
+        }
+    }
 
     /// Its four suits, shown next to the name wherever the deck is offered - seeing the marks is
     /// the fastest way to know which deck is meant.
@@ -37,8 +42,9 @@ struct JassSuit {
     /// deal with four suits, whichever deck is on the table.
     let role: String
 
-    /// The suit on its own: "Schaufel", "Schilten". What VoiceOver reads for the mark, what a
-    /// filename carries, and what stands under the mark in the compact picker.
+    /// The suit on its own: "Schaufel", "Schilten". What VoiceOver reads for the mark and what
+    /// stands under the mark in the compact picker. A filename carries the `token` instead, which
+    /// does not change with the language.
     ///
     /// The mark itself is not here: it is vector art in the asset catalogue under this suit's
     /// `token`, drawn by `SuitMark`. A string would not do - Unicode has the French suits but no
@@ -51,21 +57,21 @@ struct JassSuit {
     let markCredit: MarkCredit
 
     static let all: [JassSuit] = [
-        JassSuit(token: "clubs",    deck: .french, role: "clubs",    name: "Kreuz",
+        JassSuit(token: "clubs",    deck: .french, role: "clubs",    name: String(localized: "suit.clubs", defaultValue: "Kreuz"),
                  markCredit: MarkCredit(file: "SuitClubs.svg", author: "F l a n k e r", publicDomain: true)),
-        JassSuit(token: "diamonds", deck: .french, role: "diamonds", name: "Ecken",
+        JassSuit(token: "diamonds", deck: .french, role: "diamonds", name: String(localized: "suit.diamonds", defaultValue: "Ecken"),
                  markCredit: MarkCredit(file: "Ecke_Neu.svg", author: "Jensche", publicDomain: false)),
-        JassSuit(token: "hearts",   deck: .french, role: "hearts",   name: "Herz",
+        JassSuit(token: "hearts",   deck: .french, role: "hearts",   name: String(localized: "suit.hearts", defaultValue: "Herz"),
                  markCredit: MarkCredit(file: "Herz_Neu.svg", author: "Jensche", publicDomain: false)),
-        JassSuit(token: "spades",   deck: .french, role: "spades",   name: "Schaufel",
+        JassSuit(token: "spades",   deck: .french, role: "spades",   name: String(localized: "suit.spades", defaultValue: "Schaufel"),
                  markCredit: MarkCredit(file: "Schaufel_Neu.svg", author: "Jensche", publicDomain: false)),
-        JassSuit(token: "acorns",   deck: .german, role: "clubs",    name: "Eichel",
+        JassSuit(token: "acorns",   deck: .german, role: "clubs",    name: String(localized: "suit.acorns", defaultValue: "Eichel"),
                  markCredit: MarkCredit(file: "Eichel_Neu.svg", author: "Jensche", publicDomain: false)),
-        JassSuit(token: "roses",    deck: .german, role: "hearts",   name: "Rosen",
+        JassSuit(token: "roses",    deck: .german, role: "hearts",   name: String(localized: "suit.roses", defaultValue: "Rosen"),
                  markCredit: MarkCredit(file: "Rosen_Neu.svg", author: "Jensche", publicDomain: false)),
-        JassSuit(token: "bells",    deck: .german, role: "diamonds", name: "Schellen",
+        JassSuit(token: "bells",    deck: .german, role: "diamonds", name: String(localized: "suit.bells", defaultValue: "Schellen"),
                  markCredit: MarkCredit(file: "Schellen_Neu.svg", author: "Jensche", publicDomain: false)),
-        JassSuit(token: "shields",  deck: .german, role: "spades",   name: "Schilten",
+        JassSuit(token: "shields",  deck: .german, role: "spades",   name: String(localized: "suit.shields", defaultValue: "Schilten"),
                  markCredit: MarkCredit(file: "Schilten_Neu.svg", author: "Jensche", publicDomain: false)),
     ]
 
@@ -90,7 +96,9 @@ struct MarkCredit {
     let publicDomain: Bool
 
     var page: URL { URL(string: "https://commons.wikimedia.org/wiki/File:\(file)")! }
-    var attribution: String { "\(author) · \(publicDomain ? "gemeinfrei" : "CC BY-SA 4.0")" }
+    var attribution: String {
+        "\(author) · \(publicDomain ? String(localized: "about.public_domain", defaultValue: "gemeinfrei") : "CC BY-SA 4.0")"
+    }
 }
 
 /// A class label as the model emits it, taken apart.
@@ -127,6 +135,9 @@ struct CardLabel {
     var isRed: Bool { role == "hearts" || role == "diamonds" }
 
     private static let jassRanks = [
-        "jack": "Under", "queen": "Ober", "king": "König", "ace": "Ass",
+        "jack": String(localized: "rank.jack", defaultValue: "Under"),
+        "queen": String(localized: "rank.queen", defaultValue: "Ober"),
+        "king": String(localized: "rank.king", defaultValue: "König"),
+        "ace": String(localized: "rank.ace", defaultValue: "Ass"),
     ]
 }

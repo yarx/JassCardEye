@@ -1,0 +1,43 @@
+<article class="mx-auto max-w-3xl px-4 py-12">
+  <h1 class="text-4xl font-extrabold tracking-tight">Guide</h1>
+  <p class="mt-4 text-lg leading-relaxed text-zinc-300">
+    Counting happens after the game: the cards one team has won are laid one by one onto a pile in front of
+    the camera. The app recognises the top card each time and adds it up.
+  </p>
+
+  <h2 class="mt-12 text-2xl font-bold">A count</h2>
+  <ol class="mt-4 list-decimal space-y-3 pl-6 leading-relaxed text-zinc-300 marker:text-jass">
+    <li>Tap <strong class="text-white">Start counting</strong>.</li>
+    <li>Choose deck, discipline, last trick and factor – every team knows them after the game – and tap <strong class="text-white">Start counting</strong> again.</li>
+    <li>Lay the cards on top of the pile one after the other. The app confirms every counted card with a short sound and a vibration. Sound and vibration can be adjusted or turned off in the settings under “Feedback”.</li>
+    <li>Your points are on the left, the opponents' on the right. <strong class="text-white">Done</strong> ends the count, and the result stays on the home screen until the next count.</li>
+  </ol>
+
+  <h2 class="mt-12 text-2xl font-bold">How the scan works</h2>
+  <div class="mt-4 grid gap-4 sm:grid-cols-2">
+    @for (rule of rules; track rule.title) {
+      <div class="rounded-2xl bg-panel p-5 ring-1 ring-line">
+        <h3 class="font-semibold text-jass">{{ rule.title }}</h3>
+        <p class="mt-2 text-sm leading-relaxed text-zinc-300">{{ rule.text }}</p>
+      </div>
+    }
+  </div>
+
+  <h2 class="mt-12 text-2xl font-bold">Correcting</h2>
+  <ul class="mt-4 list-disc space-y-3 pl-6 leading-relaxed text-zinc-300 marker:text-jass">
+    <li>Recognised wrongly? Tap the card in the list at the bottom – it is removed from the count.</li>
+    <li><strong class="text-white">Card missing?</strong> This button adds a card by hand, say one that lies very flat.</li>
+    <li><strong class="text-white">Reset</strong> empties the pile and starts over.</li>
+  </ul>
+
+  <h2 class="mt-12 text-2xl font-bold">The cards the app knows</h2>
+  <ul class="mt-4 space-y-3 leading-relaxed text-zinc-300">
+    <li><strong class="text-white">French:</strong> the Swiss Jass cards with French suits by AGMüller (Neuhausen) – Clubs, Diamonds, Hearts, Spades.</li>
+    <li><strong class="text-white">German:</strong> the Schaffhausen playing cards “Opti-Quatro” by AGMüller – Acorns, Bells, Roses, Shields.</li>
+  </ul>
+  <p class="mt-4 leading-relaxed text-zinc-300">
+    Other designs – even from other makers with the same suits – are not recognised reliably. Do you play
+    with another deck? <a routerLink="/support" class="font-semibold text-jass underline">Get in touch</a>,
+    with photos of the 36 cards the recognition can be trained on it.
+  </p>
+</article>

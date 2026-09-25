@@ -2,7 +2,7 @@
   "trailingSlash": "never",
   "navigationFallback": {
     "rewrite": "/index.html",
-    "exclude": ["/screens/*", "/*.{png,jpg,svg,ico,css,js,json,txt}"]
+    "exclude": ["/*/screens/*", "/*.{png,jpg,svg,ico,css,js,json,txt}"]
   },
   "globalHeaders": {
     "X-Content-Type-Options": "nosniff",

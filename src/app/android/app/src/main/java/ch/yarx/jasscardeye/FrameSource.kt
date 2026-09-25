@@ -1,5 +1,6 @@
 package ch.yarx.jasscardeye
 
+import android.content.Context
 import android.graphics.Bitmap
 import androidx.lifecycle.LifecycleOwner
 
@@ -44,8 +45,8 @@ sealed interface FrameSource {
         data object Denied : Problem()
         data class Other(val text: String) : Problem()
 
-        val message: String get() = when (this) {
-            Denied -> "Kein Kamerazugriff."
+        fun message(context: Context): String = when (this) {
+            Denied -> context.getString(R.string.camera_denied)
             is Other -> text
         }
         val isDenied: Boolean get() = this is Denied

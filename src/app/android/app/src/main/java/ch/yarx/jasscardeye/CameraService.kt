@@ -134,10 +134,10 @@ class CameraService(private val context: Context, private val executor: Executor
      */
     override suspend fun start(owner: LifecycleOwner, lens: CameraLens): FrameSource.Problem? {
         val provider = try { provider() } catch (error: Exception) {
-            return FrameSource.Problem.Other("Keine Kamera gefunden - die App braucht ein echtes Gerät.")
+            return FrameSource.Problem.Other(context.getString(R.string.camera_none))
         }
         val backs = backCameras(provider)
-        if (backs.isEmpty()) return FrameSource.Problem.Other("Keine Kamera gefunden - die App braucht ein echtes Gerät.")
+        if (backs.isEmpty()) return FrameSource.Problem.Other(context.getString(R.string.camera_none))
 
         // The ultra-wide as a camera of its own where the phone exposes one; otherwise the standard camera,
         // zoomed out to its minimum ratio below. Falls back to the standard lens: a setting can outlive its phone.
@@ -186,7 +186,7 @@ class CameraService(private val context: Context, private val executor: Executor
             null
         } catch (error: Exception) {
             Log.e(TAG, "Binding the camera failed", error)
-            FrameSource.Problem.Other("Kamera konnte nicht eingebunden werden.")
+            FrameSource.Problem.Other(context.getString(R.string.camera_attach_failed))
         }
     }
 

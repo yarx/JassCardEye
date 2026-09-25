@@ -57,6 +57,9 @@ temp/
 src/app/ios/JassCardEye.xcodeproj/
 # Written by XcodeGen from project.yml, like the Xcode project itself - not by hand.
 src/app/ios/Generated-Info.plist
+# Written by src/tools/l10n.py from l10n/*.json whenever XcodeGen generates the project.
+src/app/ios/Localizable.xcstrings
+src/app/ios/InfoPlist.xcstrings
 src/app/ios/JassCardEye.entitlements
 src/app/ios/build/
 src/app/ios/Models/*.mlpackage

@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -61,9 +62,9 @@ fun PurchaseSheet(onDismiss: () -> Unit) {
         containerColor = Color.Black,
     ) {
         Box(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-            Text("Freischalten", style = JassType.headline, color = Color.White, modifier = Modifier.align(Alignment.Center))
+            Text(stringResource(R.string.purchase_title), style = JassType.headline, color = Color.White, modifier = Modifier.align(Alignment.Center))
             TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.CenterStart)) {
-                Text("Schliessen", style = JassType.headline, color = JassColors.Green)
+                Text(stringResource(R.string.common_close), style = JassType.headline, color = JassColors.Green)
             }
         }
         Column(
@@ -76,13 +77,13 @@ fun PurchaseSheet(onDismiss: () -> Unit) {
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Icon(Icons.Outlined.LockOpen, contentDescription = null, tint = JassColors.Green, modifier = Modifier.size(44.dp))
-                Text("Punkte freischalten", style = JassType.title3.copy(fontWeight = FontWeight.Bold), color = Color.White)
+                Text(stringResource(R.string.purchase_unlock), style = JassType.title3.copy(fontWeight = FontWeight.Bold), color = Color.White)
             }
 
             Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                Benefit(Icons.Outlined.Visibility, "Die gezählten Punkte werden lesbar - deine und die des Gegners, mit der Aufschlüsselung.")
-                Benefit(Icons.Outlined.History, "Auch «Letzte Zählung» auf dem Startbildschirm zeigt die Punkte.")
-                Benefit(Icons.Outlined.Verified, "Einmal kaufen, für immer. Kein Abo, kein Konto.")
+                Benefit(Icons.Outlined.Visibility, stringResource(R.string.purchase_benefit_readable))
+                Benefit(Icons.Outlined.History, stringResource(R.string.purchase_benefit_last_count))
+                Benefit(Icons.Outlined.Verified, stringResource(R.string.purchase_benefit_once))
             }
 
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -94,15 +95,16 @@ fun PurchaseSheet(onDismiss: () -> Unit) {
                     colors = ButtonDefaults.buttonColors(containerColor = JassColors.Green, contentColor = Color.White),
                 ) {
                     Text(
-                        store.price?.let { "Kaufen für $it" } ?: if (store.productUnavailable) "Nicht verfügbar" else "Preis wird geladen …",
+                        store.price?.let { stringResource(R.string.purchase_buy, it) }
+                            ?: stringResource(if (store.productUnavailable) R.string.purchase_unavailable else R.string.purchase_loading),
                         style = JassType.headline,
                     )
                 }
-                if (store.pending) Note("Der Kauf wartet auf die Zahlung. Die Punkte werden frei, sobald sie eingegangen ist.")
-                if (store.productUnavailable) Note("Google Play ist gerade nicht erreichbar. Die Demo zählt weiter wie bisher.")
+                if (store.pending) Note(stringResource(R.string.purchase_pending_android))
+                if (store.productUnavailable) Note(stringResource(R.string.purchase_store_unreachable_android))
                 store.problem?.let { Note(it) }
                 TextButton(onClick = store::restore) {
-                    Text("Kauf wiederherstellen", style = JassType.callout, color = JassColors.Green)
+                    Text(stringResource(R.string.purchase_restore), style = JassType.callout, color = JassColors.Green)
                 }
             }
             Spacer(Modifier.height(8.dp))
@@ -126,7 +128,7 @@ fun UnlockButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
         Icon(Icons.Outlined.LockOpen, contentDescription = null, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(6.dp))
         Text(
-            store.price?.let { "Punkte freischalten – $it" } ?: "Punkte freischalten",
+            store.price?.let { stringResource(R.string.purchase_unlock_price, it) } ?: stringResource(R.string.purchase_unlock),
             style = JassType.callout.copy(fontWeight = FontWeight.SemiBold),
         )
     }

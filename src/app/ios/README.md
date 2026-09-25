@@ -130,6 +130,29 @@ xcodebuild -project src/app/ios/JassCardEye.xcodeproj -scheme JassCardEye -desti
 target) and `bundleIdPrefix` in `project.yml` before generating. Team `5TV46KLX3W` and the bundle ID
 `ch.yarx.JassCardEye` belong to YARX, and signing for a device needs a team you are a member of.
 
+## Texts
+
+Every text a user reads is a key in `l10n/de.json`, with a line of context in `l10n/keys.md`; both apps
+are built from that file. `xcodegen generate` runs `src/tools/l10n.py --ios .` first (`preGenCommand`
+in `project.yml`), which writes `Localizable.xcstrings` and `InfoPlist.xcstrings` - generated like the
+project, not versioned. In the code a text is its key with the German text as the default:
+
+```swift
+Text(String(localized: "scan.missing_card", defaultValue: "Karte fehlt?"))
+```
+
+The default is what a reader of the code sees and what the app would show for a key the catalog lacks;
+`python3 src/tools/l10n.py` from the repository root holds it to `de.json`, checks that every key is
+used, and runs in CI. A number interpolated into the default fills the catalog's `%1$lld`, a text its
+`%1$@`, in the order they appear. German is the development language; every file in `l10n/` becomes a
+language of the catalog and an `.lproj` of the bundle, which is what iOS offers in the app's settings
+and what App Store Connect lists. A phone set to any other language sees German. To try a language in
+the simulator: `xcrun simctl launch booted ch.yarx.JassCardEye -AppleLanguages "(fr)"`. The developer tools (*Bild*, *Session aufzeichnen*), the model picker a release never
+shows and the notes of a build without a model stay inline German: no user sees them.
+
+The Info.plist still carries the German app name and camera question from `project.yml`, because a
+catalog only translates keys that exist; the check makes sure the two agree.
+
 ## Testing in the simulator
 
 The simulator has no camera, so a **looping video** takes its place and feeds the same frame loop:
@@ -146,6 +169,8 @@ stability rule, pile and score behave as on a phone.
 - A note on the picture says *Simulator: Testvideo statt Kamera (Endlosschleife).*;
   `JASSCARDEYE_SCREENSHOTS=1` leaves it out for store screenshots (see `store/listing.md`). The
   simulator offers no torch and no lens choice.
+- Without a filmed pile, `python3 src/tools/make_test_video.py test-video.mp4` renders one from the card
+  scans: twelve French cards laid one by one, the same on every run.
 
 ## Demo and purchase
 
@@ -198,7 +223,8 @@ itself is not persisted, and a recording starts only while the tools are shown.
 0.95) into the app's Documents folder. The context travels in the file name, so it survives AirDrop
 and a copy into any folder: `capture_<yyyyMMdd-HHmmss-SSS>_<label>-<confidence %>_<discipline>.jpg`,
 with `nichts` in place of label and confidence when the model saw no card, for example
-`capture_20260912-173958-895_clubs_6-98_herz.jpg`. The request is served by the next frame on the
+`capture_20260912-173958-895_clubs_6-98_hearts.jpg` - the discipline as a token that does not change
+with the language, see `CountingMode.token(deck:)`. The request is served by the next frame on the
 camera queue, so the name records what the model made of exactly the picture that was written.
 
 The saved square is a dataset image: the same crop, so it goes straight into the labelling tool as a
@@ -252,10 +278,13 @@ CI runs both checks on Linux (`.github/workflows/ci.yml`, job *Scoring and pile*
 
 ```bash
 swiftc -o /tmp/check_scoring src/app/ios/Sources/JassScoring.swift src/app/ios/Sources/JassDeck.swift \
-    src/tools/check_scoring.swift && /tmp/check_scoring
+    src/tools/localized_fallback.swift src/tools/check_scoring.swift && /tmp/check_scoring
 swiftc -o /tmp/check_pile src/app/ios/Sources/PileTracker.swift src/app/ios/Sources/StabilityRule.swift \
-    src/tools/check_pile.swift && /tmp/check_pile
+    src/tools/localized_fallback.swift src/tools/check_pile.swift && /tmp/check_pile
 ```
+
+`localized_fallback.swift` stands in for `String(localized:)`, which Foundation on Linux lacks, with the
+German default; on a Mac it compiles to nothing.
 
 - **`check_scoring`:** every discipline totals 152 on both decks, a German card is worth what its French
   counterpart is worth, trump lands on the right suit, each deck owns four suits with a mark of its
@@ -286,6 +315,7 @@ swiftc -o /tmp/check_pile src/app/ios/Sources/PileTracker.swift src/app/ios/Sour
 | `Assets.xcassets/` | the app icon, and the eight suit marks as SVG image sets named after their tokens |
 | `Sounds/` | `card-tick.caf`, made by `src/tools/make_card_sound.py` |
 | `PrivacyInfo.xcprivacy` | the privacy manifest |
+| `Localizable.xcstrings`, `InfoPlist.xcstrings` | the texts, written from `l10n/` by `src/tools/l10n.py` - generated, not versioned |
 | `ExportOptions.plist` | how the archive becomes an `.ipa` for App Store Connect |
 | `store/` | App Store and TestFlight texts (`listing.md`) and the screenshots |
 

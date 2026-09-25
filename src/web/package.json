@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build"
+    "build": "ng build && node scripts/site-root.mjs"
   },
   "private": true,
   "dependencies": {
@@ -22,6 +22,7 @@
     "@angular/build": "^22.1.8",
     "@angular/cli": "^22.1.8",
     "@angular/compiler-cli": "^22.1.6",
+    "@angular/localize": "^22.1.6",
     "@tailwindcss/postcss": "^4.3.2",
     "postcss": "^8.5.16",
     "tailwindcss": "^4.3.2",

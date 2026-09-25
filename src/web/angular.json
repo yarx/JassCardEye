@@ -12,6 +12,14 @@
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
+      "i18n": {
+        "sourceLocale": { "code": "de", "subPath": "de" },
+        "locales": {
+          "fr": { "translation": "src/locale/messages.fr.json" },
+          "it": { "translation": "src/locale/messages.it.json" },
+          "en": { "translation": "src/locale/messages.en.json" }
+        }
+      },
       "architect": {
         "build": {
           "builder": "@angular/build:application",
@@ -26,7 +34,9 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.css"]
+            "styles": ["src/styles.css"],
+            "polyfills": ["@angular/localize/init"],
+            "i18nMissingTranslation": "error"
           },
           "configurations": {
             "production": {
@@ -37,13 +47,17 @@
                   "maximumError": "1MB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "localize": true
             },
             "development": {
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
-            }
+            },
+            "fr": { "localize": ["fr"] },
+            "it": { "localize": ["it"] },
+            "en": { "localize": ["en"] }
           },
           "defaultConfiguration": "production"
         },
@@ -55,7 +69,10 @@
             },
             "development": {
               "buildTarget": "jasscardeye-web:build:development"
-            }
+            },
+            "fr": { "buildTarget": "jasscardeye-web:build:development,fr" },
+            "it": { "buildTarget": "jasscardeye-web:build:development,it" },
+            "en": { "buildTarget": "jasscardeye-web:build:development,en" }
           },
           "defaultConfiguration": "development"
         }

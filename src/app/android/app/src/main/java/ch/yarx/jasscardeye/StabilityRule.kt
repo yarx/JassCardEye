@@ -1,6 +1,9 @@
 package ch.yarx.jasscardeye
 
-// Port of src/app/ios/Sources/StabilityRule.swift.
+import androidx.annotation.StringRes
+
+// Port of src/app/ios/Sources/StabilityRule.swift. The texts are string resources, as in JassScoring.kt, so
+// the rule stays free of Android types.
 
 /**
  * How a detection earns its place on the pile.
@@ -22,19 +25,19 @@ enum class StabilityRule(val id: String) {
      */
     fun windowSize(votes: Int): Int = maxOf(1, votes * 2 - 1)
 
-    fun displayName(votes: Int): String = when (this) {
-        RUN -> "Serie – $votes hintereinander"
-        MAJORITY -> "Mehrheit – $votes von ${windowSize(votes)}"
-    }
-
-    val explanation: String
+    /** The picker's line, formatted with the votes and the [windowSize] - a run only shows the votes. */
+    @get:StringRes
+    val displayName: Int
         get() = when (this) {
-            RUN -> "Eine Karte wird gezählt, wenn sie in so vielen Bildern hintereinander zuoberst liegt. " +
-                "Ein einziges abweichendes Bild setzt den Zähler zurück."
-            MAJORITY -> "Eine Karte wird gezählt, wenn sie die Mehrheit der letzten Bilder für sich hat und " +
-                "keine andere darin mehr als einmal vorkommt. Einzelne Aussetzer brechen nichts mehr " +
-                "ab, aber eine Fehlerkennung während einer Bewegung braucht jetzt eine echte Mehrheit " +
-                "statt drei zufällig benachbarter Bilder."
+            RUN -> R.string.rule_run
+            MAJORITY -> R.string.rule_majority
+        }
+
+    @get:StringRes
+    val explanation: Int
+        get() = when (this) {
+            RUN -> R.string.rule_run_note
+            MAJORITY -> R.string.rule_majority_note
         }
 
     companion object {

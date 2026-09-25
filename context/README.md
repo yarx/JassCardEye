@@ -28,7 +28,8 @@ Each topic has one home, so a fact is changed in one place and linked from every
 | `src/tools/dataset/README.md` | Reference of the dataset CLI and manual of the Dataset Tool. |
 | `src/app/ios/README.md`, `src/app/android/README.md` | Build, run, test and release per platform, and the map of the code. |
 | `src/app/ios/store/listing.md`, `src/app/android/store/listing.md` | What is entered in App Store Connect and the Play Console. |
-| `src/web/privacy.md` | The privacy policy, published on the project website. |
+| `src/web/privacy.md` | The privacy policy, published on the project website; `privacy.<language>.md` in the other languages. |
+| `l10n/README.md` | The texts of both apps and how to add a language. |
 | `src/web/README.md` | The project website, https://jasscardeye.yarx.ch. |
 | `doc/README.md` | The thesis and the work journal (LaTeX). |
 

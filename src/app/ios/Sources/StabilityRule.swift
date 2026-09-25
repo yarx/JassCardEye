@@ -20,25 +20,19 @@ enum StabilityRule: String, CaseIterable, Identifiable, Codable {
 
     func displayName(votes: Int) -> String {
         switch self {
-        case .run:      return "Serie – \(votes) hintereinander"
-        case .majority: return "Mehrheit – \(votes) von \(windowSize(votes: votes))"
+        case .run:
+            return String(localized: "rule.run", defaultValue: "Serie – \(votes) hintereinander")
+        case .majority:
+            return String(localized: "rule.majority", defaultValue: "Mehrheit – \(votes) von \(windowSize(votes: votes))")
         }
     }
 
     var explanation: String {
         switch self {
         case .run:
-            return """
-                Eine Karte wird gezählt, wenn sie in so vielen Bildern hintereinander zuoberst liegt. \
-                Ein einziges abweichendes Bild setzt den Zähler zurück.
-                """
+            return String(localized: "rule.run.note", defaultValue: "Eine Karte wird gezählt, wenn sie in so vielen Bildern hintereinander zuoberst liegt. Ein einziges abweichendes Bild setzt den Zähler zurück.")
         case .majority:
-            return """
-                Eine Karte wird gezählt, wenn sie die Mehrheit der letzten Bilder für sich hat und \
-                keine andere darin mehr als einmal vorkommt. Einzelne Aussetzer brechen nichts mehr \
-                ab, aber eine Fehlerkennung während einer Bewegung braucht jetzt eine echte Mehrheit \
-                statt drei zufällig benachbarter Bilder.
-                """
+            return String(localized: "rule.majority.note", defaultValue: "Eine Karte wird gezählt, wenn sie die Mehrheit der letzten Bilder für sich hat und keine andere darin mehr als einmal vorkommt. Einzelne Aussetzer brechen nichts mehr ab, aber eine Fehlerkennung während einer Bewegung braucht jetzt eine echte Mehrheit statt drei zufällig benachbarter Bilder.")
         }
     }
 }

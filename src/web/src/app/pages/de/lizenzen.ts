@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 
 /**
- * The facts of the Über page in both apps (AboutView.swift, AboutScreen.kt), for reading on the web - but
- * not a copy of it: the library lines here are more complete, and the website adds its own. A licence or
- * credit that changes in the apps has to change here too, and the other way round.
+ * The facts of the Über page in both apps - its texts in l10n/, its links in AboutView.swift and
+ * AboutScreen.kt - for reading on the web, but not a copy of it: the library lines here are more complete,
+ * and the website adds its own. A licence or credit that changes in the apps has to change here too, in every
+ * language, and the other way round.
  */
 @Component({
   selector: 'app-lizenzen',

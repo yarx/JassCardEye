@@ -1,0 +1,70 @@
+<article class="mx-auto max-w-3xl px-4 py-12 leading-relaxed text-zinc-300">
+  <h1 class="text-4xl font-extrabold tracking-tight text-white">Licences et crédits des images</h1>
+
+  <h2 class="mt-10 text-2xl font-bold text-white">Licence</h2>
+  <p class="mt-3">
+    JassCardEye est un logiciel libre sous la
+    <a href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank" rel="noopener" class="font-semibold text-jass underline">GNU Affero General Public License 3.0</a>.
+    La distribution par l’App Store et Google Play est couverte par une autorisation supplémentaire, décrite dans
+    le fichier de licence du code source.
+  </p>
+  <p class="mt-3">
+    Code source :
+    <a href="https://github.com/yarx/JassCardEye" target="_blank" rel="noopener" class="font-semibold text-jass underline">github.com/yarx/JassCardEye</a>
+  </p>
+
+  <h2 class="mt-10 text-2xl font-bold text-white">Reconnaissance</h2>
+  <p class="mt-3">
+    Le modèle de reconnaissance a été entraîné avec
+    <a href="https://github.com/ultralytics/ultralytics" target="_blank" rel="noopener" class="font-semibold text-jass underline">Ultralytics YOLO11</a>
+    (AGPL-3.0), sur un jeu de Jass français et un jeu suisse allemand.
+  </p>
+
+  <h2 class="mt-10 text-2xl font-bold text-white">Crédits des images</h2>
+  <p class="mt-3">
+    Les signes des couleurs proviennent de Wikimedia Commons et sont repris sans modification.
+  </p>
+  <div class="mt-4 overflow-x-auto rounded-2xl ring-1 ring-line">
+    <table class="w-full text-left text-sm">
+      <thead class="bg-panel text-white">
+        <tr>
+          <th class="px-4 py-3 font-semibold">Couleur</th>
+          <th class="px-4 py-3 font-semibold">Auteur</th>
+          <th class="px-4 py-3 font-semibold">Licence</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (mark of marks; track mark.file) {
+          <tr class="border-t border-line">
+            <td class="px-4 py-3">
+              <a [href]="commonsPage(mark.file)" target="_blank" rel="noopener" class="font-semibold text-jass underline">{{ mark.name }}</a>
+            </td>
+            <td class="px-4 py-3">{{ mark.author }}</td>
+            <td class="px-4 py-3">{{ mark.licence }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  <p class="mt-3 text-sm">
+    Texte de la licence :
+    <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.fr" target="_blank" rel="noopener" class="font-semibold text-jass underline">CC BY-SA 4.0</a>
+  </p>
+
+  <h2 class="mt-10 text-2xl font-bold text-white">Bibliothèques</h2>
+  <p class="mt-3">
+    <strong class="text-white">iPhone :</strong> en dehors des frameworks d’Apple, l’app n’utilise aucune
+    bibliothèque tierce.
+  </p>
+  <p class="mt-3">
+    <strong class="text-white">Android :</strong> AndroidX avec Jetpack Compose et CameraX, LiteRT de Google, la
+    bibliothèque standard Kotlin et kotlinx.coroutines, toutes sous la licence
+    <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank" rel="noopener" class="font-semibold text-jass underline">Apache License 2.0</a>.
+    Pour l’achat s’ajoute la Play Billing Library de Google, sous la licence
+    <a href="https://developer.android.com/studio/terms.html" target="_blank" rel="noopener" class="font-semibold text-jass underline">Android Software Development Kit License</a>.
+  </p>
+  <p class="mt-3">
+    <strong class="text-white">Ce site :</strong> Angular et Tailwind CSS, tous deux sous licence MIT, ainsi que
+    RxJS (Apache License 2.0) et tslib (0BSD).
+  </p>
+</article>

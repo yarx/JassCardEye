@@ -74,6 +74,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -169,9 +170,9 @@ private fun CardPicker(missing: List<String>, onPick: (String) -> Unit, onDismis
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(), containerColor = Color(0xFF1C1C1E)) {
         Box(Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
             TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.CenterStart)) {
-                Text("Abbrechen", style = JassType.body, color = JassColors.Green)
+                Text(stringResource(R.string.common_cancel), style = JassType.body, color = JassColors.Green)
             }
-            Text("Karte hinzufügen", style = JassType.headline, color = Color.White, modifier = Modifier.align(Alignment.Center))
+            Text(stringResource(R.string.scan_add_card), style = JassType.headline, color = Color.White, modifier = Modifier.align(Alignment.Center))
         }
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
@@ -345,15 +346,15 @@ private fun DeniedNotice() {
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Icon(Icons.Outlined.VideocamOff, contentDescription = null, tint = JassColors.Secondary, modifier = Modifier.size(40.dp))
-        Text("Kein Kamerazugriff", style = JassType.headline, color = Color.White)
-        Text("JassCardEye erkennt die oberste Karte über die Kamera. Ohne Zugriff kann nicht gezählt werden.",
+        Text(stringResource(R.string.scan_camera_denied), style = JassType.headline, color = Color.White)
+        Text(stringResource(R.string.scan_camera_denied_text),
             style = JassType.footnote, color = JassColors.Secondary, textAlign = TextAlign.Center)
         Button(
             onClick = {
                 context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", context.packageName, null)))
             },
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0A84FF), contentColor = Color.White),
-        ) { Text("Einstellungen öffnen", style = JassType.body) }
+        ) { Text(stringResource(R.string.scan_open_settings), style = JassType.body) }
     }
 }
 
@@ -385,15 +386,15 @@ private fun ScoreBar(model: LiveDetectionModel, onShowPicker: () -> Unit, onShow
             pointsCaption = myCaption(model, store.unlocked),
             opponentPoints = model.opponentPoints,
             cards = model.pile.size,
-            modeName = model.mode.displayName(model.deck),
+            modeName = stringResource(model.mode.displayName(model.deck)),
             modeSuit = model.mode.markSuit(model.deck),
-            note = model.lastTrick.note,
+            note = model.lastTrick.note?.let { stringResource(it, JassRules.LAST_TRICK_BONUS) },
             locked = !store.unlocked,
         )
 
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Capsule(enabled = model.pile.size < DeckLayout.COUNT, onClick = onShowPicker) {
-                Text("Karte fehlt?", style = JassType.callout, color = Color.White)
+                Text(stringResource(R.string.scan_missing_card), style = JassType.callout, color = Color.White)
             }
             // Keeps a picture of a situation the model got wrong. The count is lasting confirmation. Only with the
             // developer tools on.
@@ -409,7 +410,7 @@ private fun ScoreBar(model: LiveDetectionModel, onShowPicker: () -> Unit, onShow
                 Capsule(
                     onClick = model::toggleTorch,
                     background = if (model.torchOn) JassColors.Yellow else Color.White.copy(alpha = 0.18f),
-                    description = if (model.torchOn) "Licht ausschalten" else "Licht einschalten",
+                    description = stringResource(if (model.torchOn) R.string.scan_torch_off else R.string.scan_torch_on),
                 ) {
                     Icon(if (model.torchOn) Icons.Filled.FlashlightOn else Icons.Filled.FlashlightOff, contentDescription = null,
                         tint = if (model.torchOn) Color.Black else Color.White, modifier = Modifier.size(22.dp))
@@ -424,13 +425,13 @@ private fun ScoreBar(model: LiveDetectionModel, onShowPicker: () -> Unit, onShow
                     containerColor = Color.White.copy(alpha = 0.12f), contentColor = Color.White,
                     disabledContainerColor = Color.White.copy(alpha = 0.06f), disabledContentColor = Color.White.copy(alpha = 0.3f),
                 ),
-            ) { Text("Reset", style = JassType.callout) }
+            ) { Text(stringResource(R.string.scan_reset), style = JassType.callout) }
         }
 
         // The strip keeps its place from the start, so the first recognition does not push the controls upwards.
         Box(Modifier.fillMaxWidth().defaultMinSize(minHeight = ScanMetrics.stripHeight), contentAlignment = Alignment.CenterStart) {
             if (model.pile.isEmpty()) {
-                Text("Erkannte Karten erscheinen hier.", style = JassType.callout, color = Color.White.copy(alpha = 0.45f))
+                Text(stringResource(R.string.scan_empty), style = JassType.callout, color = Color.White.copy(alpha = 0.45f))
             } else {
                 val listState = rememberLazyListState()
                 // The list follows the newest card: during a count nobody wants to drag the strip along.
@@ -465,7 +466,7 @@ private fun ScoreBar(model: LiveDetectionModel, onShowPicker: () -> Unit, onShow
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(containerColor = JassColors.Green, contentColor = Color.White),
         ) {
-            Text("Fertig", style = JassType.headline, modifier = Modifier.padding(vertical = 4.dp))
+            Text(stringResource(R.string.common_done), style = JassType.headline, modifier = Modifier.padding(vertical = 4.dp))
         }
     }
 }
@@ -493,11 +494,13 @@ private fun Capsule(
  * The number is what gets written on the slate; when multiplier or bonuses are in play, this caption shows
  * where it comes from ("62 Karten +5 ×2").
  */
+@Composable
 private fun myCaption(model: LiveDetectionModel, unlocked: Boolean): String {
+    val mine = stringResource(R.string.score_mine)
     // In the demo the breakdown would give the points away. The factor stays: it was chosen at the start, not counted.
-    if (!unlocked) return if (model.multiplier > 1) "meine Punkte ×${model.multiplier}" else "meine Punkte"
-    if (model.bonusPoints == 0 && model.multiplier <= 1) return "meine Punkte"
-    val parts = mutableListOf("${model.cardPoints} Karten")
+    if (!unlocked) return if (model.multiplier > 1) stringResource(R.string.score_mine_factor, model.multiplier) else mine
+    if (model.bonusPoints == 0 && model.multiplier <= 1) return mine
+    val parts = mutableListOf(stringResource(R.string.score_card_points, model.cardPoints))
     if (model.bonusPoints > 0) parts += "+${model.bonusPoints}"
     if (model.multiplier > 1) parts += "×${model.multiplier}"
     return parts.joinToString(" ")

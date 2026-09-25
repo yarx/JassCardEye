@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.content.ContextWrapper
+import androidx.annotation.StringRes
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -128,7 +129,7 @@ class Store(application: Application) : AndroidViewModel(application), Purchases
         problem = null
         val result = client.launchBillingFlow(activity, BillingFlowParams.newBuilder().setProductDetailsParamsList(listOf(productParams)).build())
         purchasing = result.responseCode == BillingResponseCode.OK
-        if (!purchasing) problem = PURCHASE_FAILED
+        if (!purchasing) problem = text(R.string.purchase_failed)
     }
 
     override fun onPurchasesUpdated(result: BillingResult, purchases: MutableList<Purchase>?) {
@@ -136,7 +137,7 @@ class Store(application: Application) : AndroidViewModel(application), Purchases
         when (result.responseCode) {
             BillingResponseCode.OK, BillingResponseCode.ITEM_ALREADY_OWNED -> refresh()
             BillingResponseCode.USER_CANCELED -> {}
-            else -> problem = PURCHASE_FAILED
+            else -> problem = text(R.string.purchase_failed)
         }
     }
 
@@ -146,11 +147,11 @@ class Store(application: Application) : AndroidViewModel(application), Purchases
         val params = QueryPurchasesParams.newBuilder().setProductType(ProductType.INAPP).build()
         client.queryPurchasesAsync(params) { result, purchases ->
             if (result.responseCode != BillingResponseCode.OK) {
-                problem = "Die Käufe konnten gerade nicht abgefragt werden."
+                problem = text(R.string.purchase_query_failed)
                 return@queryPurchasesAsync
             }
             apply(purchases)
-            if (!unlocked) problem = "Mit diesem Google-Konto ist kein Kauf vorhanden."
+            if (!unlocked) problem = text(R.string.purchase_nothing_to_restore_android)
         }
     }
 
@@ -173,9 +174,10 @@ class Store(application: Application) : AndroidViewModel(application), Purchases
         client.endConnection()
     }
 
+    private fun text(@StringRes id: Int): String = getApplication<Application>().getString(id)
+
     companion object {
         const val PRODUCT_ID = "ch.yarx.jasscardeye.counting"
-        private const val PURCHASE_FAILED = "Der Kauf ist nicht zustande gekommen. Bitte versuche es später nochmals."
     }
 }
 
