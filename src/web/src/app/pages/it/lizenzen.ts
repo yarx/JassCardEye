@@ -13,7 +13,7 @@ export class Lizenzen {
     { name: 'Picche', file: 'Schaufel_Neu.svg', author: 'Jensche', licence: 'CC BY-SA 4.0' },
     { name: 'Ghiande', file: 'Eichel_Neu.svg', author: 'Jensche', licence: 'CC BY-SA 4.0' },
     { name: 'Rose', file: 'Rosen_Neu.svg', author: 'Jensche', licence: 'CC BY-SA 4.0' },
-    { name: 'Sonagli', file: 'Schellen_Neu.svg', author: 'Jensche', licence: 'CC BY-SA 4.0' },
+    { name: 'Campanelle', file: 'Schellen_Neu.svg', author: 'Jensche', licence: 'CC BY-SA 4.0' },
     { name: 'Scudi', file: 'Schilten_Neu.svg', author: 'Jensche', licence: 'CC BY-SA 4.0' },
   ];
 

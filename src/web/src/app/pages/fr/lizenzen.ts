@@ -14,7 +14,7 @@ export class Lizenzen {
     { name: 'Glands', file: 'Eichel_Neu.svg', author: 'Jensche', licence: 'CC BY-SA 4.0' },
     { name: 'Roses', file: 'Rosen_Neu.svg', author: 'Jensche', licence: 'CC BY-SA 4.0' },
     { name: 'Grelots', file: 'Schellen_Neu.svg', author: 'Jensche', licence: 'CC BY-SA 4.0' },
-    { name: 'Écus', file: 'Schilten_Neu.svg', author: 'Jensche', licence: 'CC BY-SA 4.0' },
+    { name: 'Écussons', file: 'Schilten_Neu.svg', author: 'Jensche', licence: 'CC BY-SA 4.0' },
   ];
 
   protected commonsPage(file: string): string {

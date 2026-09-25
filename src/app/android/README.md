@@ -224,6 +224,14 @@ An emulator without a Google account runs the demo, so the points come out blurr
 screenshots differ from that: they show readable points and, with all four models bundled, the
 *Erkennungsmodell* section; taking them again is open (`store/listing.md`).
 
+**Another language** is the same run with the app set to it first, and the images in a folder of that
+language (`store/screenshots/fr/`), the German ones staying where they are:
+
+```bash
+adb shell cmd locale set-app-locales ch.yarx.jasscardeye --locales fr-CH   # it-CH, en-GB
+adb shell cmd locale set-app-locales ch.yarx.jasscardeye --locales ""       # back to the system's language
+```
+
 ## Demo and purchase
 
 The demo shows the counted points blurred; one purchase makes them readable. On Android:

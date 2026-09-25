@@ -41,12 +41,16 @@ The website is translated separately, page by page - see "Languages" in `src/web
 
 ## Status
 
-| Language | Jass vocabulary checked by a player |
-|---|---|
-| German | yes - the source |
-| French | not yet |
-| Italian | not yet |
-| English | not yet |
+| Language | Vocabulary held against the published rules | Checked by a player |
+|---|---|---|
+| German | the source | yes |
+| French | [Swisslos, «Les règles du Jass»](https://www.swisslos.ch/fr/jass/informations/les-regles-du-jass/bases-du-jass.html) (*jeu français*, *jeu allemand*, *atout*, *dernier pli*, *Obenabe*, *Undenufe*, *grelot*, *écusson*); *Bour* and *Nell* as the Romandie says them | not yet |
+| Italian | [Swisslos, «Regole dello jass»](https://www.swisslos.ch/it/jass/informazioni/regole-dello-jass/nozioni-di-base-dello-jass.html) (*mazzo francese*, *mazzo tedesco*, *briscola*, *presa*, *ultima presa*, *dall'alto*, *dal basso*); the Swiss suits after the [Circolo Svizzero](https://www.svizzeri.ch/2021/01/31/le-36-carte-per-giocare-a-jass/) (*Ghiande*, *Rose*, *Campanelle*, *Scudi*) | not yet |
+| English | [pagat.com, Schieber](https://www.pagat.com/jass/schieber.html) (*Acorns*, *Bells*, *Shields*, *Obenabe*, *Undenufe*, *last trick*) | not yet |
 
 A language counts as checked once a person who plays Jass in it has gone through the vocabulary in
-`keys.md` and the website's guide; this table then says so.
+`keys.md` and the website's guide; this table then says so. Until then the words are the published
+ones where a source names them, and a careful choice where none does: the Italian hint names the trump
+nine *nove* because no Italian source calls it *Nell*, and the French one keeps *Obenabe* and
+*Undenufe* as Swisslos does, although older Romandie players also say *de haut en bas* and *de bas en
+haut*.

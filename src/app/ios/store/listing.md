@@ -41,6 +41,80 @@ Die Schlüsselwörter belegen 99 der 100 Zeichen.
 > • Falsch erkannte Karte antippen und entfernen
 > • Erkennung direkt auf dem iPhone, ohne Internet
 
+## Weitere Sprachen
+
+Die App spricht Deutsch, Französisch, Italienisch und Englisch (`l10n/`), und App Store Connect listet
+die Sprachen aus dem Build. Die Produktseite ist heute nur auf Deutsch eingetragen; für jede weitere
+Sprache kommt unter *App-Informationen → Lokalisierung* eine Lokalisierung dazu, mit den Texten unten.
+Name, URLs und Copyright bleiben gleich. Die Jassbegriffe folgen `l10n/<Sprache>.json`; welche davon ein
+jassender Mensch schon geprüft hat, steht in `l10n/README.md`.
+
+### Französisch
+
+| Feld | Inhalt |
+|---|---|
+| Lokalisierung | Französisch (fr-FR) |
+| Untertitel (max. 30) | Compter les points du Jass |
+| Werbetext (max. 170) | Après le Jass, plus besoin de compter le tas à la main : pose les cartes devant la caméra, JassCardEye fait le total des points. |
+| Schlüsselwörter (max. 100) | Jass,chibre,cartes,points,compter,atout,Obenabe,Undenufe,Slalom,Guschti,Suisse,jeu de cartes |
+| In-App-Kauf: Anzeigename / Beschreibung | Compter les points / Rend lisibles les points comptés. |
+| TestFlight: Beta-App-Beschreibung | JassCardEye compte les points après le Jass. Pose les cartes l’une après l’autre devant la caméra, l’app reconnaît la carte du dessus et fait le total au fur et à mesure. |
+| Screenshots | `store/screenshots/6.5/fr/*.png`, sobald aufgenommen (siehe «Screenshots»); bis dahin die deutschen |
+
+**Beschreibung:**
+
+> JassCardEye compte les points après le Jass. Pose les cartes l’une après l’autre devant la caméra, l’app reconnaît la carte du dessus et fait le total au fur et à mesure.
+>
+> • Jeu français et jeu suisse allemand
+> • Atout dans chaque couleur, Obenabe, Undenufe, Slalom et Guschti
+> • Dernier pli et facteur ×1 à ×8
+> • Toucher une carte mal reconnue pour la retirer
+> • Reconnaissance directement sur l’iPhone, sans Internet
+
+### Italienisch
+
+| Feld | Inhalt |
+|---|---|
+| Lokalisierung | Italienisch (it) |
+| Untertitel (max. 30) | Contare i punti del Jass |
+| Werbetext (max. 170) | Dopo il Jass, basta contare il mazzetto a mano: posa le carte davanti alla fotocamera, JassCardEye fa il totale dei punti. |
+| Schlüsselwörter (max. 100) | Jass,carte,punti,contare,briscola,Obenabe,Undenufe,Slalom,Guschti,Svizzera,Ticino,gioco di carte |
+| In-App-Kauf: Anzeigename / Beschreibung | Contare i punti / Rende leggibili i punti contati. |
+| TestFlight: Beta-App-Beschreibung | JassCardEye conta i punti dopo il Jass. Posa le carte una dopo l’altra davanti alla fotocamera, l’app riconosce la carta in cima e fa il totale man mano. |
+| Screenshots | `store/screenshots/6.5/it/*.png`, sobald aufgenommen (siehe «Screenshots»); bis dahin die deutschen |
+
+**Beschreibung:**
+
+> JassCardEye conta i punti dopo il Jass. Posa le carte una dopo l’altra davanti alla fotocamera, l’app riconosce la carta in cima e fa il totale man mano.
+>
+> • Mazzo francese e mazzo svizzero tedesco
+> • Briscola in ogni seme, Obenabe, Undenufe, Slalom e Guschti
+> • Ultima presa e fattore da ×1 a ×8
+> • Toccare una carta riconosciuta male per toglierla
+> • Riconoscimento direttamente sull’iPhone, senza Internet
+
+### Englisch
+
+| Feld | Inhalt |
+|---|---|
+| Lokalisierung | Englisch (Vereinigtes Königreich) (en-GB) |
+| Untertitel (max. 30) | Count Jass points by camera |
+| Werbetext (max. 170) | No more counting the pile by hand after a game of Jass: lay the cards in front of the camera, JassCardEye adds up the points. |
+| Schlüsselwörter (max. 100) | Jass,Schieber,cards,points,count,score,trump,Obenabe,Undenufe,Slalom,Guschti,Swiss,card game |
+| In-App-Kauf: Anzeigename / Beschreibung | Count points / Makes the counted points readable. |
+| TestFlight: Beta-App-Beschreibung | JassCardEye counts the points after a game of Jass. Lay the cards down one by one in front of the camera, the app recognises the top card and keeps adding up. |
+| Screenshots | `store/screenshots/6.5/en/*.png`, sobald aufgenommen (siehe «Screenshots»); bis dahin die deutschen |
+
+**Beschreibung:**
+
+> JassCardEye counts the points after a game of Jass. Lay the cards down one by one in front of the camera, the app recognises the top card and keeps adding up.
+>
+> • French and Swiss German deck
+> • Trump in every suit, Obenabe, Undenufe, Slalom and Guschti
+> • Last trick and factor ×1 to ×8
+> • Tap a wrongly recognised card to remove it
+> • Recognition right on the iPhone, without internet
+
 ## App-Informationen
 
 | Feld | Inhalt |
@@ -77,7 +151,7 @@ eigenen Netzwerkcode, nur StoreKit fragt beim App Store nach, und die Zahlung wi
 | Preis | CHF 5, Basis Schweiz |
 | Verfügbarkeit | 175 Länder und Regionen |
 | Familienfreigabe | an |
-| Lokalisierung | Deutsch |
+| Lokalisierung | Deutsch; Französisch, Italienisch und Englisch siehe «Weitere Sprachen» |
 | Prüfung | Screenshot für die Prüfung hochgeladen; mit Version 1.0.0 eingereicht |
 
 ## App-Prüfung
@@ -170,3 +244,16 @@ der ausgelieferten App an.
 
 In App Store Connect werden die Dateien von Hand ins 6,5"-Feld gezogen; ein Upload per Skript geht
 dort nicht.
+
+### Je Sprache
+
+Derselbe Ablauf für jede weitere Sprache, mit der Sprache beim Start und einem Unterordner je Sprache
+(`6.9/fr/`, `6.5/fr/` …); die deutschen Bilder bleiben, wo sie sind. Im Schritt 3 kommt die Sprache dazu:
+
+```bash
+SIMCTL_CHILD_JASSCARDEYE_SCREENSHOTS=1 SIMCTL_CHILD_JASSCARDEYE_VIDEO=/Pfad/zum/Testvideo.mov \
+    xcrun simctl launch --terminate-running-process <udid> ch.yarx.JassCardEye -AppleLanguages "(fr)" -AppleLocale fr_CH
+```
+
+Die Knöpfe heissen dann so, wie `l10n/<Sprache>.json` sie nennt («Commencer à compter», «Inizia a
+contare», «Start counting»). Aufgenommen ist noch keine weitere Sprache.
