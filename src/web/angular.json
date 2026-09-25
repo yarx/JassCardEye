@@ -12,6 +12,9 @@
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
+      "i18n": {
+        "sourceLocale": { "code": "de", "subPath": "de" }
+      },
       "architect": {
         "build": {
           "builder": "@angular/build:application",
@@ -26,7 +29,8 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.css"]
+            "styles": ["src/styles.css"],
+            "polyfills": ["@angular/localize/init"]
           },
           "configurations": {
             "production": {
@@ -37,7 +41,8 @@
                   "maximumError": "1MB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "localize": true
             },
             "development": {
               "optimization": false,

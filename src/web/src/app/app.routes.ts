@@ -8,11 +8,11 @@ import { Lizenzen } from './pages/lizenzen';
 import { Support } from './pages/support';
 
 export const routes: Routes = [
-  { path: '', component: Home, title: 'JassCardEye – Jasspunkte zählen per Kamera' },
-  { path: 'anleitung', component: Anleitung, title: 'Anleitung – JassCardEye' },
-  { path: 'support', component: Support, title: 'Support und Kontakt – JassCardEye' },
-  { path: 'datenschutz', component: Datenschutz, title: 'Datenschutz – JassCardEye' },
-  { path: 'impressum', component: Impressum, title: 'Impressum – JassCardEye' },
-  { path: 'lizenzen', component: Lizenzen, title: 'Lizenzen und Bildnachweis – JassCardEye' },
+  { path: '', component: Home, title: $localize`:@@title.home:JassCardEye – Jasspunkte zählen per Kamera` },
+  { path: 'anleitung', component: Anleitung, title: $localize`:@@title.guide:Anleitung – JassCardEye` },
+  { path: 'support', component: Support, title: $localize`:@@title.support:Support und Kontakt – JassCardEye` },
+  { path: 'datenschutz', component: Datenschutz, title: $localize`:@@title.privacy:Datenschutz – JassCardEye` },
+  { path: 'impressum', component: Impressum, title: $localize`:@@title.imprint:Impressum – JassCardEye` },
+  { path: 'lizenzen', component: Lizenzen, title: $localize`:@@title.licences:Lizenzen und Bildnachweis – JassCardEye` },
   { path: '**', redirectTo: '' },
 ];

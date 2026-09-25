@@ -1,16 +1,18 @@
 # Website (src/web)
 
-The public website of JassCardEye, in German: https://jasscardeye.yarx.ch
+The public website of JassCardEye: https://jasscardeye.yarx.ch
 
 It exists because both stores want a support page and a privacy policy on the web before they review an
-app, and because a player or a reviewer should find the manual without installing anything. Six pages:
-Start (`/`), Anleitung (`/anleitung`), Support (`/support`), Datenschutz (`/datenschutz`), Impressum
-(`/impressum`) and Lizenzen (`/lizenzen`).
+app, and because a player or a reviewer should find the manual without installing anything. Six pages per
+language: Start (`/de`), Anleitung (`/de/anleitung`), Support (`/de/support`), Datenschutz
+(`/de/datenschutz`), Impressum (`/de/impressum`) and Lizenzen (`/de/lizenzen`). German is the only
+language so far; see "Languages".
 
 ## Three URLs that must never change
 
 These addresses are entered in App Store Connect and in the Play Console. A renamed route breaks the store
-entry, and nothing warns about it until a reviewer or a player follows the link.
+entry, and nothing warns about it until a reviewer or a player follows the link. They carry no language:
+each is a redirect page that sends the visitor on to the page in their language (see "Languages").
 
 - `https://jasscardeye.yarx.ch` - marketing URL in the App Store and TestFlight, website in Google Play
 - `https://jasscardeye.yarx.ch/support` - support URL in the App Store
@@ -33,15 +35,16 @@ repeats - features, scan rules, questions, credits.
 ```bash
 cd src/web
 npm ci          # the exact versions in package-lock.json
-npm start       # development server with reload on http://localhost:4200
-npm run build   # production build, every page prerendered
+npm start       # development server with reload on http://localhost:4200, German, without a language path
+npm run build   # production build: every page of every language prerendered, then the root
 ```
 
 CI builds with Node 22. The Angular 22 build tools accept Node 22.22.3 or a later 22.x, 24.15.0 or a later
 24.x, and 26 or newer.
 
-`dist/jasscardeye-web/browser/` is exactly what gets published: one `index.html` per page
-(`anleitung/index.html`, ...), the script and stylesheet bundles, and everything from `public/`. Next to it,
+`dist/jasscardeye-web/browser/` is exactly what gets published: one folder per language (`de/`) with one
+`index.html` per page (`de/anleitung/index.html`, ...), the script and stylesheet bundles and everything
+from `public/`, and above them the redirect pages and `staticwebapp.config.json`. Next to it,
 `dist/jasscardeye-web/3rdpartylicenses.txt` lists the licences of the libraries in the bundle. That file is
 not published, but it is where the «Diese Webseite» line on the Lizenzen page comes from.
 
@@ -58,11 +61,13 @@ so a tap made while the script loads is not lost. From there, a link switches th
 ## Adding a page
 
 1. `src/app/pages/<name>.ts` and `<name>.html`, named after the German route like the other pages.
-2. A route in `src/app/app.routes.ts`, with a title of the form `<Seite> – JassCardEye`.
-3. A link: the header navigation is `navLinks` in `src/app/app.ts`, and the footer lists its links in
-   `src/app/app.html`.
+2. A route in `src/app/app.routes.ts`, with a title of the form `<Seite> – JassCardEye` as a message with
+   its own id: `` $localize`:@@title.<name>:<Seite> – JassCardEye` ``.
+3. A link: the header navigation is `navLinks` in `src/app/app.ts`, and the footer names the same pages
+   and Lizenzen (`footerLinks`).
 
-Nothing else - the prerender picks up every route by itself. The catch-all route sends an unknown path to
+Nothing else - the prerender picks up every route by itself, and the build gives the new page its redirect
+page at the root and its `hreflang` links. The catch-all route sends an unknown path to
 the start page.
 
 ## Deploy
@@ -84,14 +89,37 @@ app as a custom domain; Azure issues and renews the certificate.
 
 ## Azure configuration
 
-`public/staticwebapp.config.json` lands in the output with the other public files, and Azure reads it:
+`staticwebapp.config.json` is copied to the root of the output by `scripts/site-root.mjs` - Azure reads it
+only there, and `public/` lands in every language folder instead. It says:
 
-- `trailingSlash: "never"` - `/anleitung/` redirects to `/anleitung`, so every page has one address.
-- `navigationFallback` - a path that matches no file is answered with `/index.html`, the prerendered start
-  page, with status 200, and the client router then moves to `/`. There is no 404 page. Images, scripts,
-  stylesheets and the other listed file types are excluded, so a missing asset still fails with a 404.
+- `trailingSlash: "never"` - `/de/anleitung/` redirects to `/de/anleitung`, so every page has one address.
+- `navigationFallback` - a path that matches no file is answered with `/index.html`, the redirect page of
+  the root, with status 200, which sends the visitor to the start page in their language. There is no 404
+  page. The screenshots, images, scripts, stylesheets and the other listed file types are excluded, so a
+  missing asset still fails with a 404.
+
+The local emulator of the Static Web Apps CLI adds a slash to a folder instead of honouring
+`trailingSlash`, so a check with it is a check of the redirects, not of the addresses.
 - Two headers on every response: `X-Content-Type-Options: nosniff` and
   `Referrer-Policy: strict-origin-when-cross-origin`.
+
+## Languages
+
+The site is built with Angular's own localisation, `@angular/localize`: `i18n` in `angular.json` names the
+languages, the source locale German first, and the production build (`localize: true`) prerenders a complete
+site per language into its own folder, each with its `<base href>` and `lang`. The development server builds
+the source language only.
+
+- **The pages are prose, written per language** as a whole page. Only navigation, titles, the footer and the
+  menu button are messages, marked with a stable id like the keys of the apps: `i18n="@@nav.menu"` in a
+  template, `` $localize`:@@nav.guide:Anleitung` `` in code.
+- **`scripts/site-root.mjs`** runs after `ng build` and writes what lies above the languages: a redirect page
+  at the root and at every page's address without a language (`/datenschutz`), which picks the first of the
+  browser's languages the site has - Swiss German counting as German - and German when it has none; with
+  JavaScript off it refreshes to the German page. It adds `hreflang` links for every language and the
+  `x-default` address to every page, and copies `staticwebapp.config.json`. Languages and pages come from
+  `angular.json` and the German build, and a language missing a page stops the build.
+- A language switcher in the header comes with the second language.
 
 ## Writing the pages
 

@@ -23,6 +23,7 @@
         (click)="toggleMenu()"
         class="rounded-lg p-2 text-zinc-200 hover:bg-panel sm:hidden"
         aria-label="Menü öffnen oder schliessen"
+        i18n-aria-label="@@nav.menu"
         [attr.aria-expanded]="menuOpen()"
       >
         @if (menuOpen()) {
@@ -61,11 +62,9 @@
     <div class="mx-auto flex max-w-5xl flex-col gap-4 px-4 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
       <p>© {{ year }} YARX GmbH</p>
       <nav class="flex flex-wrap gap-x-5 gap-y-2">
-        <a routerLink="/anleitung" class="hover:text-white">Anleitung</a>
-        <a routerLink="/support" class="hover:text-white">Support</a>
-        <a routerLink="/datenschutz" class="hover:text-white">Datenschutz</a>
-        <a routerLink="/impressum" class="hover:text-white">Impressum</a>
-        <a routerLink="/lizenzen" class="hover:text-white">Lizenzen</a>
+        @for (link of footerLinks; track link.path) {
+          <a [routerLink]="link.path" class="hover:text-white">{{ link.label }}</a>
+        }
       </nav>
     </div>
   </footer>
