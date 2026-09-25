@@ -70,6 +70,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -115,6 +116,15 @@ fun ScanScreen(model: LiveDetectionModel, onFinish: (CountResult) -> Unit) {
         if (model.hasCameraPermission()) model.start(owner) else permission.launch(Manifest.permission.CAMERA)
     }
     DisposableEffect(Unit) { onDispose { model.stop() } }
+
+    // The screen stays on for as long as a count runs: nobody touches the phone while cards are laid down, and a
+    // display that dims or locks halfway through interrupts the scan. The flag belongs to the view the session is
+    // drawn in, so it is cleared the moment the session closes and the system setting applies again.
+    val view = LocalView.current
+    DisposableEffect(view) {
+        view.keepScreenOn = true
+        onDispose { view.keepScreenOn = false }
+    }
 
     val finish = { onFinish(model.finishCounting()) }
     // The system back gesture closes the session the way "Fertig" does - iOS has no back, only "Fertig".
