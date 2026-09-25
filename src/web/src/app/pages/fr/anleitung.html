@@ -1,0 +1,43 @@
+<article class="mx-auto max-w-3xl px-4 py-12">
+  <h1 class="text-4xl font-extrabold tracking-tight">Mode d’emploi</h1>
+  <p class="mt-4 text-lg leading-relaxed text-zinc-300">
+    On compte après la partie : les cartes qu’une équipe a gagnées sont posées l’une après l’autre sur un tas
+    devant la caméra. L’app reconnaît chaque fois la carte du dessus et fait le compte.
+  </p>
+
+  <h2 class="mt-12 text-2xl font-bold">Un comptage</h2>
+  <ol class="mt-4 list-decimal space-y-3 pl-6 leading-relaxed text-zinc-300 marker:text-jass">
+    <li>Toucher <strong class="text-white">Commencer à compter</strong>.</li>
+    <li>Choisir le jeu, la variante, le dernier pli et le facteur – après la partie, chaque équipe les connaît – et toucher encore une fois <strong class="text-white">Commencer à compter</strong>.</li>
+    <li>Poser les cartes l’une après l’autre sur le tas. L’app confirme chaque carte comptée par un bref son et une vibration. Son et vibration se règlent ou se désactivent dans les réglages, sous «Retour tactile et sonore».</li>
+    <li>Tes points sont à gauche, ceux des adversaires à droite. <strong class="text-white">Terminé</strong> met fin au comptage, et le résultat reste sur l’écran d’accueil jusqu’au prochain comptage.</li>
+  </ol>
+
+  <h2 class="mt-12 text-2xl font-bold">Pour que le scan marche</h2>
+  <div class="mt-4 grid gap-4 sm:grid-cols-2">
+    @for (rule of rules; track rule.title) {
+      <div class="rounded-2xl bg-panel p-5 ring-1 ring-line">
+        <h3 class="font-semibold text-jass">{{ rule.title }}</h3>
+        <p class="mt-2 text-sm leading-relaxed text-zinc-300">{{ rule.text }}</p>
+      </div>
+    }
+  </div>
+
+  <h2 class="mt-12 text-2xl font-bold">Corriger</h2>
+  <ul class="mt-4 list-disc space-y-3 pl-6 leading-relaxed text-zinc-300 marker:text-jass">
+    <li>Mal reconnue ? Toucher la carte dans la liste en bas – elle est retirée du comptage.</li>
+    <li><strong class="text-white">Carte manquante ?</strong> Ce bouton ajoute une carte à la main, par exemple une carte posée très à plat.</li>
+    <li><strong class="text-white">Reset</strong> vide le tas et recommence depuis le début.</li>
+  </ul>
+
+  <h2 class="mt-12 text-2xl font-bold">Les cartes que l’app connaît</h2>
+  <ul class="mt-4 space-y-3 leading-relaxed text-zinc-300">
+    <li><strong class="text-white">Français :</strong> les cartes de Jass suisses aux couleurs françaises d’AGMüller (Neuhausen) – Trèfle, Carreau, Cœur, Pique.</li>
+    <li><strong class="text-white">Allemand :</strong> les cartes de Schaffhouse «Opti-Quatro» d’AGMüller – Glands, Grelots, Roses, Écus.</li>
+  </ul>
+  <p class="mt-4 leading-relaxed text-zinc-300">
+    D’autres motifs – même d’autres fabricants avec les mêmes couleurs – ne sont pas reconnus de façon fiable.
+    Vous jouez avec un autre jeu ? <a routerLink="/support" class="font-semibold text-jass underline">Écrivez-nous</a> :
+    avec des photos des 36 cartes, la reconnaissance peut être entraînée dessus.
+  </p>
+</article>

@@ -144,8 +144,10 @@ Text(String(localized: "scan.missing_card", defaultValue: "Karte fehlt?"))
 The default is what a reader of the code sees and what the app would show for a key the catalog lacks;
 `python3 src/tools/l10n.py` from the repository root holds it to `de.json`, checks that every key is
 used, and runs in CI. A number interpolated into the default fills the catalog's `%1$lld`, a text its
-`%1$@`, in the order they appear. German is the development language and, for now, the one language
-the app ships. The developer tools (*Bild*, *Session aufzeichnen*), the model picker a release never
+`%1$@`, in the order they appear. German is the development language; every file in `l10n/` becomes a
+language of the catalog and an `.lproj` of the bundle, which is what iOS offers in the app's settings
+and what App Store Connect lists. A phone set to any other language sees German. To try a language in
+the simulator: `xcrun simctl launch booted ch.yarx.JassCardEye -AppleLanguages "(fr)"`. The developer tools (*Bild*, *Session aufzeichnen*), the model picker a release never
 shows and the notes of a build without a model stay inline German: no user sees them.
 
 The Info.plist still carries the German app name and camera question from `project.yml`, because a

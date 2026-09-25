@@ -91,6 +91,8 @@ abstract class GenerateStrings @Inject constructor(private val exec: ExecOperati
         exec.exec { commandLine("python3", generator.get().asFile.path, "--android", outputDir.get().asFile.path) }
     }
 }
+val appLanguages = rootProject.file("../../../l10n").listFiles { file -> file.extension == "json" }!!
+    .map { it.nameWithoutExtension }.sorted()
 val generateStrings = tasks.register<GenerateStrings>("generateStrings") {
     description = "Writes the app's strings.xml from l10n/*.json."
     texts.set(rootProject.file("../../../l10n"))
@@ -161,9 +163,13 @@ android {
     androidResources {
         // Memory-mapped straight out of the APK; a compressed model would have to be copied first.
         noCompress += "tflite"
-        // The languages the app speaks - those of l10n/. Also keeps the libraries' own texts to them, so a
-        // system dialog inside the app does not answer in a language the app itself does not know.
-        localeFilters += listOf("de")
+        // The languages the app speaks: one per file in l10n/, so a new language needs nothing here. Also keeps
+        // the libraries' own texts to them, so a system dialog inside the app does not answer in a language the
+        // app itself does not know.
+        localeFilters += appLanguages
+        // Offers the app's languages in the system settings (Android 13 and later), where each app can be given
+        // its own; src/main/res/resources.properties names German as the language of the unqualified values/.
+        generateLocaleConfig = true
     }
 
     compileOptions {

@@ -1,0 +1,19 @@
+{
+  "locale": "en",
+  "translations": {
+    "nav.menu": "Open or close the menu",
+    "nav.language": "Language",
+    "title.home": "JassCardEye – Count Jass points with the camera",
+    "title.guide": "Guide – JassCardEye",
+    "title.support": "Support and contact – JassCardEye",
+    "title.privacy": "Privacy – JassCardEye",
+    "title.imprint": "Imprint – JassCardEye",
+    "title.licences": "Licences and image credits – JassCardEye",
+    "nav.guide": "Guide",
+    "nav.support": "Support",
+    "nav.privacy": "Privacy",
+    "nav.imprint": "Imprint",
+    "nav.licences": "Licences",
+    "meta.description": "JassCardEye counts the points after a game of Jass: lay the cards down one by one in front of the camera, the app recognises the top card and keeps adding up."
+  }
+}

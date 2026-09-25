@@ -6,24 +6,30 @@ them in the same change. The working rules for AI agents are in the root `CLAUDE
 
 ## Language and user-facing text
 
-- **English** for code, identifiers, comments, commit messages, READMEs and `context/`. German
-  exceptions: `src/web/privacy.md` (published), the store notes `src/app/*/store/listing.md`
-  (they mirror the consoles) and the thesis in `doc/`.
-- **German for everything a user reads**: the apps, the website, the privacy policy, store texts and
-  the training notifications. Swiss spelling - never "ß", always "ss" (*Schliessen*, *ausser*).
-- The user is addressed with **du** (a group with *ihr*), never *Sie*.
-- A label quoted inside a sentence goes in **« »**. Typography: the multiplication sign `×` (×1…×8,
+- **English** for code, identifiers, comments, commit messages, READMEs and `context/`. Exceptions:
+  the published privacy policy `src/web/privacy*.md`, the German store notes
+  `src/app/*/store/listing.md` (they mirror the consoles) and the thesis in `doc/`.
+- **What a user reads comes in four languages**: the apps and the website speak German, French,
+  Italian and English, with German as the source every other language is translated from, and any
+  other language showing German. The store texts and the training notifications are German. German
+  is written the Swiss way - never "ß", always "ss" (*Schliessen*, *ausser*).
+- The user is addressed informally, never formally: **du** (a group with *ihr*), *tu* (*vous* for a
+  group), *tu* (*voi*), *you*.
+- **Jass words are vocabulary**: suits, decks, ranks and disciplines in French, Italian and English are
+  what players at a table say, checked by a person who plays Jass in that language; `l10n/README.md`
+  records which languages have been.
+- A label quoted inside a sentence goes in **« »** (in English “ ”). Typography: the multiplication sign `×` (×1…×8,
   "Normal (1×)"), the decimal comma ("0,5×"), an ellipsis after a space ("Preis wird geladen …").
   Dashes are not unified: the apps mix " - " and " – "; the website uses " – ".
 - On screen the ranks are *Under*, *Ober*, *König*, *Ass* for both decks; suit and trump names follow
   the deck in play (*Herz* on the French deck, *Rosen* on the German one).
-- **Every text a user reads in the apps is a key** in `l10n/de.json`, with a line of context in
-  `l10n/keys.md`, and both apps are built from that file by `src/tools/l10n.py`. Keys name the place,
+- **Every text a user reads in the apps is a key** in `l10n/de.json`, translated in `l10n/<language>.json`,
+  with a line of context in `l10n/keys.md`, and both apps are built from these files by
+  `src/tools/l10n.py`. Keys name the place,
   not the words (`scan.missing_card`); a key ending in `.ios` or `.android` belongs to that app only,
   because the stores and systems are named differently. Swift writes
   `String(localized: "<key>", defaultValue: "<German>")`, Kotlin `stringResource(R.string.<key_with_underscores>)`;
-  plurals are entries with `one` and `other`, never a condition in the code. German is the source and,
-  for now, the only language shipped. Not keys: the developer tools, the model picker a release never
+  plurals are entries with a form per plural category, never a condition in the code. Not keys: the developer tools, the model picker a release never
   shows, the notes of a build without a model, and every machine format (the recognition log, the
   session info, file names, the model's class tokens).
 - Full sentences end with a period; labels, captions and button titles do not. Sheet vocabulary is
@@ -164,8 +170,11 @@ them in the same change. The working rules for AI agents are in the root `CLAUDE
   files by path; no line numbers, which go stale at the next commit. No history: a document describes
   the project as it is, and says why where that helps.
 - **Sync points** - a change on one side updates the other in the same change:
-  - `src/web/privacy.md` ↔ `src/web/src/app/pages/datenschutz.html` ↔ the privacy text on the *Über*
-    page of both apps (`about.privacy_text` in `l10n/de.json`)
+  - `src/web/privacy.md` ↔ `src/web/src/app/pages/de/datenschutz.html` ↔ the privacy text on the *Über*
+    page of both apps (`about.privacy_text` in `l10n/de.json`) - and the same three in every other
+    language (`privacy.<language>.md`, `pages/<language>/`, `l10n/<language>.json`)
+  - a page of the website ↔ the same page in the other languages
+  - a text in `l10n/de.json` ↔ every other file in `l10n/`
   - the *Über* page of both apps ↔ the website's licence page
   - the store descriptions (`src/app/*/store/listing.md`) ↔ the website's home and support pages
   - the scan rules on the website's *Anleitung* ↔ the training data (`context/architecture/data-pipeline.md`)

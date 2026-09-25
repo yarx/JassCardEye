@@ -8,8 +8,9 @@
 name: JassCardEye
 options:
   bundleIdPrefix: ch.yarx
-  # The texts are German first: German is the development language, and the String Catalogs are
-  # written from l10n/*.json before every generation - see l10n/keys.md. Generated, like the project.
+  # The texts: German is the development language, and the String Catalogs are written from
+  # l10n/*.json before every generation, one language per file - see l10n/README.md. Generated, like
+  # the project.
   developmentLanguage: de
   preGenCommand: python3 ../../tools/l10n.py --ios .
   deploymentTarget:

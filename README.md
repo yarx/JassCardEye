@@ -34,7 +34,7 @@ alike. Each part of the code has its own README for the details.
   scripts of both apps. [Training pipeline](src/training/pipeline.md)
 - **`src/tools`** - checks (scoring, pile, dataset, run plan, pod sweep, app texts) and the generators of
   the icons, the tick sound and the apps' string resources.
-- **`l10n`** - the texts of both apps, one file per language, German first. [Keys](l10n/keys.md)
+- **`l10n`** - the texts of both apps, one file per language, German as the source. [README](l10n/README.md)
 - **`src/web`** - the website: Angular, every page prerendered. [README](src/web/README.md)
 - **`data/cards`** - the 72 card scans the training images are rendered from, 36 per deck.
 - **`data/real/val`** - labelled real photos and video frames: the validation set.

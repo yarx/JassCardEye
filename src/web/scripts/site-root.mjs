@@ -16,7 +16,8 @@
 //
 // The languages come from angular.json (source locale first, as the fallback) and the pages from the
 // folders of the German build, so a new language or a new page needs nothing here. A language that
-// lacks a page of the German build stops the build.
+// lacks a page of the German build stops the build, and so does a language switcher that does not offer
+// exactly the languages built.
 
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -51,6 +52,16 @@ function pagesOf(language) {
     .filter((entry) => entry.isDirectory() && existsSync(join(folder, entry.name, 'index.html')))
     .map((entry) => entry.name);
   return ['', ...pages.sort()];
+}
+
+// Every translation carries exactly the messages of the source (src/locale/messages.json, written by
+// `ng extract-i18n`). The build already stops on a missing one; this also catches one that is left over.
+const messages = Object.keys(JSON.parse(readFileSync(join(web, 'src/locale/messages.json'), 'utf8')).translations);
+for (const [code, locale] of Object.entries(i18n.locales ?? {})) {
+  const file = typeof locale === 'string' ? locale : locale.translation;
+  const keys = Object.keys(JSON.parse(readFileSync(join(web, file), 'utf8')).translations);
+  const stale = keys.filter((key) => !messages.includes(key));
+  if (stale.length) fail(`${file} has messages the site no longer uses: ${stale.join(', ')}`);
 }
 
 const pages = pagesOf(languages[0]);
@@ -105,7 +116,12 @@ for (const page of pages) {
   for (const language of languages) {
     const file = join(browser, language, page, 'index.html');
     const html = readFileSync(file, 'utf8');
-    if (html.includes('hreflang=')) fail(`${file} already carries hreflang links`);
+    if (html.includes('<link rel="alternate"')) fail(`${file} already carries hreflang links`);
+    // The switcher in the header (src/app/languages.ts) has to offer exactly the languages that were built.
+    const switcher = [...html.split('<body')[1].matchAll(/<a [^>]*hreflang="([^"]+)"/g)].map((match) => match[1]);
+    if (switcher.join() !== languages.join()) {
+      fail(`${file} offers ${switcher.join(', ') || 'no language'} in its switcher, but the build has ${languages.join(', ')}`);
+    }
     writeFileSync(file, html.replace('</head>', `  ${alternates(page)}\n  </head>`));
   }
 }

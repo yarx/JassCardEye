@@ -2,7 +2,7 @@
 
 The Android app: Kotlin, Jetpack Compose, Material 3, CameraX and LiteRT, laid out for a phone in
 portrait. It is the same app as the iOS one in `src/app/ios/` - the same flow, the same screens, the
-same German wording, translated into Android idioms. **Both apps move together**: every feature, text
+same wording in each of its languages, translated into Android idioms. **Both apps move together**: every feature, text
 and design change lands on iOS and Android in the same change, and the Kotlin sources mirror
 `src/app/ios/Sources/` file for file, which stays the reference for names and structure.
 
@@ -341,9 +341,12 @@ The classes the JVM tests compile - `JassScoring`, `JassDeck`, `StabilityRule`, 
 `@StringRes` ids rather than text and stay free of Android types; the screen resolves them, and the view
 models, which have the application, do so for their messages. `python3 src/tools/l10n.py` from the
 repository root checks that every key is used and that every `R.string` exists; CI runs it.
-`localeFilters` lists the languages the app ships - German, for now - which also keeps the libraries'
-own texts to them. The developer tools (*Bild*, *Session aufzeichnen*), the model picker a release
-never shows and the notes of a build without a model stay inline German: no user sees them.
+`localeFilters` lists the languages the app ships - one per file in `l10n/`, read by the build - which
+also keeps the libraries' own texts to them, and `generateLocaleConfig` offers them in the system
+settings, where Android 13 and later let each app have a language of its own. German is the unqualified
+`values/` (`src/main/res/resources.properties` says so), so any other language shows German. The
+developer tools (*Bild*, *Session aufzeichnen*), the model picker a release never shows and the notes of
+a build without a model stay inline German: no user sees them.
 
 ## Checking on a phone
 

@@ -6,7 +6,7 @@
         <span class="text-lg font-bold tracking-tight">JassCardEye</span>
       </a>
 
-      <nav class="hidden items-center gap-1 sm:flex">
+      <nav class="hidden items-center gap-1 lg:flex">
         @for (link of navLinks; track link.path) {
           <a
             [routerLink]="link.path"
@@ -16,12 +16,13 @@
             {{ link.label }}
           </a>
         }
+        <ng-container *ngTemplateOutlet="languageSwitch" />
       </nav>
 
       <button
         type="button"
         (click)="toggleMenu()"
-        class="rounded-lg p-2 text-zinc-200 hover:bg-panel sm:hidden"
+        class="rounded-lg p-2 text-zinc-200 hover:bg-panel lg:hidden"
         aria-label="Menü öffnen oder schliessen"
         i18n-aria-label="@@nav.menu"
         [attr.aria-expanded]="menuOpen()"
@@ -39,7 +40,7 @@
     </div>
 
     @if (menuOpen()) {
-      <nav class="border-t border-line px-4 pb-4 pt-2 sm:hidden">
+      <nav class="border-t border-line px-4 pb-4 pt-2 lg:hidden">
         @for (link of navLinks; track link.path) {
           <a
             [routerLink]="link.path"
@@ -50,9 +51,29 @@
             {{ link.label }}
           </a>
         }
+        <div class="mt-2 px-3"><ng-container *ngTemplateOutlet="languageSwitch" /></div>
       </nav>
     }
   </header>
+
+  <!-- The same page in the other languages. Plain links: every language is a build of its own. -->
+  <ng-template #languageSwitch>
+    <span class="ml-2 flex items-center gap-1" role="group" aria-label="Sprache" i18n-aria-label="@@nav.language">
+      @for (language of languages; track language.code) {
+        <a
+          [href]="languageLink(language.code)"
+          [attr.hreflang]="language.code"
+          [attr.lang]="language.code"
+          [attr.title]="language.name"
+          [attr.aria-current]="language.code === currentLanguage ? 'true' : null"
+          class="rounded-full px-2 py-1 text-xs font-semibold uppercase tracking-wide transition"
+          [class]="language.code === currentLanguage ? 'bg-panel text-jass' : 'text-zinc-400 hover:text-white'"
+        >
+          {{ language.code }}
+        </a>
+      }
+    </span>
+  </ng-template>
 
   <main class="flex-1">
     <router-outlet />

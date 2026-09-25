@@ -1,0 +1,19 @@
+{
+  "locale": "it",
+  "translations": {
+    "nav.menu": "Apri o chiudi il menu",
+    "nav.language": "Lingua",
+    "title.home": "JassCardEye – Contare i punti del Jass con la fotocamera",
+    "title.guide": "Istruzioni – JassCardEye",
+    "title.support": "Supporto e contatto – JassCardEye",
+    "title.privacy": "Protezione dei dati – JassCardEye",
+    "title.imprint": "Note legali – JassCardEye",
+    "title.licences": "Licenze e crediti delle immagini – JassCardEye",
+    "nav.guide": "Istruzioni",
+    "nav.support": "Supporto",
+    "nav.privacy": "Protezione dei dati",
+    "nav.imprint": "Note legali",
+    "nav.licences": "Licenze",
+    "meta.description": "JassCardEye conta i punti dopo il Jass: posa le carte una dopo l’altra davanti alla fotocamera, l’app riconosce la carta in cima e fa il totale man mano."
+  }
+}
