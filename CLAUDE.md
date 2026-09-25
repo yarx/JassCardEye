@@ -21,8 +21,10 @@ details live - read it before changing anything.
   design. If one platform genuinely cannot do something, say so instead of skipping it.
 - **Commit, push, TestFlight and Play uploads only when the owner says so.** A permission given for
   one task covers that task. Never merge a pull request unless told to.
-- **One branch and one pull request per feature**, on `feature/<name>` or `fix/<name>`. Pull requests
-  are **squash-merged**: one commit per feature on `main`, `feat: …` or `fix: …`.
+- **One branch and one pull request per feature or bug**, on `feature/<issue>-<name>` or
+  `bug/<issue>-<name>`: the issue number right after the slash when there is an issue, then a short
+  English name (`feature/1-keep-screen-awake`). Pull requests are **squash-merged**: one commit per
+  feature on `main`, `feat: …` or `fix: …`.
 - **Developer tools stay out of user-facing text.** *Bild* and *Session aufzeichnen* are never
   mentioned in the privacy policy, the website, store texts, review notes or in-app texts. Developer
   documentation may describe them.
