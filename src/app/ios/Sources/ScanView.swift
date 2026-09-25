@@ -30,6 +30,15 @@ private enum ScanMetrics {
     static let stripHeight: CGFloat = chipMark + 2 * chipPadding
 }
 
+/// Keeps the display from dimming and locking while `awake` is true. Only iOS has an idle timer to
+/// hold off; the macOS build, which exists to keep the sources compiling, leaves the display alone.
+@MainActor
+private func keepScreenAwake(_ awake: Bool) {
+    #if os(iOS)
+    UIApplication.shared.isIdleTimerDisabled = awake
+    #endif
+}
+
 /// A counting session: camera preview, detection band, the virtual pile and its score. The view
 /// exists only while counting - it starts camera and inference when it appears and stops them when
 /// it closes, so nothing expensive runs while the app sits on the home screen.
@@ -70,7 +79,14 @@ struct ScanView: View {
             .padding(ScanMetrics.margin)
         }
         .task { await model.start() }
-        .onDisappear { model.stop() }
+        // The screen stays on for as long as a count runs: nobody touches the phone while cards are
+        // laid down, and a display that dims or locks halfway through interrupts the scan. The idle
+        // timer belongs to the whole app, so it goes back to the system the moment the session closes.
+        .onAppear { keepScreenAwake(true) }
+        .onDisappear {
+            model.stop()
+            keepScreenAwake(false)
+        }
         // Bought in the middle of a count, the page closes and the score turns sharp - computed from
         // the pile already lying there, nothing has to be scanned again.
         .sheet(isPresented: $showPurchase) {

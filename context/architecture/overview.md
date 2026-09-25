@@ -69,7 +69,8 @@ Inside, both apps are built from the same parts:
 
 - **`LiveDetectionModel`** lives as long as the app. It holds the settings and the loaded recogniser;
   camera and per-frame inference run only while a counting session is open, so the home screen costs
-  nothing.
+  nothing. For the same stretch the display is kept on, because nobody touches the phone while cards
+  are laid down; outside a session the system's own dimming and lock apply.
 - **`CardRecognizer`** puts the variant behind one interface, so the frame loop, the stability rule
   and the pile never learn which model runs.
 - **`PileTracker`** owns the pile - the stability rule, the counted cards and the corrections by hand -
