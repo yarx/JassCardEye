@@ -198,8 +198,8 @@ class LiveDetectionModel(application: Application) : AndroidViewModel(applicatio
         CardSound.prepare()
         capturedCount = 0
         captureNote = null
-        val name = chosen.displayName(deck)
-        updateSettings { it.copy(counting = true, modeName = name) }
+        val name = chosen.token(deck)
+        updateSettings { it.copy(counting = true, discipline = name) }
 
         // Only with the developer tools on: a switch nobody can see must not record.
         if (developerTools && recordSession) {
@@ -232,7 +232,8 @@ class LiveDetectionModel(application: Application) : AndroidViewModel(applicatio
     fun finishCounting(): CountResult {
         counting = false
         updateSettings { it.copy(counting = false) }
-        return CountResult(mode.displayName(deck), mode.markSuit(deck)?.token, pile.size, points, opponentPoints, multiplier)
+        return CountResult(context.getString(mode.displayName(deck)), mode.markSuit(deck)?.token, pile.size, points,
+            opponentPoints, multiplier)
     }
 
     /** Closes a running recording and reports what became of it. Safe to call when nothing is being recorded. */
@@ -341,13 +342,13 @@ class LiveDetectionModel(application: Application) : AndroidViewModel(applicatio
 
     /**
      * The UI-owned settings as the analysis thread reads them, replaced as a whole rather than touched per
-     * field. `counting` gates committing; `modeName` rides along so a saved frame can record what was counted.
+     * field. `counting` gates committing; `discipline` rides along so a saved frame can record what was counted.
      */
     private data class FrameSettings(
         val confidence: Float = 0.6f,
         val frames: Int = DEFAULT_FRAMES,
         val counting: Boolean = false,
-        val modeName: String = "",
+        val discipline: String = "",
         val rule: StabilityRule = StabilityRule.RUN,
         val deck: JassDeck = JassDeck.FRENCH,
         val variant: RecognitionVariant = RecognitionVariant.C,
@@ -468,7 +469,7 @@ class LiveDetectionModel(application: Application) : AndroidViewModel(applicatio
     /** Called by the scan screen when the permission request was answered with no. */
     fun cameraRefused() {
         cameraDenied = true
-        statusMessage = "Kein Kamerazugriff."
+        statusMessage = context.getString(R.string.camera_denied)
     }
 
     fun start(owner: LifecycleOwner) {
@@ -490,7 +491,7 @@ class LiveDetectionModel(application: Application) : AndroidViewModel(applicatio
             frames.onFrame = ::process
             val problem = frames.start(owner, cameraLens)
             if (problem != null) {
-                statusMessage = problem.message
+                statusMessage = problem.message(context)
                 cameraDenied = problem.isDenied
                 return@launch
             }
@@ -545,7 +546,7 @@ class LiveDetectionModel(application: Application) : AndroidViewModel(applicatio
         }
         true
     } catch (error: Throwable) {
-        statusMessage = "Modell (${target.displayName}) konnte nicht geladen werden: ${error.message}"
+        statusMessage = context.getString(R.string.scan_model_failed, target.displayName, error.message)
         false
     }
 
@@ -596,7 +597,7 @@ class LiveDetectionModel(application: Application) : AndroidViewModel(applicatio
         if (captureRequested.getAndSet(false)) {
             val top = detections.firstOrNull()
             val (note, saved) = try {
-                "Gesichert: ${FrameCapture.save(context, square, top?.label, top?.confidence ?: 0f, frame.modeName)}" to true
+                "Gesichert: ${FrameCapture.save(context, square, top?.label, top?.confidence ?: 0f, frame.discipline)}" to true
             } catch (error: Exception) {
                 "Nicht gesichert: ${error.message}" to false
             }

@@ -60,9 +60,9 @@ enum LastTrick: String, CaseIterable, Identifiable, Codable {
     /// For the segmented control, where three options share the width of a phone.
     var shortName: String {
         switch self {
-        case .mine:      return "Wir"
-        case .opponents: return "Gegner"
-        case .unused:    return "Keiner"
+        case .mine:      return String(localized: "last_trick.mine", defaultValue: "Wir")
+        case .opponents: return String(localized: "last_trick.opponents", defaultValue: "Gegner")
+        case .unused:    return String(localized: "last_trick.none", defaultValue: "Keiner")
         }
     }
 
@@ -70,8 +70,10 @@ enum LastTrick: String, CaseIterable, Identifiable, Codable {
     /// to explain.
     var note: String? {
         switch self {
-        case .mine:      return "+\(JassRules.lastTrickBonus) letzter Stich"
-        case .opponents: return "letzter Stich bei den Gegnern"
+        case .mine:
+            return String(localized: "last_trick.note_mine", defaultValue: "+\(JassRules.lastTrickBonus) letzter Stich")
+        case .opponents:
+            return String(localized: "last_trick.note_opponents", defaultValue: "letzter Stich bei den Gegnern")
         case .unused:    return nil
         }
     }
@@ -140,13 +142,21 @@ struct CountingMode: Identifiable, Hashable {
     /// "Rosen" on a German one. Derived from the suit table rather than rewritten from a stored
     /// string, so a name and the cards it refers to cannot drift apart.
     ///
-    /// Text only. It travels into capture and recording file names, and it is what VoiceOver
-    /// reads; the mark that goes with it is drawn separately wherever there is room for it.
+    /// Text only. It is what VoiceOver reads; the mark that goes with it is drawn separately
+    /// wherever there is room for it.
     func displayName(deck: JassDeck) -> String {
         switch kind {
         case .trump:                return suitName(deck: deck)
         case .open(let label, _, _): return label
         }
+    }
+
+    /// The discipline as the session info and the names of captures and recordings carry it: the
+    /// trump suit's token for the deck in play ("roses"), or the id of a discipline without trump
+    /// ("slalom.obe"). Unlike `displayName` it does not change with the language, because the
+    /// dataset tool reads it and sessions from different phones have to compare.
+    func token(deck: JassDeck) -> String {
+        markSuit(deck: deck)?.token ?? id
     }
 
     /// The trump suit as this deck prints it. The role always resolves - both decks own all four -
@@ -194,7 +204,7 @@ enum JassModes {
     private static let suits: [CountingMode] = DeckLayout.suits.map { suit in
         CountingMode(id: "trump.\(suit)", kind: .trump(role: suit),
                      trumpValues: ValueTables.trump, normalValues: ValueTables.plain,
-                     hint: "Under 20, Nell 14")
+                     hint: String(localized: "mode.trump.hint", defaultValue: "Under 20, Nell 14"))
     }
 
     private static func noTrump(_ id: String, _ label: String, _ values: [String: Int],
@@ -203,25 +213,37 @@ enum JassModes {
                      trumpValues: values, normalValues: values, hint: hint)
     }
 
-    static let obenabe = noTrump("obenabe", "Obenabe", ValueTables.obenabe,
-                                 "Ass zählt 11, Acht 8", "arrow.down", "Obenabe")
+    static let obenabe = noTrump("obenabe",
+                                 String(localized: "mode.obenabe.name", defaultValue: "Obenabe"), ValueTables.obenabe,
+                                 String(localized: "mode.obenabe.hint", defaultValue: "Ass zählt 11, Acht 8"), "arrow.down",
+                                 String(localized: "mode.obenabe.short", defaultValue: "Obenabe"))
 
-    static let undenufe = noTrump("undenufe", "Undenufe", ValueTables.undenufe,
-                                  "Sechs zählt 11, Ass 0", "arrow.up", "Undenufe")
+    static let undenufe = noTrump("undenufe",
+                                  String(localized: "mode.undenufe.name", defaultValue: "Undenufe"), ValueTables.undenufe,
+                                  String(localized: "mode.undenufe.hint", defaultValue: "Sechs zählt 11, Ass 0"), "arrow.up",
+                                  String(localized: "mode.undenufe.short", defaultValue: "Undenufe"))
 
     // Slalom alternates obenabe and undeufe from trick to trick; which of the two it started with
     // is what decides the values for the round, the same way Guschti's start decides its.
-    static let slalomObe = noTrump("slalom.obe", "Slalom (oben)", ValueTables.obenabe,
-                                   "Obe begonnen – gezählt wird obenabe", "arrow.up.arrow.down", "Slalom ↓")
+    static let slalomObe = noTrump("slalom.obe",
+                                   String(localized: "mode.slalom_obe.name", defaultValue: "Slalom (oben)"), ValueTables.obenabe,
+                                   String(localized: "mode.slalom_obe.hint", defaultValue: "Obe begonnen – gezählt wird obenabe"),
+                                   "arrow.up.arrow.down",
+                                   String(localized: "mode.slalom_obe.short", defaultValue: "Slalom ↓"))
 
-    static let slalomUnde = noTrump("slalom.unde", "Slalom (unten)", ValueTables.undenufe,
-                                    "Unde begonnen – gezählt wird undenufe", "arrow.up.arrow.down", "Slalom ↑")
+    static let slalomUnde = noTrump("slalom.unde",
+                                    String(localized: "mode.slalom_unde.name", defaultValue: "Slalom (unten)"), ValueTables.undenufe,
+                                    String(localized: "mode.slalom_unde.hint", defaultValue: "Unde begonnen – gezählt wird undenufe"),
+                                    "arrow.up.arrow.down",
+                                    String(localized: "mode.slalom_unde.short", defaultValue: "Slalom ↑"))
 
     // One entry, no direction to ask about: Guschti always begins obenabe, and the switch to
     // undeufe after the fourth trick changes how it is played, not what the cards are worth.
-    static let guschti = noTrump("guschti", "Guschti", ValueTables.obenabe,
-                                 "4 Stiche obenabe, dann 5 undeufe – gezählt wird obenabe",
-                                 "arrow.triangle.branch", "Guschti")
+    static let guschti = noTrump("guschti",
+                                 String(localized: "mode.guschti.name", defaultValue: "Guschti"), ValueTables.obenabe,
+                                 String(localized: "mode.guschti.hint", defaultValue: "4 Stiche obenabe, dann 5 undeufe – gezählt wird obenabe"),
+                                 "arrow.triangle.branch",
+                                 String(localized: "mode.guschti.short", defaultValue: "Guschti"))
 }
 
 /// The arithmetic of a counted pile, with no camera around it.

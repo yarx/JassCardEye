@@ -59,6 +59,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -108,8 +110,8 @@ fun HomeScreen(model: LiveDetectionModel, lastResult: CountResult?, onStart: () 
                 .padding(end = 12.dp, top = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            RoundIconButton(Icons.Outlined.Info, "Über") { showAbout = true }
-            RoundIconButton(Icons.Outlined.Settings, "Einstellungen") { showSettings = true }
+            RoundIconButton(Icons.Outlined.Info, stringResource(R.string.about_title)) { showAbout = true }
+            RoundIconButton(Icons.Outlined.Settings, stringResource(R.string.settings_title)) { showSettings = true }
         }
     }
 
@@ -158,12 +160,13 @@ private fun Header(model: LiveDetectionModel) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        Text("JassCardEye", style = JassType.largeTitle.copy(fontWeight = FontWeight.Bold), color = Color.White)
+        Text(stringResource(R.string.app_name), style = JassType.largeTitle.copy(fontWeight = FontWeight.Bold), color = Color.White)
         // The deck, because it stays as the default. What was played belongs to the single round and is
         // asked when a count starts. The marks alone tell the two decks apart at a glance; the name is left
         // to TalkBack.
+        val deckName = stringResource(model.deck.displayName)
         Row(
-            Modifier.clearAndSetSemantics { contentDescription = model.deck.displayName },
+            Modifier.clearAndSetSemantics { contentDescription = deckName },
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             for (suit in model.deck.suits) SuitMark(suit, 24.dp)
@@ -174,7 +177,7 @@ private fun Header(model: LiveDetectionModel) {
 @Composable
 private fun LastResultCard(result: CountResult?, locked: Boolean, onUnlock: () -> Unit) {
     if (result == null) {
-        Text("Noch nichts gezählt.", style = JassType.callout, color = JassColors.Secondary,
+        Text(stringResource(R.string.home_nothing_counted), style = JassType.callout, color = JassColors.Secondary,
             modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
         return
     }
@@ -186,11 +189,11 @@ private fun LastResultCard(result: CountResult?, locked: Boolean, onUnlock: () -
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text("Letzte Zählung", style = JassType.caption, color = JassColors.Secondary)
+        Text(stringResource(R.string.home_last_count), style = JassType.caption, color = JassColors.Secondary)
         // The same three columns a session shows, so the number stands where it stood a moment ago.
         ScoreRow(
             points = result.points,
-            pointsCaption = "meine Punkte",
+            pointsCaption = stringResource(R.string.score_mine),
             opponentPoints = result.opponentPoints,
             cards = result.cards,
             modeName = result.modeName,
@@ -232,11 +235,11 @@ private fun StartButton(model: LiveDetectionModel, locked: Boolean, onTap: () ->
         ) {
             Icon(Icons.Outlined.CenterFocusStrong, contentDescription = null, modifier = Modifier.size(26.dp))
             Spacer(Modifier.size(10.dp))
-            Text("Zählen starten", style = JassType.title3.copy(fontWeight = FontWeight.SemiBold))
+            Text(stringResource(R.string.count_start), style = JassType.title3.copy(fontWeight = FontWeight.SemiBold))
         }
         // Said once, where a count starts: the demo is the whole app, only the result is blurred.
         if (locked) {
-            Text("Die Demo zählt wie die gekaufte App - nur die Punkte bleiben verwischt.",
+            Text(stringResource(R.string.home_demo_note),
                 style = JassType.footnote, color = JassColors.Secondary, textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth())
         }
@@ -261,9 +264,9 @@ fun SettingsSheet(model: LiveDetectionModel, onDismiss: () -> Unit) {
         containerColor = Color.Black,
     ) {
         Box(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-            Text("Einstellungen", style = JassType.headline, color = Color.White, modifier = Modifier.align(Alignment.Center))
+            Text(stringResource(R.string.settings_title), style = JassType.headline, color = Color.White, modifier = Modifier.align(Alignment.Center))
             TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.CenterEnd)) {
-                Text("Fertig", style = JassType.headline, color = JassColors.Green)
+                Text(stringResource(R.string.common_done), style = JassType.headline, color = JassColors.Green)
             }
         }
         Column(
@@ -285,57 +288,64 @@ fun SettingsSheet(model: LiveDetectionModel, onDismiss: () -> Unit) {
             }
 
             if (model.availableLenses.size > 1) {
-                FormSection("Kamera") {
-                    PickerRow("Objektiv", model.cameraLens.displayName, model.availableLenses.map { it.displayName }) { index ->
+                FormSection(stringResource(R.string.settings_camera)) {
+                    PickerRow(stringResource(R.string.settings_lens), stringResource(model.cameraLens.displayName),
+                        model.availableLenses.map { stringResource(it.displayName) }) { index ->
                         model.cameraLens = model.availableLenses[index]
                     }
                     FormDivider()
-                    FormNote(model.cameraLens.explanation)
+                    FormNote(stringResource(model.cameraLens.explanation))
                 }
             }
 
-            FormSection("Stabilität") {
+            FormSection(stringResource(R.string.settings_stability)) {
                 Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text(if (model.requiredFrames == 1) "1 Bild muss zustimmen" else "${model.requiredFrames} Bilder müssen zustimmen", style = JassType.body, color = Color.White, modifier = Modifier.weight(1f))
+                    Text(pluralStringResource(R.plurals.settings_frames, model.requiredFrames, model.requiredFrames),
+                        style = JassType.body, color = Color.White, modifier = Modifier.weight(1f))
                     Stepper(
                         onMinus = { if (model.requiredFrames > LiveDetectionModel.FRAME_RANGE.first) model.requiredFrames -= 1 },
                         onPlus = { if (model.requiredFrames < LiveDetectionModel.FRAME_RANGE.last) model.requiredFrames += 1 },
                     )
                 }
                 FormDivider()
-                PickerRow("Zählweise", model.stabilityRule.displayName(model.requiredFrames),
-                    StabilityRule.entries.map { it.displayName(model.requiredFrames) }) { index ->
+                PickerRow(stringResource(R.string.settings_rule), model.stabilityRule.label(model.requiredFrames),
+                    StabilityRule.entries.map { it.label(model.requiredFrames) }) { index ->
                     model.stabilityRule = StabilityRule.entries[index]
                 }
                 FormDivider()
-                FormNote(model.stabilityRule.explanation)
+                FormNote(stringResource(model.stabilityRule.explanation))
             }
 
             // Sliders rather than switches: 0 is off, and everything above depends on the table.
-            FormSection("Rückmeldung") {
-                FeedbackSlider("Vibration", { Icon(Icons.Outlined.PhoneAndroid, null, tint = JassColors.Secondary) },
+            FormSection(stringResource(R.string.settings_feedback)) {
+                FeedbackSlider(stringResource(R.string.settings_vibration), { Icon(Icons.Outlined.PhoneAndroid, null, tint = JassColors.Secondary) },
                     { Icon(Icons.Outlined.Vibration, null, tint = JassColors.Secondary) },
                     model.hapticStrength, { model.hapticStrength = it }, Haptics::preview)
                 FormDivider()
-                FeedbackSlider("Ton", { Icon(Icons.AutoMirrored.Outlined.VolumeOff, null, tint = JassColors.Secondary) },
+                FeedbackSlider(stringResource(R.string.settings_sound), { Icon(Icons.AutoMirrored.Outlined.VolumeOff, null, tint = JassColors.Secondary) },
                     { Icon(Icons.AutoMirrored.Outlined.VolumeUp, null, tint = JassColors.Secondary) },
                     model.soundVolume, { model.soundVolume = it }, CardSound::preview)
                 FormDivider()
-                FormNote("Bei jeder gezählten Karte. Ganz links ist aus. Der Ton folgt der Medienlautstärke, auch im Lautlos-Modus, und lässt laufende Musik weiterspielen. Die Vibrationseinstellungen des Telefons gelten trotzdem.")
+                FormNote(stringResource(R.string.settings_feedback_note_android))
             }
 
             // A visible way to restore a purchase, for a new phone or a reinstall - as on iOS.
-            FormSection("Kauf", footer = store.problem) {
-                ValueRow("Punkte", if (store.unlocked) "Freigeschaltet" else "Demo")
+            FormSection(stringResource(R.string.settings_purchase), footer = store.problem) {
+                ValueRow(stringResource(R.string.settings_points),
+                    stringResource(if (store.unlocked) R.string.purchase_unlocked else R.string.purchase_demo))
                 FormDivider()
                 Box(Modifier.fillMaxWidth().clickable(onClick = store::restore).padding(horizontal = 16.dp, vertical = 12.dp)) {
-                    Text("Kauf wiederherstellen", style = JassType.body, color = JassColors.Green)
+                    Text(stringResource(R.string.purchase_restore), style = JassType.body, color = JassColors.Green)
                 }
             }
             Spacer(Modifier.height(24.dp))
         }
     }
 }
+
+/** A stability rule as the picker names it, with the frames that have to agree. */
+@Composable
+private fun StabilityRule.label(votes: Int): String = stringResource(displayName, votes, windowSize(votes))
 
 /** A menu-style picker row: the label on the left, the choice and its chevrons on the right. */
 @Composable
@@ -372,11 +382,11 @@ private fun Stepper(onMinus: () -> Unit, onPlus: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         IconButton(onClick = onMinus, modifier = Modifier.size(width = 52.dp, height = 36.dp)) {
-            Icon(Icons.Outlined.Remove, contentDescription = "Weniger", tint = Color.White)
+            Icon(Icons.Outlined.Remove, contentDescription = stringResource(R.string.settings_fewer_android), tint = Color.White)
         }
         Box(Modifier.size(width = 1.dp, height = 20.dp).background(Color.White.copy(alpha = 0.25f)))
         IconButton(onClick = onPlus, modifier = Modifier.size(width = 52.dp, height = 36.dp)) {
-            Icon(Icons.Outlined.Add, contentDescription = "Mehr", tint = Color.White)
+            Icon(Icons.Outlined.Add, contentDescription = stringResource(R.string.settings_more_android), tint = Color.White)
         }
     }
 }
@@ -395,6 +405,8 @@ private fun FeedbackSlider(
     onChange: (Double) -> Unit,
     preview: () -> Unit,
 ) {
+    val state = if (value == 0.0) stringResource(R.string.settings_feedback_off)
+        else stringResource(R.string.settings_feedback_percent, (value * 100).toInt())
     Column(Modifier.padding(horizontal = 16.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(title, style = JassType.body, color = Color.White)
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -418,7 +430,7 @@ private fun FeedbackSlider(
                 },
                 modifier = Modifier
                     .weight(1f)
-                    .semantics { stateDescription = if (value == 0.0) "Aus" else "${(value * 100).toInt()} Prozent" },
+                    .semantics { stateDescription = state },
             )
             high()
         }

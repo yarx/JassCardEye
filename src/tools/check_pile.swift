@@ -5,7 +5,7 @@
 // below are the same as src/app/android/app/src/test/.../PileTrackerTest.kt, in the same order.
 //
 //   swiftc -o /tmp/check_pile src/app/ios/Sources/PileTracker.swift src/app/ios/Sources/StabilityRule.swift \
-//       src/tools/check_pile.swift && /tmp/check_pile
+//       src/tools/localized_fallback.swift src/tools/check_pile.swift && /tmp/check_pile
 //
 // The files import nothing but Foundation, so this also runs on Linux, next to check_scoring.swift.
 

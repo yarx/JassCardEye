@@ -90,7 +90,8 @@ enum FrameCapture {
         return "capture_\(stamp())_\(verdict)_\(modeToken(mode)).jpg"
     }
 
-    /// The mode name carries a suit symbol and a "×" - neither belongs in a file name.
+    /// A discipline's token - see `CountingMode.token(deck:)` - may carry a dot ("slalom.obe"),
+    /// which would read as a second file extension.
     private static func modeToken(_ mode: String) -> String {
         mode.lowercased().filter { $0.isLetter || $0.isNumber }
     }

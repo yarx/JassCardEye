@@ -38,11 +38,11 @@ struct HomeView: View {
                     Button { showAbout = true } label: {
                         Image(systemName: "info.circle")
                     }
-                    .accessibilityLabel("Über")
+                    .accessibilityLabel(String(localized: "about.title", defaultValue: "Über"))
                     Button { showSettings = true } label: {
                         Image(systemName: "gearshape")
                     }
-                    .accessibilityLabel("Einstellungen")
+                    .accessibilityLabel(String(localized: "settings.title", defaultValue: "Einstellungen"))
                 }
             }
             .sheet(isPresented: $showAbout) {
@@ -95,7 +95,7 @@ struct HomeView: View {
 
     private var header: some View {
         VStack(spacing: 6) {
-            Text("JassCardEye")
+            Text(String(localized: "app.name", defaultValue: "JassCardEye"))
                 .font(.largeTitle.weight(.bold))
             // The deck, because it stays as the default. What was played belongs to the single round
             // and is asked when a count starts. The marks alone tell the two decks apart at a
@@ -117,13 +117,13 @@ struct HomeView: View {
     private var lastResultCard: some View {
         if let result = lastResult {
             VStack(spacing: 12) {
-                Text("Letzte Zählung")
+                Text(String(localized: "home.last_count", defaultValue: "Letzte Zählung"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 // The same three columns a session shows, so the number stands where it stood a
                 // moment ago.
                 ScoreRow(points: result.points,
-                         pointsCaption: "meine Punkte",
+                         pointsCaption: String(localized: "score.mine", defaultValue: "meine Punkte"),
                          opponentPoints: result.opponentPoints,
                          cards: result.cards,
                          modeName: result.modeName,
@@ -138,7 +138,7 @@ struct HomeView: View {
             .frame(maxWidth: .infinity)
             .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 14))
         } else {
-            Text("Noch nichts gezählt.")
+            Text(String(localized: "home.nothing_counted", defaultValue: "Noch nichts gezählt."))
                 .font(.callout)
                 .foregroundStyle(.secondary)
         }
@@ -160,7 +160,7 @@ struct HomeView: View {
             Button {
                 showStart = true
             } label: {
-                Label("Zählen starten", systemImage: "camera.viewfinder")
+                Label(String(localized: "count.start", defaultValue: "Zählen starten"), systemImage: "camera.viewfinder")
                     .font(.title3.weight(.semibold))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
@@ -170,7 +170,7 @@ struct HomeView: View {
 
             // Said once, where a count starts: the demo is the whole app, only the result is blurred.
             if !store.unlocked {
-                Text("Die Demo zählt wie die gekaufte App - nur die Punkte bleiben verwischt.")
+                Text(String(localized: "home.demo_note", defaultValue: "Die Demo zählt wie die gekaufte App - nur die Punkte bleiben verwischt."))
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -209,8 +209,8 @@ struct SettingsSheet: View {
                 }
 
                 if model.availableLenses.count > 1 {
-                    Section("Kamera") {
-                        Picker("Objektiv", selection: $model.cameraLens) {
+                    Section(String(localized: "settings.camera", defaultValue: "Kamera")) {
+                        Picker(String(localized: "settings.lens", defaultValue: "Objektiv"), selection: $model.cameraLens) {
                             ForEach(model.availableLenses) { lens in
                                 Text(lens.displayName).tag(lens)
                             }
@@ -221,10 +221,10 @@ struct SettingsSheet: View {
                     }
                 }
 
-                Section("Stabilität") {
-                    Stepper(model.requiredFrames == 1 ? "1 Bild muss zustimmen" : "\(model.requiredFrames) Bilder müssen zustimmen",
+                Section(String(localized: "settings.stability", defaultValue: "Stabilität")) {
+                    Stepper(String(localized: "settings.frames", defaultValue: "\(model.requiredFrames) Bilder müssen zustimmen"),
                             value: $model.requiredFrames, in: LiveDetectionModel.frameRange)
-                    Picker("Zählweise", selection: $model.stabilityRule) {
+                    Picker(String(localized: "settings.rule", defaultValue: "Zählweise"), selection: $model.stabilityRule) {
                         ForEach(StabilityRule.allCases) { rule in
                             Text(rule.displayName(votes: model.requiredFrames)).tag(rule)
                         }
@@ -237,22 +237,23 @@ struct SettingsSheet: View {
                 // Sliders rather than switches: 0 is off, and everything above depends on the table -
                 // a phone lying on wood feels different from one on a cloth, and a quiet kitchen
                 // sounds different from a restaurant.
-                Section("Rückmeldung") {
-                    FeedbackSlider(title: "Vibration",
+                Section(String(localized: "settings.feedback", defaultValue: "Rückmeldung")) {
+                    FeedbackSlider(title: String(localized: "settings.vibration", defaultValue: "Vibration"),
                                    lowSymbol: "iphone", highSymbol: "iphone.radiowaves.left.and.right",
                                    value: $model.hapticStrength, preview: Haptics.preview)
-                    FeedbackSlider(title: "Ton",
+                    FeedbackSlider(title: String(localized: "settings.sound", defaultValue: "Ton"),
                                    lowSymbol: "speaker.slash", highSymbol: "speaker.wave.3",
                                    value: $model.soundVolume, preview: CardSound.preview)
-                    Text("Bei jeder gezählten Karte. Ganz links ist aus. Der Ton folgt der Medienlautstärke, auch im Lautlos-Modus, und lässt laufende Musik weiterspielen. Die System-Haptik des iPhones gilt trotzdem.")
+                    Text(String(localized: "settings.feedback_note.ios", defaultValue: "Bei jeder gezählten Karte. Ganz links ist aus. Der Ton folgt der Medienlautstärke, auch im Lautlos-Modus, und lässt laufende Musik weiterspielen. Die System-Haptik des iPhones gilt trotzdem."))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
 
                 // Apple asks for a visible way to restore a purchase, for a new phone or a reinstall.
-                Section("Kauf") {
-                    LabeledContent("Punkte", value: store.unlocked ? "Freigeschaltet" : "Demo")
-                    Button("Kauf wiederherstellen") {
+                Section(String(localized: "settings.purchase", defaultValue: "Kauf")) {
+                    LabeledContent(String(localized: "settings.points", defaultValue: "Punkte"),
+                                   value: store.unlocked ? String(localized: "purchase.unlocked", defaultValue: "Freigeschaltet") : String(localized: "purchase.demo", defaultValue: "Demo"))
+                    Button(String(localized: "purchase.restore", defaultValue: "Kauf wiederherstellen")) {
                         Task { await store.restore() }
                     }
                     if let problem = store.problem {
@@ -262,13 +263,13 @@ struct SettingsSheet: View {
                     }
                 }
             }
-            .navigationTitle("Einstellungen")
+            .navigationTitle(String(localized: "settings.title", defaultValue: "Einstellungen"))
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             #endif
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Fertig") { dismiss() }
+                    Button(String(localized: "common.done", defaultValue: "Fertig")) { dismiss() }
                 }
             }
         }
@@ -302,7 +303,8 @@ private struct FeedbackSlider: View {
             } onEditingChanged: { editing in
                 if !editing { preview() }
             }
-            .accessibilityValue(value == 0 ? "Aus" : "\(Int((value * 100).rounded())) Prozent")
+            .accessibilityValue(value == 0 ? String(localized: "settings.feedback_off", defaultValue: "Aus")
+                                : String(localized: "settings.feedback_percent", defaultValue: "\(Int((value * 100).rounded())) Prozent"))
         }
     }
 }

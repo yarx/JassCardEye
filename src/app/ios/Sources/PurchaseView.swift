@@ -18,15 +18,15 @@ struct PurchaseView: View {
                         Image(systemName: "lock.open.fill")
                             .font(.system(size: 42))
                             .foregroundStyle(.green)
-                        Text("Punkte freischalten")
+                        Text(String(localized: "purchase.unlock", defaultValue: "Punkte freischalten"))
                             .font(.title2.weight(.bold))
                     }
                     .padding(.top, 8)
 
                     VStack(alignment: .leading, spacing: 14) {
-                        benefit("eye", "Die gezählten Punkte werden lesbar - deine und die des Gegners, mit der Aufschlüsselung.")
-                        benefit("clock.arrow.circlepath", "Auch «Letzte Zählung» auf dem Startbildschirm zeigt die Punkte.")
-                        benefit("checkmark.seal", "Einmal kaufen, für immer. Kein Abo, kein Konto.")
+                        benefit("eye", String(localized: "purchase.benefit_readable", defaultValue: "Die gezählten Punkte werden lesbar - deine und die des Gegners, mit der Aufschlüsselung."))
+                        benefit("clock.arrow.circlepath", String(localized: "purchase.benefit_last_count", defaultValue: "Auch «Letzte Zählung» auf dem Startbildschirm zeigt die Punkte."))
+                        benefit("checkmark.seal", String(localized: "purchase.benefit_once", defaultValue: "Einmal kaufen, für immer. Kein Abo, kein Konto."))
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -44,16 +44,16 @@ struct PurchaseView: View {
                         .disabled(store.product == nil || store.purchasing || store.pending)
 
                         if store.pending {
-                            note("Der Kauf wartet auf eine Bestätigung. Die Punkte werden frei, sobald er bestätigt ist.")
+                            note(String(localized: "purchase.pending.ios", defaultValue: "Der Kauf wartet auf eine Bestätigung. Die Punkte werden frei, sobald er bestätigt ist."))
                         }
                         if store.productUnavailable {
-                            note("Der App Store ist gerade nicht erreichbar. Die Demo zählt weiter wie bisher.")
+                            note(String(localized: "purchase.store_unreachable.ios", defaultValue: "Der App Store ist gerade nicht erreichbar. Die Demo zählt weiter wie bisher."))
                         }
                         if let problem = store.problem {
                             note(problem)
                         }
 
-                        Button("Kauf wiederherstellen") {
+                        Button(String(localized: "purchase.restore", defaultValue: "Kauf wiederherstellen")) {
                             Task { await store.restore() }
                         }
                         .font(.callout)
@@ -62,13 +62,13 @@ struct PurchaseView: View {
                 }
                 .padding(24)
             }
-            .navigationTitle("Freischalten")
+            .navigationTitle(String(localized: "purchase.title", defaultValue: "Freischalten"))
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             #endif
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Schliessen") { dismiss() }
+                    Button(String(localized: "common.close", defaultValue: "Schliessen")) { dismiss() }
                 }
             }
         }
@@ -79,8 +79,11 @@ struct PurchaseView: View {
     }
 
     private var buyTitle: String {
-        if let price = store.product?.displayPrice { return "Kaufen für \(price)" }
-        return store.productUnavailable ? "Nicht verfügbar" : "Preis wird geladen …"
+        if let price = store.product?.displayPrice {
+            return String(localized: "purchase.buy", defaultValue: "Kaufen für \(price)")
+        }
+        return store.productUnavailable ? String(localized: "purchase.unavailable", defaultValue: "Nicht verfügbar")
+                                        : String(localized: "purchase.loading", defaultValue: "Preis wird geladen …")
     }
 
     private func benefit(_ symbol: String, _ text: String) -> some View {
@@ -119,7 +122,9 @@ struct UnlockButton: View {
     }
 
     private var title: String {
-        guard let price = store.product?.displayPrice else { return "Punkte freischalten" }
-        return "Punkte freischalten – \(price)"
+        guard let price = store.product?.displayPrice else {
+            return String(localized: "purchase.unlock", defaultValue: "Punkte freischalten")
+        }
+        return String(localized: "purchase.unlock_price", defaultValue: "Punkte freischalten – \(price)")
     }
 }

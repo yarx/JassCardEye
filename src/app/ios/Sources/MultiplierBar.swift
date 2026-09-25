@@ -28,7 +28,7 @@ struct MultiplierBar: View {
                         .contentShape(RoundedRectangle(cornerRadius: 8))
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Faktor \(factor)")
+                .accessibilityLabel(String(localized: "start.factor_value", defaultValue: "Faktor \(factor)"))
                 .accessibilityAddTraits(factor == multiplier ? [.isSelected] : [])
             }
         }

@@ -262,7 +262,7 @@ lapsing. There is no automated counterpart of iOS's `StoreTests.swift`.
 | `app/src/main/AndroidManifest.xml` | permissions, the camera feature, portrait lock, backup off, the large-screen opt-out |
 | `app/src/main/java/ch/yarx/jasscardeye/` | the sources - see "Where the sources meet" |
 | `app/src/main/assets/models/` | `JassCardEye-<variant>.tflite` + `.labels.txt` + `models.json` (generated, not versioned) |
-| `app/src/main/res/` | suit marks, the tick sound, the launcher icon, the dark window theme |
+| `app/src/main/res/` | suit marks, the tick sound, the launcher icon, the dark window theme - the strings are generated, see "Texts" |
 | `app/src/test/` | `JassScoringTest`, `PileTrackerTest`, `TensorDecodingTest`, `SuitMarkTest`, `SessionRecorderTest`, `SessionInfoTest`, `SessionArchiveTest` - plain JVM tests |
 | `app/proguard-rules.pro` | no rules of our own: LiteRT's AARs bring the ones its native code needs |
 | `store/` | Play Store icon, feature graphic, screenshots, and `listing.md` - what is entered in the Play Console |
@@ -326,6 +326,24 @@ debug build.
 - Play Billing 9.1.0, for the purchase.
 - JUnit 4.13.2 for the JVM tests.
 - NDK 28.2.13676358, only to extract the native symbol tables for Play.
+
+## Texts
+
+Every text a user reads is a key in `l10n/de.json`, with a line of context in `l10n/keys.md`; the iOS
+app is built from the same file. The `generateStrings` task in `app/build.gradle.kts` runs
+`src/tools/l10n.py --android` into `app/build/generated/res/generateStrings/` and adds that folder to
+the resources of every variant, so there is no `strings.xml` in `src/main/res` and nothing to commit.
+It needs `python3` on the path. A key becomes a resource name with underscores for dots:
+`scan.missing_card` is `R.string.scan_missing_card`, read with `stringResource`, and a plural such as
+`score.cards` is `R.plurals.score_cards`, read with `pluralStringResource`.
+
+The classes the JVM tests compile - `JassScoring`, `JassDeck`, `StabilityRule`, `CameraLens` - hold
+`@StringRes` ids rather than text and stay free of Android types; the screen resolves them, and the view
+models, which have the application, do so for their messages. `python3 src/tools/l10n.py` from the
+repository root checks that every key is used and that every `R.string` exists; CI runs it.
+`localeFilters` lists the languages the app ships - German, for now - which also keeps the libraries'
+own texts to them. The developer tools (*Bild*, *Session aufzeichnen*), the model picker a release
+never shows and the notes of a build without a model stay inline German: no user sees them.
 
 ## Checking on a phone
 

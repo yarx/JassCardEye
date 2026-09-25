@@ -61,17 +61,22 @@ class JassScoringTest {
         assertEquals("Rosen Under under Rosen trump is 20", 20, hearts.points("roses_jack"))
         assertEquals("Rosen Nell under Rosen trump is 14", 14, hearts.points("roses_9"))
         assertEquals("Schilten Under is not trump, so 2", 2, hearts.points("shields_jack"))
-        assertEquals("Rosen", hearts.displayName(JassDeck.GERMAN))
-        assertEquals("Herz", hearts.displayName(JassDeck.FRENCH))
-        assertEquals("Schilten", mode("trump.spades").displayName(JassDeck.GERMAN))
+        // Names are string resources here; the German behind each id is l10n/de.json's, checked by src/tools/l10n.py.
+        assertEquals(R.string.suit_roses, hearts.displayName(JassDeck.GERMAN))
+        assertEquals(R.string.suit_hearts, hearts.displayName(JassDeck.FRENCH))
+        assertEquals(R.string.suit_shields, mode("trump.spades").displayName(JassDeck.GERMAN))
         val obenabe = mode("obenabe")
         assertEquals("Obenabe is named the same on both decks",
             obenabe.displayName(JassDeck.FRENCH), obenabe.displayName(JassDeck.GERMAN))
+        // What a recording carries instead of the name: the same in every language.
+        assertEquals("roses", hearts.token(JassDeck.GERMAN))
+        assertEquals("hearts", hearts.token(JassDeck.FRENCH))
+        assertEquals("obenabe", obenabe.token(JassDeck.GERMAN))
 
         assertEquals("roses", CardLabel.parse("roses_jack")?.suit?.token)
-        assertEquals("Under", CardLabel.parse("roses_jack")?.rankName)
+        assertEquals(R.string.rank_jack, CardLabel.parse("roses_jack")?.rankName)
         assertEquals("spades", CardLabel.parse("spades_10")?.suit?.token)
-        assertEquals("10", CardLabel.parse("spades_10")?.rankName)
+        assertNull("a numbered rank reads as its number", CardLabel.parse("spades_10")?.rankName)
         assertEquals("Schellen follows Ecken, so red", true, CardLabel.parse("bells_ace")?.isRed)
         assertNull("an unknown suit is no card", CardLabel.parse("nonsense"))
     }
@@ -80,8 +85,8 @@ class JassScoringTest {
     @Test
     fun eachDeckOwnsFourSuitsWithMarksOfTheirOwn() {
         assertEquals("two decks", 2, JassDeck.entries.size)
-        assertEquals("Französisch", JassDeck.FRENCH.displayName)
-        assertEquals("Deutsch", JassDeck.GERMAN.displayName)
+        assertEquals(R.string.deck_french, JassDeck.FRENCH.displayName)
+        assertEquals(R.string.deck_german, JassDeck.GERMAN.displayName)
         for (deck in JassDeck.entries) {
             val suits = JassSuit.all.filter { it.deck == deck }
             assertEquals("$deck has four suits", 4, suits.size)

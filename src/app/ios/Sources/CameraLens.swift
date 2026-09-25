@@ -16,17 +16,17 @@ enum CameraLens: String, CaseIterable, Identifiable, Codable {
 
     var displayName: String {
         switch self {
-        case .wide:      return "Normal (1×)"
-        case .ultraWide: return "Weitwinkel (0,5×)"
+        case .wide:      return String(localized: "lens.wide", defaultValue: "Normal (1×)")
+        case .ultraWide: return String(localized: "lens.ultra_wide", defaultValue: "Weitwinkel (0,5×)")
         }
     }
 
     var explanation: String {
         switch self {
         case .wide:
-            return "Der übliche Bildausschnitt. Das Telefon muss höher über den Tisch, damit der ganze Stapel ins Quadrat passt."
+            return String(localized: "lens.wide.note", defaultValue: "Der übliche Bildausschnitt. Das Telefon muss höher über den Tisch, damit der ganze Stapel ins Quadrat passt.")
         case .ultraWide:
-            return "Sieht bei gleicher Höhe deutlich mehr Tisch. Die Karte belegt dafür weniger Pixel – die Aufnahme läuft darum in höherer Auflösung, damit dem Modell gleich viel Detail bleibt."
+            return String(localized: "lens.ultra_wide.note", defaultValue: "Sieht bei gleicher Höhe deutlich mehr Tisch. Die Karte belegt dafür weniger Pixel – die Aufnahme läuft darum in höherer Auflösung, damit dem Modell gleich viel Detail bleibt.")
         }
     }
 

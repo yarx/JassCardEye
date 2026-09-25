@@ -22,7 +22,7 @@ final class CameraService: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
 
         var message: String {
             switch self {
-            case .denied: return "Kein Kamerazugriff."
+            case .denied: return String(localized: "camera.denied", defaultValue: "Kein Kamerazugriff.")
             case .other(let text): return text
             }
         }
@@ -114,7 +114,7 @@ final class CameraService: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
         let device = AVCaptureDevice.default(for: .video)
         #endif
         guard let device, let input = try? AVCaptureDeviceInput(device: device) else {
-            return .other("Keine Kamera gefunden - die App braucht ein echtes Gerät.")
+            return .other(String(localized: "camera.none", defaultValue: "Keine Kamera gefunden - die App braucht ein echtes Gerät."))
         }
 
         session.beginConfiguration()
@@ -125,7 +125,7 @@ final class CameraService: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
 
         guard session.canAddInput(input) else {
             session.commitConfiguration()
-            return .other("Kamera konnte nicht eingebunden werden.")
+            return .other(String(localized: "camera.attach_failed", defaultValue: "Kamera konnte nicht eingebunden werden."))
         }
         session.addInput(input)
 
@@ -138,7 +138,7 @@ final class CameraService: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
         output.setSampleBufferDelegate(self, queue: frameQueue)
         guard session.canAddOutput(output) else {
             session.commitConfiguration()
-            return .other("Video-Ausgabe konnte nicht eingebunden werden.")
+            return .other(String(localized: "camera.output_failed.ios", defaultValue: "Video-Ausgabe konnte nicht eingebunden werden."))
         }
         session.addOutput(output)
 

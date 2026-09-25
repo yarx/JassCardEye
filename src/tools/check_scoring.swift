@@ -14,10 +14,11 @@
 //   7. The written result: a full pile with the last trick is 157, and the factor moves both sides.
 //
 //   swiftc -o /tmp/check_scoring src/app/ios/Sources/JassScoring.swift src/app/ios/Sources/JassDeck.swift \
-//       src/tools/check_scoring.swift && /tmp/check_scoring
+//       src/tools/localized_fallback.swift src/tools/check_scoring.swift && /tmp/check_scoring
 //
-// The three files import nothing but Foundation, so this also compiles and runs on Linux - where a
-// runner is free, unlike the macOS ones this repository's Actions budget has to ration.
+// The files import nothing but Foundation, so this also compiles and runs on Linux - where a runner
+// is free, unlike the macOS ones this repository's Actions budget has to ration. The names it checks
+// are the German ones; localized_fallback.swift says why.
 
 import Foundation
 
@@ -90,6 +91,12 @@ enum ScoringCheck {
         if let obenabe = mode("obenabe") {
             check(obenabe.displayName(deck: .german) == obenabe.displayName(deck: .french),
                   "Obenabe is named the same on both decks")
+        }
+        // What a recording carries instead of the name: the same in every language.
+        if let hearts = mode("trump.hearts"), let obenabe = mode("obenabe") {
+            check(hearts.token(deck: .german) == "roses", hearts.token(deck: .german))
+            check(hearts.token(deck: .french) == "hearts", hearts.token(deck: .french))
+            check(obenabe.token(deck: .german) == "obenabe", obenabe.token(deck: .german))
         }
 
         // The labels themselves, since everything above goes through them. A chip is a drawn mark

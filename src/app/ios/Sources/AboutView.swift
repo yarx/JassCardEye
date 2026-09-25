@@ -26,12 +26,13 @@ struct AboutView: View {
             Form {
                 Section {
                     VStack(spacing: 4) {
-                        Text("JassCardEye")
+                        Text(String(localized: "app.name", defaultValue: "JassCardEye"))
                             .font(.title2.weight(.bold))
-                        Text("Version \(AppInfo.versionLine)")
+                        Text(String(localized: "about.version", defaultValue: "Version \(AppInfo.versionLine)"))
                             .font(.callout)
                             .foregroundStyle(.secondary)
-                        Text(unlocked ? "Freigeschaltet" : "Demo")
+                        Text(unlocked ? String(localized: "purchase.unlocked", defaultValue: "Freigeschaltet")
+                                      : String(localized: "purchase.demo", defaultValue: "Demo"))
                             .font(.callout)
                             .foregroundStyle(unlocked ? .green : .secondary)
                     }
@@ -40,30 +41,30 @@ struct AboutView: View {
                 .listRowBackground(Color.clear)
 
                 Section {
-                    LabeledContent("Firma", value: About.publisher)
+                    LabeledContent(String(localized: "about.company", defaultValue: "Firma"), value: About.publisher)
                         .contentShape(Rectangle())
                         .onTapGesture(perform: publisherTapped)
-                    LabeledContent("E-Mail") {
+                    LabeledContent(String(localized: "about.email", defaultValue: "E-Mail")) {
                         Link(About.email, destination: About.emailURL)
                     }
-                    LabeledContent("Website") {
+                    LabeledContent(String(localized: "about.website", defaultValue: "Website")) {
                         Link(About.websiteLabel, destination: About.website)
                     }
                 } header: {
-                    Text("Herausgeber")
+                    Text(String(localized: "about.publisher", defaultValue: "Herausgeber"))
                 } footer: {
                     if toolsSwitched {
                         Text("Bild und Session aufzeichnen sind \(developerTools ? "eingeblendet" : "ausgeblendet").")
                     }
                 }
 
-                Section("Lizenz") {
+                Section(String(localized: "about.licence", defaultValue: "Lizenz")) {
                     Text(About.licenceText)
-                    Link("Lizenztext (AGPL-3.0)", destination: About.licence)
-                    Link("Quellcode", destination: About.source)
+                    Link(String(localized: "about.licence_link", defaultValue: "Lizenztext (AGPL-3.0)"), destination: About.licence)
+                    Link(String(localized: "about.source", defaultValue: "Quellcode"), destination: About.source)
                 }
 
-                Section("Erkennung") {
+                Section(String(localized: "about.recognition", defaultValue: "Erkennung")) {
                     Text(About.modelText)
                     Link("Ultralytics YOLO", destination: About.ultralytics)
                 }
@@ -72,30 +73,30 @@ struct AboutView: View {
                     ForEach(JassSuit.all, id: \.token) { suit in
                         creditRow(suit)
                     }
-                    Link("Lizenz CC BY-SA 4.0", destination: About.ccBySa)
+                    Link(String(localized: "about.credits_licence", defaultValue: "Lizenz CC BY-SA 4.0"), destination: About.ccBySa)
                 } header: {
-                    Text("Bildnachweis")
+                    Text(String(localized: "about.credits", defaultValue: "Bildnachweis"))
                 } footer: {
                     Text(About.creditsNote)
                 }
 
-                Section("Datenschutz") {
+                Section(String(localized: "about.privacy", defaultValue: "Datenschutz")) {
                     Text(About.privacyText)
                 }
 
-                Section("Bibliotheken") {
-                    Text("Ausser den Frameworks von Apple verwendet die App keine fremden Bibliotheken.")
+                Section(String(localized: "about.libraries", defaultValue: "Bibliotheken")) {
+                    Text(String(localized: "about.libraries_text.ios", defaultValue: "Ausser den Frameworks von Apple verwendet die App keine fremden Bibliotheken."))
                 }
             }
             // Links in the app's green, as on Android - the one accent both apps use for things to tap.
             .tint(.green)
-            .navigationTitle("Über")
+            .navigationTitle(String(localized: "about.title", defaultValue: "Über"))
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             #endif
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Fertig") { dismiss() }
+                    Button(String(localized: "common.done", defaultValue: "Fertig")) { dismiss() }
                 }
             }
         }
@@ -136,8 +137,8 @@ enum About {
     static let ultralytics = URL(string: "https://github.com/ultralytics/ultralytics")!
     static let ccBySa = URL(string: "https://creativecommons.org/licenses/by-sa/4.0/deed.de")!
 
-    static let licenceText = "JassCardEye ist freie Software unter der GNU Affero General Public License 3.0. Für den Vertrieb über den App Store und Google Play gilt eine zusätzliche Erlaubnis, beschrieben in der Lizenzdatei."
-    static let modelText = "Das Erkennungsmodell wurde mit Ultralytics YOLO11 (AGPL-3.0) trainiert, auf je einem französischen und einem Deutschschweizer Jassblatt."
-    static let creditsNote = "Die Farbzeichen stammen von Wikimedia Commons und sind unverändert übernommen."
-    static let privacyText = "Die App sammelt keine Daten. Die Kamerabilder werden auf dem Gerät ausgewertet und nicht gespeichert, die App hat keine Internetverbindung, kein Konto und keine Werbung. Auf dem Gerät bleiben nur deine Einstellungen."
+    static let licenceText = String(localized: "about.licence_text", defaultValue: "JassCardEye ist freie Software unter der GNU Affero General Public License 3.0. Für den Vertrieb über den App Store und Google Play gilt eine zusätzliche Erlaubnis, beschrieben in der Lizenzdatei.")
+    static let modelText = String(localized: "about.model_text", defaultValue: "Das Erkennungsmodell wurde mit Ultralytics YOLO11 (AGPL-3.0) trainiert, auf je einem französischen und einem Deutschschweizer Jassblatt.")
+    static let creditsNote = String(localized: "about.credits_note", defaultValue: "Die Farbzeichen stammen von Wikimedia Commons und sind unverändert übernommen.")
+    static let privacyText = String(localized: "about.privacy_text", defaultValue: "Die App sammelt keine Daten. Die Kamerabilder werden auf dem Gerät ausgewertet und nicht gespeichert, die App hat keine Internetverbindung, kein Konto und keine Werbung. Auf dem Gerät bleiben nur deine Einstellungen.")
 }

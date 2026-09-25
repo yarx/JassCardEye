@@ -32,8 +32,9 @@ alike. Each part of the code has its own README for the details.
   results of a run (`fetch_run.py`). [README](src/training/README.md)
 - **`src/scripts`** - what a training pod runs, the sweep that removes orphaned pods, and the release
   scripts of both apps. [Training pipeline](src/training/pipeline.md)
-- **`src/tools`** - checks (scoring, pile, dataset, run plan, pod sweep) and the generators of the icons and
-  the tick sound.
+- **`src/tools`** - checks (scoring, pile, dataset, run plan, pod sweep, app texts) and the generators of
+  the icons, the tick sound and the apps' string resources.
+- **`l10n`** - the texts of both apps, one file per language, German first. [Keys](l10n/keys.md)
 - **`src/web`** - the website: Angular, every page prerendered. [README](src/web/README.md)
 - **`data/cards`** - the 72 card scans the training images are rendered from, 36 per deck.
 - **`data/real/val`** - labelled real photos and video frames: the validation set.
@@ -42,7 +43,8 @@ alike. Each part of the code has its own README for the details.
 - **`context`** - project knowledge. [README](context/README.md)
 - **`.github`** - CI, the release of both apps, the training launch, the pod sweep and the website deploy.
 
-Datasets, training results, the exported models and the Xcode project are generated and never committed.
+Datasets, training results, the exported models, the Xcode project and the apps' string resources are
+generated and never committed.
 Both apps build without a model and then say so.
 
 The apps ship recognition variant C, one detector for all 72 cards. The thesis compares it with a
@@ -67,9 +69,12 @@ dotnet run -c Release --project src/tools/dataset/Checks
 
 # The Jass scoring and the pile, with nothing but Foundation
 swiftc -o /tmp/check_scoring src/app/ios/Sources/JassScoring.swift src/app/ios/Sources/JassDeck.swift \
-    src/tools/check_scoring.swift && /tmp/check_scoring
+    src/tools/localized_fallback.swift src/tools/check_scoring.swift && /tmp/check_scoring
 swiftc -o /tmp/check_pile src/app/ios/Sources/PileTracker.swift src/app/ios/Sources/StabilityRule.swift \
-    src/tools/check_pile.swift && /tmp/check_pile
+    src/tools/localized_fallback.swift src/tools/check_pile.swift && /tmp/check_pile
+
+# The texts of both apps: every language complete, every key used, the code's German defaults right
+python3 src/tools/l10n.py
 
 # The Android app: unit tests, a debug build and a release bundle without the upload key
 cd src/app/android

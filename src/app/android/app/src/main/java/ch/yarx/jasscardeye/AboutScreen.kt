@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -63,9 +64,9 @@ fun AboutSheet(developerTools: Boolean, onDeveloperToolsChange: (Boolean) -> Uni
         containerColor = Color.Black,
     ) {
         Box(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-            Text("Über", style = JassType.headline, color = Color.White, modifier = Modifier.align(Alignment.Center))
+            Text(stringResource(R.string.about_title), style = JassType.headline, color = Color.White, modifier = Modifier.align(Alignment.Center))
             TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.CenterEnd)) {
-                Text("Fertig", style = JassType.headline, color = JassColors.Green)
+                Text(stringResource(R.string.common_done), style = JassType.headline, color = JassColors.Green)
             }
         }
         Column(
@@ -76,53 +77,53 @@ fun AboutSheet(developerTools: Boolean, onDeveloperToolsChange: (Boolean) -> Uni
             verticalArrangement = Arrangement.spacedBy(22.dp),
         ) {
             Column(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("JassCardEye", style = JassType.title3.copy(fontWeight = FontWeight.Bold), color = Color.White)
-                Text("Version ${AppInfo.versionLine}", style = JassType.callout, color = JassColors.Secondary)
+                Text(stringResource(R.string.app_name), style = JassType.title3.copy(fontWeight = FontWeight.Bold), color = Color.White)
+                Text(stringResource(R.string.about_version, AppInfo.versionLine), style = JassType.callout, color = JassColors.Secondary)
                 // Under the version, so a tester's report says which app they were looking at.
-                Text(if (unlocked) "Freigeschaltet" else "Demo", style = JassType.callout,
+                Text(stringResource(if (unlocked) R.string.purchase_unlocked else R.string.purchase_demo), style = JassType.callout,
                     color = if (unlocked) JassColors.Green else JassColors.Secondary)
             }
 
             FormSection(
-                "Herausgeber",
+                stringResource(R.string.about_publisher),
                 footer = if (toolsSwitched) "Bild und Session aufzeichnen sind ${if (developerTools) "eingeblendet" else "ausgeblendet"}." else null,
             ) {
-                ValueRow("Firma", About.PUBLISHER,
+                ValueRow(stringResource(R.string.about_company), About.PUBLISHER,
                     Modifier.clickable(interactionSource = null, indication = null, onClick = ::publisherTapped))
                 FormDivider()
-                ValueRow("E-Mail") { LinkText(About.EMAIL, "mailto:${About.EMAIL}") }
+                ValueRow(stringResource(R.string.about_email)) { LinkText(About.EMAIL, "mailto:${About.EMAIL}") }
                 FormDivider()
-                ValueRow("Website") { LinkText(About.WEBSITE_LABEL, About.WEBSITE) }
+                ValueRow(stringResource(R.string.about_website)) { LinkText(About.WEBSITE_LABEL, About.WEBSITE) }
             }
 
-            FormSection("Lizenz") {
-                BodyRow(About.LICENCE_TEXT)
+            FormSection(stringResource(R.string.about_licence)) {
+                BodyRow(stringResource(R.string.about_licence_text))
                 FormDivider()
-                LinkRow("Lizenztext (AGPL-3.0)", About.LICENCE)
+                LinkRow(stringResource(R.string.about_licence_link), About.LICENCE)
                 FormDivider()
-                LinkRow("Quellcode", About.SOURCE)
+                LinkRow(stringResource(R.string.about_source), About.SOURCE)
             }
 
-            FormSection("Erkennung") {
-                BodyRow(About.MODEL_TEXT)
+            FormSection(stringResource(R.string.about_recognition)) {
+                BodyRow(stringResource(R.string.about_model_text))
                 FormDivider()
                 LinkRow("Ultralytics YOLO", About.ULTRALYTICS)
             }
 
-            FormSection("Bildnachweis", footer = About.CREDITS_NOTE) {
+            FormSection(stringResource(R.string.about_credits), footer = stringResource(R.string.about_credits_note)) {
                 for (suit in JassSuit.all) {
                     CreditRow(suit)
                     FormDivider()
                 }
-                LinkRow("Lizenz CC BY-SA 4.0", About.CC_BY_SA)
+                LinkRow(stringResource(R.string.about_credits_licence), About.CC_BY_SA)
             }
 
-            FormSection("Datenschutz") {
-                BodyRow(About.PRIVACY_TEXT)
+            FormSection(stringResource(R.string.about_privacy)) {
+                BodyRow(stringResource(R.string.about_privacy_text))
             }
 
-            FormSection("Bibliotheken") {
-                BodyRow(About.LIBRARIES_TEXT)
+            FormSection(stringResource(R.string.about_libraries)) {
+                BodyRow(stringResource(R.string.about_libraries_text_android))
                 FormDivider()
                 LinkRow("Apache License 2.0", About.APACHE)
             }
@@ -133,7 +134,11 @@ fun AboutSheet(developerTools: Boolean, onDeveloperToolsChange: (Boolean) -> Uni
 
 private const val UNLOCK_TAPS = 5
 
-/** The facts on the page, in one place. iOS's `AboutView.swift` says the same in the same order. */
+/**
+ * The facts on the page, in one place. iOS's `AboutView.swift` says the same in the same order; the texts around
+ * them are string resources, the libraries paragraph among them, which is Android's own: unlike the iOS app, which
+ * uses nothing but Apple's frameworks, this one ships libraries.
+ */
 internal object About {
     const val PUBLISHER = "YARX GmbH"
     const val EMAIL = "support@yarx.ch"
@@ -144,13 +149,6 @@ internal object About {
     const val ULTRALYTICS = "https://github.com/ultralytics/ultralytics"
     const val CC_BY_SA = "https://creativecommons.org/licenses/by-sa/4.0/deed.de"
     const val APACHE = "https://www.apache.org/licenses/LICENSE-2.0"
-
-    const val LICENCE_TEXT = "JassCardEye ist freie Software unter der GNU Affero General Public License 3.0. Für den Vertrieb über den App Store und Google Play gilt eine zusätzliche Erlaubnis, beschrieben in der Lizenzdatei."
-    const val MODEL_TEXT = "Das Erkennungsmodell wurde mit Ultralytics YOLO11 (AGPL-3.0) trainiert, auf je einem französischen und einem Deutschschweizer Jassblatt."
-    const val CREDITS_NOTE = "Die Farbzeichen stammen von Wikimedia Commons und sind unverändert übernommen."
-    const val PRIVACY_TEXT = "Die App sammelt keine Daten. Die Kamerabilder werden auf dem Gerät ausgewertet und nicht gespeichert, die App hat keine Internetverbindung, kein Konto und keine Werbung. Auf dem Gerät bleiben nur deine Einstellungen."
-    // Android's own line: unlike the iOS app, which uses nothing but Apple's frameworks, this one ships libraries.
-    const val LIBRARIES_TEXT = "Die App verwendet AndroidX mit Jetpack Compose und CameraX, LiteRT von Google und die Kotlin-Standardbibliothek, alle unter der Apache License 2.0."
 }
 
 /** The mark as it appears in the app, its name linking to the Commons page, then author and licence. */
@@ -162,7 +160,12 @@ private fun CreditRow(suit: JassSuit) {
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Box(Modifier.clearAndSetSemantics { }) { SuitMark(suit, 24.dp) }
-        Box(Modifier.weight(1f)) { LinkText(suit.name, suit.markCredit.page) }
-        Text(suit.markCredit.attribution, style = JassType.footnote, color = JassColors.Secondary, textAlign = TextAlign.End)
+        Box(Modifier.weight(1f)) { LinkText(stringResource(suit.name), suit.markCredit.page) }
+        Text(suit.markCredit.attribution(), style = JassType.footnote, color = JassColors.Secondary, textAlign = TextAlign.End)
     }
 }
+
+/** Author and licence, as the row credits them: "Jensche · CC BY-SA 4.0". */
+@Composable
+private fun MarkCredit.attribution(): String =
+    "$author · ${if (publicDomain) stringResource(R.string.about_public_domain) else "CC BY-SA 4.0"}"

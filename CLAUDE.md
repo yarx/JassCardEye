@@ -47,5 +47,7 @@ details live - read it before changing anything.
   the Release workflow's run number + 1200.
 - Recognition: after the thesis only variant C (the detector) is pursued; A and B stay trainable.
 - Generated output is never committed: `output/`, `artifacts/`, exported models and `models.json`,
-  the Xcode project, the thesis PDFs.
+  the Xcode project, the apps' string resources, the thesis PDFs.
+- Every text a user reads in the apps is a key in `l10n/de.json`; `src/tools/l10n.py` builds both apps'
+  resources from it and checks them.
 - The checks CI runs, and how to run them locally, are listed in the root `README.md`.

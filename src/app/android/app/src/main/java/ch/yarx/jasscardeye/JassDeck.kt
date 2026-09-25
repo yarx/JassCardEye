@@ -1,6 +1,11 @@
 package ch.yarx.jasscardeye
 
+import androidx.annotation.StringRes
+
 // Port of src/app/ios/Sources/JassDeck.swift.
+//
+// The names are string resources rather than text: this file stays free of Android types so the unit
+// tests run on the JVM, and a resource id is resolved by whoever has a Context - the screen, as a rule.
 
 /**
  * The two decks a Swiss Jass is played with. A game uses one or the other, never both, so the deck is
@@ -11,7 +16,8 @@ enum class JassDeck(val id: String) {
     GERMAN("german");
 
     /** What it is called: "Französisch", "Deutsch". */
-    val displayName: String get() = if (this == FRENCH) "Französisch" else "Deutsch"
+    @get:StringRes
+    val displayName: Int get() = if (this == FRENCH) R.string.deck_french else R.string.deck_german
 
     /**
      * Its four suits, shown next to the name wherever the deck is offered - seeing the marks is the
@@ -40,21 +46,22 @@ enum class JassDeck(val id: String) {
  *   Rosen ≙ Herz, Schellen ≙ Ecken, Schilten ≙ Schaufel. Scoring and trump therefore only ever deal
  *   with four suits, whichever deck is on the table.
  * @property name The suit on its own: "Schaufel", "Schilten". What TalkBack reads for the mark and
- *   what stands under the mark in the compact picker.
+ *   what stands under the mark in the compact picker. A filename carries the [token] instead, which does
+ *   not change with the language.
  * @property markCredit Who drew the mark and under which licence - what the *Über* page credits. A column of
  *   this table, so no suit can be drawn without being credited.
  */
-data class JassSuit(val token: String, val deck: JassDeck, val role: String, val name: String, val markCredit: MarkCredit) {
+data class JassSuit(val token: String, val deck: JassDeck, val role: String, @StringRes val name: Int, val markCredit: MarkCredit) {
     companion object {
         val all: List<JassSuit> = listOf(
-            JassSuit("clubs", JassDeck.FRENCH, "clubs", "Kreuz", MarkCredit("SuitClubs.svg", "F l a n k e r", publicDomain = true)),
-            JassSuit("diamonds", JassDeck.FRENCH, "diamonds", "Ecken", MarkCredit("Ecke_Neu.svg", "Jensche", publicDomain = false)),
-            JassSuit("hearts", JassDeck.FRENCH, "hearts", "Herz", MarkCredit("Herz_Neu.svg", "Jensche", publicDomain = false)),
-            JassSuit("spades", JassDeck.FRENCH, "spades", "Schaufel", MarkCredit("Schaufel_Neu.svg", "Jensche", publicDomain = false)),
-            JassSuit("acorns", JassDeck.GERMAN, "clubs", "Eichel", MarkCredit("Eichel_Neu.svg", "Jensche", publicDomain = false)),
-            JassSuit("roses", JassDeck.GERMAN, "hearts", "Rosen", MarkCredit("Rosen_Neu.svg", "Jensche", publicDomain = false)),
-            JassSuit("bells", JassDeck.GERMAN, "diamonds", "Schellen", MarkCredit("Schellen_Neu.svg", "Jensche", publicDomain = false)),
-            JassSuit("shields", JassDeck.GERMAN, "spades", "Schilten", MarkCredit("Schilten_Neu.svg", "Jensche", publicDomain = false)),
+            JassSuit("clubs", JassDeck.FRENCH, "clubs", R.string.suit_clubs, MarkCredit("SuitClubs.svg", "F l a n k e r", publicDomain = true)),
+            JassSuit("diamonds", JassDeck.FRENCH, "diamonds", R.string.suit_diamonds, MarkCredit("Ecke_Neu.svg", "Jensche", publicDomain = false)),
+            JassSuit("hearts", JassDeck.FRENCH, "hearts", R.string.suit_hearts, MarkCredit("Herz_Neu.svg", "Jensche", publicDomain = false)),
+            JassSuit("spades", JassDeck.FRENCH, "spades", R.string.suit_spades, MarkCredit("Schaufel_Neu.svg", "Jensche", publicDomain = false)),
+            JassSuit("acorns", JassDeck.GERMAN, "clubs", R.string.suit_acorns, MarkCredit("Eichel_Neu.svg", "Jensche", publicDomain = false)),
+            JassSuit("roses", JassDeck.GERMAN, "hearts", R.string.suit_roses, MarkCredit("Rosen_Neu.svg", "Jensche", publicDomain = false)),
+            JassSuit("bells", JassDeck.GERMAN, "diamonds", R.string.suit_bells, MarkCredit("Schellen_Neu.svg", "Jensche", publicDomain = false)),
+            JassSuit("shields", JassDeck.GERMAN, "spades", R.string.suit_shields, MarkCredit("Schilten_Neu.svg", "Jensche", publicDomain = false)),
         )
 
         private val byToken = all.associateBy { it.token }
@@ -79,7 +86,6 @@ data class JassSuit(val token: String, val deck: JassDeck, val role: String, val
  */
 data class MarkCredit(val file: String, val author: String, val publicDomain: Boolean) {
     val page: String get() = "https://commons.wikimedia.org/wiki/File:$file"
-    val attribution: String get() = "$author · ${if (publicDomain) "gemeinfrei" else "CC BY-SA 4.0"}"
 }
 
 /**
@@ -99,9 +105,11 @@ class CardLabel private constructor(val rank: String, val suit: JassSuit) {
     /**
      * The rank as a Jass player says it. The model emits English tokens; on screen the Jass names
      * belong there. They are the same on both decks - a Swiss player calls the jack Under and the
-     * queen Ober whether the card shows a Schilte or a Schaufel.
+     * queen Ober whether the card shows a Schilte or a Schaufel. Null for the numbered ranks, which read
+     * as their [rank].
      */
-    val rankName: String get() = jassRanks[rank] ?: rank
+    @get:StringRes
+    val rankName: Int? get() = jassRanks[rank]
 
     /**
      * Whether the suit is printed in a warm colour, which is also the pair the multipliers of a
@@ -118,6 +126,9 @@ class CardLabel private constructor(val rank: String, val suit: JassSuit) {
             return CardLabel(parts[1], suit)
         }
 
-        private val jassRanks = mapOf("jack" to "Under", "queen" to "Ober", "king" to "König", "ace" to "Ass")
+        private val jassRanks = mapOf(
+            "jack" to R.string.rank_jack, "queen" to R.string.rank_queen,
+            "king" to R.string.rank_king, "ace" to R.string.rank_ace,
+        )
     }
 }

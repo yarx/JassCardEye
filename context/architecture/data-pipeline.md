@@ -465,9 +465,10 @@ sorted:
 | `compute` | where the model runs: `Core ML, all compute units` on iOS, `GPU` or `CPU` on Android |
 | `confidence_threshold` | the live threshold detections were filtered with |
 | `stability_rule`, `stability_frames` | `run` or `majority`, and its number of frames |
-| `deck`, `camera_lens`, `discipline` | the deck in play, the lens, and the discipline being counted |
+| `deck`, `camera_lens`, `discipline` | the deck in play, the lens, and the discipline being counted - as a token that does not change with the app's language: the trump suit's token for the deck in play (`roses`), or the id of a discipline without trump (`obenabe`, `slalom.obe`) |
 | `started_at` | when the recording started, UTC ISO 8601 |
 
+In file names the discipline is that token with anything but letters and digits dropped (`slalomobe`).
 When a recording ends, both apps pack its three files - `session_<time>_<discipline>.mov` (an `.mp4` on
 Android), `.csv` and `.json` - into **`session_<time>_<discipline>.zip`**, with a folder of that name
 inside that holds them. The ZIP lies in the iPhone app's Documents folder, and on Android in

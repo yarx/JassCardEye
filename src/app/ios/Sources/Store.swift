@@ -87,7 +87,7 @@ final class Store {
                 break
             }
         } catch {
-            problem = "Der Kauf ist nicht zustande gekommen. Bitte versuche es später nochmals."
+            problem = String(localized: "purchase.failed", defaultValue: "Der Kauf ist nicht zustande gekommen. Bitte versuche es später nochmals.")
         }
     }
 
@@ -100,12 +100,12 @@ final class Store {
         } catch StoreKitError.userCancelled {
             return
         } catch {
-            problem = "Die Käufe konnten gerade nicht abgefragt werden."
+            problem = String(localized: "purchase.query_failed", defaultValue: "Die Käufe konnten gerade nicht abgefragt werden.")
             return
         }
         await refresh()
         if !unlocked {
-            problem = "Mit dieser Apple-ID ist kein Kauf vorhanden."
+            problem = String(localized: "purchase.nothing_to_restore.ios", defaultValue: "Mit dieser Apple-ID ist kein Kauf vorhanden.")
         }
     }
 

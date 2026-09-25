@@ -47,6 +47,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -94,9 +95,9 @@ fun StartSheet(model: LiveDetectionModel, onStart: (CountingMode, LastTrick, Int
             Box(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp)) {
                 // The way out: nothing has started yet.
                 TextButton(onClick = onCancel, modifier = Modifier.align(Alignment.CenterStart)) {
-                    Text("Abbrechen", style = JassType.body, color = JassColors.Green)
+                    Text(stringResource(R.string.common_cancel), style = JassType.body, color = JassColors.Green)
                 }
-                Text("Neue Zählung", style = JassType.headline, color = Color.White, modifier = Modifier.align(Alignment.Center))
+                Text(stringResource(R.string.start_title), style = JassType.headline, color = Color.White, modifier = Modifier.align(Alignment.Center))
             }
 
             Column(
@@ -106,8 +107,8 @@ fun StartSheet(model: LiveDetectionModel, onStart: (CountingMode, LastTrick, Int
                     .padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp),
             ) {
-                Group("Blatt") {
-                    Segmented(JassDeck.entries.map { it.displayName }, JassDeck.entries.indexOf(model.deck)) { index ->
+                Group(stringResource(R.string.start_deck)) {
+                    Segmented(JassDeck.entries.map { stringResource(it.displayName) }, JassDeck.entries.indexOf(model.deck)) { index ->
                         model.deck = JassDeck.entries[index]
                     }
                     // The four marks of whatever was just chosen - the fastest way to check the deck on the table
@@ -117,12 +118,12 @@ fun StartSheet(model: LiveDetectionModel, onStart: (CountingMode, LastTrick, Int
                     }
                 }
 
-                Group("Trumpf") { ModeRow(trumpModes, mode, model.deck) { mode = it } }
-                Group("Ohne Trumpf") { ModeRow(openModes, mode, model.deck) { mode = it } }
+                Group(stringResource(R.string.start_trump)) { ModeRow(trumpModes, mode, model.deck) { mode = it } }
+                Group(stringResource(R.string.start_no_trump)) { ModeRow(openModes, mode, model.deck) { mode = it } }
 
                 // One line, in the place a line always is, so the layout never jumps between chosen and unchosen.
                 Text(
-                    mode?.hint ?: "Wähle, was gespielt wurde.",
+                    stringResource(mode?.hint ?: R.string.start_choose),
                     style = JassType.footnote,
                     color = if (mode == null) JassColors.Secondary else Color.White,
                     minLines = 2,
@@ -130,13 +131,13 @@ fun StartSheet(model: LiveDetectionModel, onStart: (CountingMode, LastTrick, Int
                     modifier = Modifier.fillMaxWidth(),
                 )
 
-                Group("Letzter Stich") {
-                    Segmented(LastTrick.entries.map { it.shortName }, LastTrick.entries.indexOf(lastTrick)) { index ->
+                Group(stringResource(R.string.start_last_trick)) {
+                    Segmented(LastTrick.entries.map { stringResource(it.shortName) }, LastTrick.entries.indexOf(lastTrick)) { index ->
                         lastTrick = LastTrick.entries[index]
                     }
                 }
 
-                Group("Faktor") { MultiplierBar(multiplier, onChange = { multiplier = it }) }
+                Group(stringResource(R.string.start_factor)) { MultiplierBar(multiplier, onChange = { multiplier = it }) }
             }
 
             // Pinned rather than scrolled to: on a phone small enough to need scrolling, the one control that must
@@ -156,7 +157,7 @@ fun StartSheet(model: LiveDetectionModel, onStart: (CountingMode, LastTrick, Int
                     .navigationBarsPadding()
                     .height(52.dp),
             ) {
-                Text("Zählen starten", style = JassType.headline)
+                Text(stringResource(R.string.count_start), style = JassType.headline)
             }
         }
     }
@@ -198,13 +199,14 @@ private fun ModeRow(entries: List<CountingMode>, chosenMode: CountingMode?, deck
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         for (entry in entries) {
             val chosen = entry == chosenMode
+            val name = stringResource(entry.displayName(deck))
             Column(
                 Modifier
                     .weight(1f)
                     .clip(RoundedCornerShape(10.dp))
                     .background(if (chosen) JassColors.Green else Color.White.copy(alpha = 0.13f))
                     .clickable { onPick(entry) }
-                    .semantics { contentDescription = entry.displayName(deck); selected = chosen }
+                    .semantics { contentDescription = name; selected = chosen }
                     .padding(vertical = 9.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -218,7 +220,7 @@ private fun ModeRow(entries: List<CountingMode>, chosenMode: CountingMode?, deck
                             tint = if (chosen) Color.Black else Color.White, modifier = Modifier.size(24.dp))
                     }
                 }
-                Text(entry.shortName(deck), style = JassType.caption2, color = if (chosen) Color.Black else Color.White,
+                Text(stringResource(entry.shortName(deck)), style = JassType.caption2, color = if (chosen) Color.Black else Color.White,
                     maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }

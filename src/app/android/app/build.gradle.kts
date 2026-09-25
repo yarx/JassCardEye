@@ -1,4 +1,5 @@
 import java.util.Properties
+import javax.inject.Inject
 
 plugins {
     alias(libs.plugins.android.application)
@@ -71,6 +72,36 @@ val checkReleaseInputs = tasks.register("checkReleaseInputs") {
 tasks.named { it in setOf("minifyReleaseWithR8", "packageRelease", "packageReleaseBundle", "packageReleaseUniversalApk") }
     .configureEach { dependsOn(checkReleaseInputs) }
 
+// The app's texts are not written here but in l10n/<language>.json at the repository root, which the iOS app is
+// built from too. src/tools/l10n.py checks them and turns them into values/strings.xml per language; the result is
+// a generated resource folder under build/, never committed, and a text missing in one language stops the build.
+abstract class GenerateStrings @Inject constructor(private val exec: ExecOperations) : DefaultTask() {
+    @get:InputDirectory
+    abstract val texts: DirectoryProperty
+
+    @get:InputFile
+    abstract val generator: RegularFileProperty
+
+    @get:OutputDirectory
+    abstract val outputDir: DirectoryProperty
+
+    @TaskAction
+    fun generate() {
+        outputDir.get().asFile.deleteRecursively()
+        exec.exec { commandLine("python3", generator.get().asFile.path, "--android", outputDir.get().asFile.path) }
+    }
+}
+val generateStrings = tasks.register<GenerateStrings>("generateStrings") {
+    description = "Writes the app's strings.xml from l10n/*.json."
+    texts.set(rootProject.file("../../../l10n"))
+    generator.set(rootProject.file("../../tools/l10n.py"))
+}
+androidComponents {
+    onVariants { variant ->
+        variant.sources.res?.addGeneratedSourceDirectory(generateStrings, GenerateStrings::outputDir)
+    }
+}
+
 android {
     namespace = "ch.yarx.jasscardeye"
     // 37.2 because the Compose BOM requires it; targetSdk and minSdk are decided separately below.
@@ -130,6 +161,9 @@ android {
     androidResources {
         // Memory-mapped straight out of the APK; a compressed model would have to be copied first.
         noCompress += "tflite"
+        // The languages the app speaks - those of l10n/. Also keeps the libraries' own texts to them, so a
+        // system dialog inside the app does not answer in a language the app itself does not know.
+        localeFilters += listOf("de")
     }
 
     compileOptions {

@@ -1,7 +1,10 @@
 package ch.yarx.jasscardeye
 
+import androidx.annotation.StringRes
+
 // Port of src/app/ios/Sources/JassScoring.swift - kept free of Android types, so the unit tests hold the
-// numbers to account on the JVM exactly as src/tools/check_scoring.swift does for iOS.
+// numbers to account on the JVM exactly as src/tools/check_scoring.swift does for iOS. Its names are string
+// resources, resolved by whoever shows them.
 //
 // Behind the variety of disciplines there are only three value tables - trump, Obenabe, Undenufe -
 // and every discipline the app offers keeps one of them for the whole round. That is not a
@@ -60,18 +63,23 @@ enum class LastTrick(val id: String) {
     UNUSED("unused");
 
     /** For the segmented control, where three options share the width of a phone. */
-    val shortName: String
+    @get:StringRes
+    val shortName: Int
         get() = when (this) {
-            MINE -> "Wir"
-            OPPONENTS -> "Gegner"
-            UNUSED -> "Keiner"
+            MINE -> R.string.last_trick_mine
+            OPPONENTS -> R.string.last_trick_opponents
+            UNUSED -> R.string.last_trick_none
         }
 
-    /** What it adds under the score, once the round is being counted. Null when there is nothing to explain. */
-    val note: String?
+    /**
+     * What it adds under the score, once the round is being counted, formatted with
+     * [JassRules.LAST_TRICK_BONUS]. Null when there is nothing to explain.
+     */
+    @get:StringRes
+    val note: Int?
         get() = when (this) {
-            MINE -> "+${JassRules.LAST_TRICK_BONUS} letzter Stich"
-            OPPONENTS -> "letzter Stich bei den Gegnern"
+            MINE -> R.string.last_trick_note_mine
+            OPPONENTS -> R.string.last_trick_note_opponents
             UNUSED -> null
         }
 }
@@ -92,7 +100,7 @@ sealed interface ModeKind {
      * Played without trump: its own name, its own symbol, and a short name for a narrow cell.
      * [mark] names the drawn arrow in `Symbols`, the counterpart of the SF Symbol iOS shows.
      */
-    data class Open(val label: String, val mark: String, val shortName: String) : ModeKind
+    data class Open(@StringRes val label: Int, val mark: String, @StringRes val shortName: Int) : ModeKind
 }
 
 /**
@@ -108,7 +116,7 @@ data class CountingMode(
     val kind: ModeKind,
     val trumpValues: Map<String, Int>,
     val normalValues: Map<String, Int>,
-    val hint: String,
+    @StringRes val hint: Int,
 ) {
     /** The role whose cards score as trump, or null for a discipline played without one. */
     val trumpRole: String? get() = (kind as? ModeKind.Trump)?.role
@@ -117,8 +125,9 @@ data class CountingMode(
     fun markSuit(deck: JassDeck): JassSuit? = trumpRole?.let { JassSuit.playing(it, deck) }
 
     /** The name under the mark. Shorter than [displayName] where a cell is narrow. */
-    fun shortName(deck: JassDeck): String = when (kind) {
-        is ModeKind.Trump -> suitName(deck)
+    @StringRes
+    fun shortName(deck: JassDeck): Int = when (kind) {
+        is ModeKind.Trump -> suitName(kind.role, deck)
         is ModeKind.Open -> kind.shortName
     }
 
@@ -126,15 +135,24 @@ data class CountingMode(
      * The name for the deck on the table: the same trump reads "Herz" on a French deck and "Rosen" on
      * a German one. Derived from the suit table rather than rewritten from a stored string.
      */
-    fun displayName(deck: JassDeck): String = when (kind) {
-        is ModeKind.Trump -> suitName(deck)
+    @StringRes
+    fun displayName(deck: JassDeck): Int = when (kind) {
+        is ModeKind.Trump -> suitName(kind.role, deck)
         is ModeKind.Open -> kind.label
     }
 
-    private fun suitName(deck: JassDeck): String {
-        val role = trumpRole ?: return id
-        return JassSuit.playing(role, deck)?.name ?: role
-    }
+    /**
+     * The discipline as the session info and the names of captures and recordings carry it: the trump suit's
+     * token for the deck in play ("roses"), or the id of a discipline without trump ("slalom.obe"). Unlike
+     * [displayName] it does not change with the language, because the dataset tool reads it and sessions from
+     * different phones have to compare.
+     */
+    fun token(deck: JassDeck): String = markSuit(deck)?.token ?: id
+
+    /** Both decks own all four roles, so a trump always has its suit - a resource id has no text to fall back on. */
+    @StringRes
+    private fun suitName(role: String, deck: JassDeck): Int =
+        checkNotNull(JassSuit.playing(role, deck)) { "No suit plays $role in $deck" }.name
 
     /**
      * Card points of one model label ("spades_10", "roses_9") in this discipline. Compared by role
@@ -163,28 +181,30 @@ object JassModes {
     // The suit order matches the class-ID order (clubs, diamonds, hearts, spades), so the menu reads
     // the same way the model numbers its classes.
     private val suits: List<CountingMode> = DeckLayout.suits.map { suit ->
-        CountingMode("trump.$suit", ModeKind.Trump(suit), ValueTables.trump, ValueTables.plain, "Under 20, Nell 14")
+        CountingMode("trump.$suit", ModeKind.Trump(suit), ValueTables.trump, ValueTables.plain, R.string.mode_trump_hint)
     }
 
-    private fun noTrump(id: String, label: String, values: Map<String, Int>, hint: String, mark: String, short: String) =
+    private fun noTrump(id: String, @StringRes label: Int, values: Map<String, Int>, @StringRes hint: Int, mark: String, @StringRes short: Int) =
         CountingMode(id, ModeKind.Open(label, mark, short), values, values, hint)
 
-    val obenabe = noTrump("obenabe", "Obenabe", ValueTables.obenabe, "Ass zählt 11, Acht 8", "arrow.down", "Obenabe")
+    val obenabe = noTrump("obenabe", R.string.mode_obenabe_name, ValueTables.obenabe, R.string.mode_obenabe_hint,
+        "arrow.down", R.string.mode_obenabe_short)
 
-    val undenufe = noTrump("undenufe", "Undenufe", ValueTables.undenufe, "Sechs zählt 11, Ass 0", "arrow.up", "Undenufe")
+    val undenufe = noTrump("undenufe", R.string.mode_undenufe_name, ValueTables.undenufe, R.string.mode_undenufe_hint,
+        "arrow.up", R.string.mode_undenufe_short)
 
     // Slalom alternates obenabe and undeufe from trick to trick; which of the two it started with is
     // what decides the values for the round, the same way Guschti's start decides its.
-    val slalomObe = noTrump("slalom.obe", "Slalom (oben)", ValueTables.obenabe,
-        "Obe begonnen – gezählt wird obenabe", "arrow.up.arrow.down", "Slalom ↓")
+    val slalomObe = noTrump("slalom.obe", R.string.mode_slalom_obe_name, ValueTables.obenabe,
+        R.string.mode_slalom_obe_hint, "arrow.up.arrow.down", R.string.mode_slalom_obe_short)
 
-    val slalomUnde = noTrump("slalom.unde", "Slalom (unten)", ValueTables.undenufe,
-        "Unde begonnen – gezählt wird undenufe", "arrow.up.arrow.down", "Slalom ↑")
+    val slalomUnde = noTrump("slalom.unde", R.string.mode_slalom_unde_name, ValueTables.undenufe,
+        R.string.mode_slalom_unde_hint, "arrow.up.arrow.down", R.string.mode_slalom_unde_short)
 
     // One entry, no direction to ask about: Guschti always begins obenabe, and the switch to undeufe
     // after the fourth trick changes how it is played, not what the cards are worth.
-    val guschti = noTrump("guschti", "Guschti", ValueTables.obenabe,
-        "4 Stiche obenabe, dann 5 undeufe – gezählt wird obenabe", "arrow.triangle.branch", "Guschti")
+    val guschti = noTrump("guschti", R.string.mode_guschti_name, ValueTables.obenabe,
+        R.string.mode_guschti_hint, "arrow.triangle.branch", R.string.mode_guschti_short)
 
     val all: List<CountingMode> = suits + listOf(obenabe, undenufe, slalomObe, slalomUnde, guschti)
 

@@ -14,7 +14,8 @@ All code lives under `src/`; data, documentation and infrastructure stay at the 
 | `src/tools/dataset/` | .NET 10 solution that makes and inspects the training data (see below). |
 | `src/training/` | Training (`train.py`), fetching a finished run (`fetch_run.py`), export for both apps (`export.py`). |
 | `src/scripts/` | What the training pod and the release workflow run, e.g. `run_training.sh`, `release_ios.sh`, `release_android.sh`. |
-| `src/tools/` | Checks and generators around the rest: `check_scoring.swift`, `check_pile.swift`, `check_run_plan.py`, `check_dataset.py`, `compare_capture.py`, the icon and sound makers. |
+| `src/tools/` | Checks and generators around the rest: `check_scoring.swift`, `check_pile.swift`, `check_run_plan.py`, `check_dataset.py`, `compare_capture.py`, `l10n.py` (the apps' texts), the icon and sound makers. |
+| `l10n/` | The texts of both apps, one file per language with German as the source, and `keys.md` with the context of every key. |
 | `src/app/ios/`, `src/app/android/` | The two counting apps. |
 | `src/web/` | The project website, https://jasscardeye.yarx.ch. |
 | `data/` | The source of truth for data: card scans (`cards/`), real photos without a card (`negatives/`), the real validation set (`real/val/`). |
@@ -79,6 +80,11 @@ Inside, both apps are built from the same parts:
   invariants are checked on both platforms, by `src/tools/check_scoring.swift` and `JassScoringTest`.
 - **`Store`** is the one place that knows whether the points are unlocked, read from the App Store or
   Google Play rather than from a flag of the app's own.
+
+Neither app writes its texts itself. They live in `l10n/<language>.json`, and `src/tools/l10n.py` turns
+them into a String Catalog for iOS and `strings.xml` for Android when each app is built, so a text
+reaches both apps or neither. The same script checks that every language has every key and that both
+apps use each of them.
 
 The apps have no network code of their own and no server behind them. How to build, test and release is in
 `src/app/ios/README.md` and `src/app/android/README.md`.

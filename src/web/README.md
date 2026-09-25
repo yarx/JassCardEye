@@ -134,14 +134,14 @@ to follow.
 | Start | features: both decks, disciplines, last trick, factor ×1 to ×8, corrections, recognition on the phone | `JassScoring` and `JassDeck` in both apps; the descriptions in the store listings |
 | Start, Support | free demo with blurred points; one purchase of CHF 5; family sharing on the iPhone only | `Store` and `ScoreRow` in both apps; `src/app/ios/JassCardEye.storekit`; the price itself is set in the store consoles |
 | Start | «Bald im App Store und bei Google Play» | the release: replace with links to both stores once version 1.0.0 is published |
-| Anleitung, Support | steps and labels: «Zählen starten», «Fertig», «Karte fehlt?», «Reset», «Rückmeldung», «Kauf wiederherstellen», «Über» | `HomeView`/`HomeScreen`, `StartSheet`, `ScanView`/`ScanScreen`, `AboutView`/`AboutScreen` |
+| Anleitung, Support | steps and labels: «Zählen starten», «Fertig», «Karte fehlt?», «Reset», «Rückmeldung», «Kauf wiederherstellen», «Über» | `l10n/de.json`, which both apps are built from (`count.start`, `common.done`, `scan.missing_card`, `scan.reset`, `settings.feedback`, `purchase.restore`, `about.title`); where they appear: `HomeView`/`HomeScreen`, `StartSheet`, `ScanView`/`ScanScreen`, `AboutView`/`AboutScreen` |
 | Anleitung | scan rules: tilt up to 60°, the whole card in the square, no card in motion, light | `context/architecture/data-pipeline.md` - the rules describe the training data, so new training data can change them |
 | Anleitung | the two decks | the scans in `data/cards/`; maker and names of the decks under *Blatt* in `context/glossary.md` |
 | Support | devices: iPhones from iOS 17, Android phones from Android 10 | `src/app/ios/project.yml` (deployment target, device family), `src/app/android/app/build.gradle.kts` (minSdk) |
 | Support | what goes online: nothing from the app's own code; the purchase asks the store at start, when buying and when restoring | `Store` in both apps; `AndroidManifest.xml` and "What ships" in `src/app/android/README.md` (`INTERNET` comes with Play Billing, the app's own code does not use it) |
-| Datenschutz | what is stored, permissions, purchase, backup | `src/web/privacy.md`, which has to say the same; the settings keys in `LiveDetectionModel` of both apps; `AndroidManifest.xml`; `src/app/ios/PrivacyInfo.xcprivacy`; `Store`; the privacy paragraph of the Über page |
+| Datenschutz | what is stored, permissions, purchase, backup | `src/web/privacy.md`, which has to say the same; the settings keys in `LiveDetectionModel` of both apps; `AndroidManifest.xml`; `src/app/ios/PrivacyInfo.xcprivacy`; `Store`; the privacy paragraph of the Über page, `about.privacy_text` in `l10n/de.json` |
 | Impressum | publisher, address, UID, contact | YARX GmbH - the publisher on the Über page of both apps and in `LICENSE` |
-| Lizenzen | licence, source code link, recognition model, suit mark credits | `LICENSE`; `About` in `AboutView.swift` and `AboutScreen.kt`; the suit table `JassSuit.all` in `JassDeck` |
+| Lizenzen | licence, source code link, recognition model, suit mark credits | `LICENSE`; the `about.*` texts in `l10n/de.json` and the links in `About` in `AboutView.swift` and `AboutScreen.kt`; the suit table `JassSuit.all` in `JassDeck` |
 | Lizenzen | libraries | Android: the dependencies in `src/app/android/app/build.gradle.kts`; website: `3rdpartylicenses.txt` after a build |
 
 The source code link is `https://github.com/yarx/JassCardEye`, the same on the Lizenzen page and in both

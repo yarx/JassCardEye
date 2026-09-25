@@ -62,7 +62,10 @@ object FrameCapture {
         return "capture_${stamp()}_${verdict}_${modeToken(mode)}.jpg"
     }
 
-    /** The mode name can carry a symbol - nothing but letters and digits belongs in a file name. */
+    /**
+     * A discipline's token - see [CountingMode.token] - may carry a dot ("slalom.obe"), which would read as a
+     * second file extension: nothing but letters and digits belongs in a file name.
+     */
     private fun modeToken(mode: String): String = mode.lowercase().filter { it.isLetterOrDigit() }
 
     /** Down to milliseconds: two taps in the same second must not overwrite each other. */

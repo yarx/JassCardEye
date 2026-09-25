@@ -1,6 +1,7 @@
 package ch.yarx.jasscardeye
 
 import android.util.Size
+import androidx.annotation.StringRes
 
 // Port of src/app/ios/Sources/CameraLens.swift.
 
@@ -19,16 +20,18 @@ enum class CameraLens(val id: String) {
     /** The 0.5× lens. Not on every phone, so it is only offered where it exists. */
     ULTRA_WIDE("ultraWide");
 
-    val displayName: String
+    @get:StringRes
+    val displayName: Int
         get() = when (this) {
-            WIDE -> "Normal (1×)"
-            ULTRA_WIDE -> "Weitwinkel (0,5×)"
+            WIDE -> R.string.lens_wide
+            ULTRA_WIDE -> R.string.lens_ultra_wide
         }
 
-    val explanation: String
+    @get:StringRes
+    val explanation: Int
         get() = when (this) {
-            WIDE -> "Der übliche Bildausschnitt. Das Telefon muss höher über den Tisch, damit der ganze Stapel ins Quadrat passt."
-            ULTRA_WIDE -> "Sieht bei gleicher Höhe deutlich mehr Tisch. Die Karte belegt dafür weniger Pixel – die Aufnahme läuft darum in höherer Auflösung, damit dem Modell gleich viel Detail bleibt."
+            WIDE -> R.string.lens_wide_note
+            ULTRA_WIDE -> R.string.lens_ultra_wide_note
         }
 
     /**
