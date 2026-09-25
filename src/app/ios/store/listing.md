@@ -59,7 +59,7 @@ jassender Mensch schon geprüft hat, steht in `l10n/README.md`.
 | Schlüsselwörter (max. 100) | Jass,chibre,cartes,points,compter,atout,Obenabe,Undenufe,Slalom,Guschti,Suisse,jeu de cartes |
 | In-App-Kauf: Anzeigename / Beschreibung | Compter les points / Rend lisibles les points comptés. |
 | TestFlight: Beta-App-Beschreibung | JassCardEye compte les points après le Jass. Pose les cartes l’une après l’autre devant la caméra, l’app reconnaît la carte du dessus et fait le total au fur et à mesure. |
-| Screenshots | `store/screenshots/6.5/fr/*.png`, sobald aufgenommen (siehe «Screenshots»); bis dahin die deutschen |
+| Screenshots | `store/screenshots/6.5/fr/*.png` (1284 × 2778), siehe «Screenshots» → «Je Sprache» |
 
 **Beschreibung:**
 
@@ -81,7 +81,7 @@ jassender Mensch schon geprüft hat, steht in `l10n/README.md`.
 | Schlüsselwörter (max. 100) | Jass,carte,punti,contare,briscola,Obenabe,Undenufe,Slalom,Guschti,Svizzera,Ticino,gioco di carte |
 | In-App-Kauf: Anzeigename / Beschreibung | Contare i punti / Rende leggibili i punti contati. |
 | TestFlight: Beta-App-Beschreibung | JassCardEye conta i punti dopo il Jass. Posa le carte una dopo l’altra davanti alla fotocamera, l’app riconosce la carta in cima e fa il totale man mano. |
-| Screenshots | `store/screenshots/6.5/it/*.png`, sobald aufgenommen (siehe «Screenshots»); bis dahin die deutschen |
+| Screenshots | `store/screenshots/6.5/it/*.png` (1284 × 2778), siehe «Screenshots» → «Je Sprache» |
 
 **Beschreibung:**
 
@@ -103,7 +103,7 @@ jassender Mensch schon geprüft hat, steht in `l10n/README.md`.
 | Schlüsselwörter (max. 100) | Jass,Schieber,cards,points,count,score,trump,Obenabe,Undenufe,Slalom,Guschti,Swiss,card game |
 | In-App-Kauf: Anzeigename / Beschreibung | Count points / Makes the counted points readable. |
 | TestFlight: Beta-App-Beschreibung | JassCardEye counts the points after a game of Jass. Lay the cards down one by one in front of the camera, the app recognises the top card and keeps adding up. |
-| Screenshots | `store/screenshots/6.5/en/*.png`, sobald aufgenommen (siehe «Screenshots»); bis dahin die deutschen |
+| Screenshots | `store/screenshots/6.5/en/*.png` (1284 × 2778), siehe «Screenshots» → «Je Sprache» |
 
 **Beschreibung:**
 
@@ -256,4 +256,13 @@ SIMCTL_CHILD_JASSCARDEYE_SCREENSHOTS=1 SIMCTL_CHILD_JASSCARDEYE_VIDEO=/Pfad/zum/
 ```
 
 Die Knöpfe heissen dann so, wie `l10n/<Sprache>.json` sie nennt («Commencer à compter», «Inizia a
-contare», «Start counting»). Aufgenommen ist noch keine weitere Sprache.
+contare», «Start counting»).
+
+**Stand der Sätze fr, it, en.** Aufgenommen auf «iPhone 17 Pro Max» (iOS 26.5) mit dem Modell von
+Version 1.0.1 (Lauf `20260917-0000-75d6401`) und dem Testvideo aus `src/tools/make_test_video.py`, das
+zwölf französische Karten aus `data/cards` auf einen Stapel legt. Sie zeigen die Demo wie die
+ausgelieferte App: verwischte Punkte, «Punkte freischalten» ohne Preis, keine Entwicklerwerkzeuge, kein
+Abschnitt «Erkennungsmodell». Ohne Preis, weil ein Screenshot je Sprache in mehreren Ländern erscheint
+und der Simulator den Preis aus der Sandbox mit amerikanischem Storefront lädt ($5.99); aufgenommen
+wurde darum mit einer abweichenden Bundle-ID, zu der die Sandbox kein Produkt kennt. Die deutschen
+Bilder sind die älteren, oben beschriebenen.

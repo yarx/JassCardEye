@@ -135,7 +135,8 @@ one language at a time, German unless a language is named.
 - **A new language** needs its locale in `angular.json` and `src/app/languages.ts`, its pages, its
   `messages.<language>.json`, its privacy policy as `privacy.<language>.md`, and its folder in
   `pagesByLanguage` in `src/app/app.routes.ts`. The app texts are separate, in `l10n/`.
-- **The screenshots** are the German ones in every language until the stores have screenshots per language.
+- **The screenshots** on the start page are per language, `public/screens/<language>/`; the German ones
+  lie directly in `public/screens/`.
 
 ## Writing the pages
 
@@ -168,7 +169,8 @@ one language at a time, German unless a language is named.
 - `public/icon-512.png` is the Play Store icon, the same file as `src/app/android/store/icon-512.png`, drawn
   by `src/tools/make_android_icon.py` from the app icon. It serves as favicon, touch icon and logo.
 - `public/screens/start.jpg`, `neue-zaehlung.jpg` and `zaehlen.jpg` are the first three iPhone store
-  screenshots (`src/app/ios/store/screenshots/6.9/`), scaled to 644 × 1400 and saved as JPEG. Their
+  screenshots (`src/app/ios/store/screenshots/6.9/`), scaled to 644 × 1400 and saved as JPEG; the same
+  three of every other language lie in `public/screens/<language>/`, from `6.9/<language>/`. Their
   width and height are written into each `home.html`, which keeps the page from jumping while they load; new
   screenshots need the same size or new numbers there.
 

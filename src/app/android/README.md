@@ -225,7 +225,9 @@ screenshots differ from that: they show readable points and, with all four model
 *Erkennungsmodell* section; taking them again is open (`store/listing.md`).
 
 **Another language** is the same run with the app set to it first, and the images in a folder of that
-language (`store/screenshots/fr/`), the German ones staying where they are:
+language (`store/screenshots/fr/`), the German ones staying where they are. Without a filmed pile,
+`python3 src/tools/make_test_video.py test-video.mp4` renders one from the card scans that counts the
+same way every time:
 
 ```bash
 adb shell cmd locale set-app-locales ch.yarx.jasscardeye --locales fr-CH   # it-CH, en-GB

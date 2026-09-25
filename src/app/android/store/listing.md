@@ -37,6 +37,11 @@ zeigen die Einstellungen den Abschnitt *Erkennungsmodell*, den die veröffentlic
 Modell nicht hat. Der Zählbildschirm zeigt die Bildrate des Emulators (2 FPS). Sie neu aufzunehmen ist
 offen.
 
+Die Sätze `fr/`, `it/` und `en/` sind neuer: aufgenommen mit dem Modell von Version 1.0.1 (Lauf
+`20260917-0000-75d6401`) und dem Testvideo aus `src/tools/make_test_video.py`, mit der Demo wie in der
+veröffentlichten App - verwischte Punkte, «Punkte freischalten», kein *Erkennungsmodell*. Der
+Zählbildschirm zeigt auch hier die Bildrate des Emulators (1 FPS).
+
 **Beschreibung (max. 4000):**
 
 > JassCardEye zählt nach dem Jass die Punkte. Karten der Reihe nach vor die Kamera legen, die App
@@ -63,7 +68,7 @@ Jassbegriffe folgen `l10n/<Sprache>.json`; welche davon ein jassender Mensch sch
 | Sprache | Französisch – fr-FR |
 | Kurzbeschreibung (max. 80) | Compte les cartes après le Jass avec la caméra, carte après carte. |
 | In-App-Produkt: Name / Beschreibung | Compter les points / Rend lisibles les points comptés. |
-| Screenshots Telefon | `store/screenshots/fr/*.png`, sobald aufgenommen (Ablauf: «Store screenshots» in `src/app/android/README.md`, die Sprache mit `adb shell cmd locale set-app-locales ch.yarx.jasscardeye --locales fr-CH`); bis dahin die deutschen |
+| Screenshots Telefon | `store/screenshots/fr/*.png` (1080 × 2160), aufgenommen mit der App auf `fr-CH` - siehe «Zu den Screenshots» |
 
 **Beschreibung:**
 
@@ -82,7 +87,7 @@ Jassbegriffe folgen `l10n/<Sprache>.json`; welche davon ein jassender Mensch sch
 | Sprache | Italienisch – it-IT |
 | Kurzbeschreibung (max. 80) | Conta le carte dopo il Jass con la fotocamera, carta dopo carta. |
 | In-App-Produkt: Name / Beschreibung | Contare i punti / Rende leggibili i punti contati. |
-| Screenshots Telefon | `store/screenshots/it/*.png`, sobald aufgenommen (Ablauf: «Store screenshots» in `src/app/android/README.md`, die Sprache mit `adb shell cmd locale set-app-locales ch.yarx.jasscardeye --locales it-CH`); bis dahin die deutschen |
+| Screenshots Telefon | `store/screenshots/it/*.png` (1080 × 2160), aufgenommen mit der App auf `it-CH` - siehe «Zu den Screenshots» |
 
 **Beschreibung:**
 
@@ -101,7 +106,7 @@ Jassbegriffe folgen `l10n/<Sprache>.json`; welche davon ein jassender Mensch sch
 | Sprache | Englisch (Vereinigtes Königreich) – en-GB |
 | Kurzbeschreibung (max. 80) | Counts the cards after a game of Jass with the camera, card by card. |
 | In-App-Produkt: Name / Beschreibung | Count points / Makes the counted points readable. |
-| Screenshots Telefon | `store/screenshots/en/*.png`, sobald aufgenommen (Ablauf: «Store screenshots» in `src/app/android/README.md`, die Sprache mit `adb shell cmd locale set-app-locales ch.yarx.jasscardeye --locales en-GB`); bis dahin die deutschen |
+| Screenshots Telefon | `store/screenshots/en/*.png` (1080 × 2160), aufgenommen mit der App auf `en-GB` - siehe «Zu den Screenshots» |
 
 **Beschreibung:**
 

@@ -16,8 +16,8 @@ export class Home {
   ];
 
   protected readonly screens = [
-    { src: 'screens/start.jpg', alt: 'Écran d’accueil avec le dernier comptage' },
-    { src: 'screens/neue-zaehlung.jpg', alt: 'Nouveau comptage : jeu, variante, dernier pli et facteur' },
-    { src: 'screens/zaehlen.jpg', alt: 'Écran de comptage : la carte du dessus est reconnue, les points suivent' },
+    { src: 'screens/fr/start.jpg', alt: 'Écran d’accueil avec le dernier comptage' },
+    { src: 'screens/fr/neue-zaehlung.jpg', alt: 'Nouveau comptage : jeu, variante, dernier pli et facteur' },
+    { src: 'screens/fr/zaehlen.jpg', alt: 'Écran de comptage : la carte du dessus est reconnue, les points suivent' },
   ];
 }

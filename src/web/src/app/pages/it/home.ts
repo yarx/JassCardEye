@@ -16,8 +16,8 @@ export class Home {
   ];
 
   protected readonly screens = [
-    { src: 'screens/start.jpg', alt: 'Schermata iniziale con l’ultimo conteggio' },
-    { src: 'screens/neue-zaehlung.jpg', alt: 'Nuovo conteggio: mazzo, variante, ultima presa e fattore' },
-    { src: 'screens/zaehlen.jpg', alt: 'Schermata di conteggio: la carta in cima è riconosciuta, i punti si aggiornano' },
+    { src: 'screens/it/start.jpg', alt: 'Schermata iniziale con l’ultimo conteggio' },
+    { src: 'screens/it/neue-zaehlung.jpg', alt: 'Nuovo conteggio: mazzo, variante, ultima presa e fattore' },
+    { src: 'screens/it/zaehlen.jpg', alt: 'Schermata di conteggio: la carta in cima è riconosciuta, i punti si aggiornano' },
   ];
 }

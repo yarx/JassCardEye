@@ -14,7 +14,7 @@ All code lives under `src/`; data, documentation and infrastructure stay at the 
 | `src/tools/dataset/` | .NET 10 solution that makes and inspects the training data (see below). |
 | `src/training/` | Training (`train.py`), fetching a finished run (`fetch_run.py`), export for both apps (`export.py`). |
 | `src/scripts/` | What the training pod and the release workflow run, e.g. `run_training.sh`, `release_ios.sh`, `release_android.sh`. |
-| `src/tools/` | Checks and generators around the rest: `check_scoring.swift`, `check_pile.swift`, `check_run_plan.py`, `check_dataset.py`, `compare_capture.py`, `l10n.py` (the apps' texts), the icon and sound makers. |
+| `src/tools/` | Checks and generators around the rest: `check_scoring.swift`, `check_pile.swift`, `check_run_plan.py`, `check_dataset.py`, `compare_capture.py`, `l10n.py` (the apps' texts), `make_test_video.py` (a pile for the simulator and the emulator), the icon and sound makers. |
 | `l10n/` | The texts of both apps, one file per language with German as the source, and `keys.md` with the context of every key. |
 | `src/app/ios/`, `src/app/android/` | The two counting apps. |
 | `src/web/` | The project website, https://jasscardeye.yarx.ch. |

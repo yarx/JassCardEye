@@ -169,6 +169,8 @@ stability rule, pile and score behave as on a phone.
 - A note on the picture says *Simulator: Testvideo statt Kamera (Endlosschleife).*;
   `JASSCARDEYE_SCREENSHOTS=1` leaves it out for store screenshots (see `store/listing.md`). The
   simulator offers no torch and no lens choice.
+- Without a filmed pile, `python3 src/tools/make_test_video.py test-video.mp4` renders one from the card
+  scans: twelve French cards laid one by one, the same on every run.
 
 ## Demo and purchase
 

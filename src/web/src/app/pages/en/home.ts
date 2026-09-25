@@ -16,8 +16,8 @@ export class Home {
   ];
 
   protected readonly screens = [
-    { src: 'screens/start.jpg', alt: 'Home screen with the last count' },
-    { src: 'screens/neue-zaehlung.jpg', alt: 'New count: deck, discipline, last trick and factor' },
-    { src: 'screens/zaehlen.jpg', alt: 'Counting screen: the top card is recognised, the points keep up' },
+    { src: 'screens/en/start.jpg', alt: 'Home screen with the last count' },
+    { src: 'screens/en/neue-zaehlung.jpg', alt: 'New count: deck, discipline, last trick and factor' },
+    { src: 'screens/en/zaehlen.jpg', alt: 'Counting screen: the top card is recognised, the points keep up' },
   ];
 }
