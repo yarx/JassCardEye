@@ -146,6 +146,7 @@ scatter of the heap), `TopCardJitter` (0.32), and `AlignedStackRadius` (0.014) w
 `AlignedStackRotationDegrees` (2.5) for the residual mess of a squared deck.
 
 Not modelled: tilted or standing cards, a hand in the frame, and shadows cast by anything but the cards.
+The 3D counting sequences render those (see *3D counting sequences*).
 
 ## Label variants (three approaches A/B/C)
 
@@ -486,6 +487,67 @@ What the tool marks as an **anomaly** is a heuristic, not ground truth
 - **Back and forth** - two cards taking turns in runs of up to three frames, at least four runs long.
 - **Count against its neighbourhood** - a card was counted while most of the four frames on either side
   named another.
+
+## 3D counting sequences
+
+The 2D generator draws still piles. What sets off false alarms at a real table is the moment in between:
+a hand carrying a card over the pile, the card in the air with real motion blur, hard shadows of the hand
+and the phone, the pile half covered, the phone shaking. `src/tools/render3d` renders that as a 3D
+animation in Blender and takes training frames from it at the video's rate, each labelled from the
+scene, which is known exactly. It is an experiment next to the 2D generator, not a replacement: the
+2D generator stays what a training run uses.
+
+**The scene** comes from a seed, in pure Python (`scene.py`): the same deck rules as the 2D generator
+(one deck per pile, no card twice), a scattered pile of 0-35 cards, and one card laid onto it in 1.6 s -
+brought in by a hand from the player's side, lowered, let go a centimetre above the pile, settling with
+a little slide. Cards are 57 × 89 × 0.3 mm slabs with rounded corners and the scan as their face; the
+hand is a simple model built from metaballs, holding the card with the thumb on top of its edge; the
+phone is a body behind the camera that casts a shadow without being seen. Table patterns are procedural
+(felt, solid, speckle, checker, tartan), the light a small lamp with hard shadows, a large diffuse source,
+or one of Blender's HDRI panoramas. The camera follows the 2D generator's ranges - tilt 0-60°, field of
+view 45-55°, 1.8-4.2 card heights away - and is held by hand, steady, or sweeping sideways.
+
+**The label** is decided from geometry, with the 2D generator's thresholds. The top card is the one
+resting on the pile; a laid card becomes it once it has settled. Its corners are projected; how much of
+its face is visible is measured by casting rays from the camera to points on it, at the start, middle and
+end of the open shutter, because a hand smearing across the card hides it too; its smear is how far the
+corners move while the shutter is open. A frame is a positive when the card lies 3 px clear of the
+border, at least 95 % visible and smeared by at most 0.09 card heights; a negative when it is at most
+85 % in frame, at most 70 % visible, smeared by 0.25 or more, or when there is no card on the table yet;
+the rest is ambiguous and is neither rendered nor written into a dataset. The labels are written in the
+format above, so a dataset of 3D frames trains with `train.py` unchanged.
+
+**Reproducibility** is weaker than the 2D generator's, on purpose: the same seed gives the same scene -
+cards, poses, light, camera path - but not the same pixels on every machine, since Blender renders
+differently on another GPU or on a CPU. `test_scene.py` holds the scene to its promises in CI.
+
+**Speed.** On an M4 Max, EEVEE renders 9-10 frames/s (7-8 with Blender's start-up and the labelling),
+Cycles about 1 frame/s; the 2D generator makes about 120 images/s. By Blender's benchmark database an A100
+renders Cycles at about three quarters of the M4 Max's rate; EEVEE on an A100 has not been measured.
+
+**What it does to false counts.** Three detectors (YOLO11n, 20 epochs, 640 px, validated on
+`data/real/val`) were trained on 3000 images each - 2D only, 3D only (EEVEE), and half of each - and
+asked about every real frame the way the apps ask (`src/training/evaluate_real.py`: the best card of the
+deck in play at the threshold 0.6, single frames, no stability rule):
+
+| Trained on | mAP50 | correct | wrong card | missed | card on an empty frame | false counts |
+|---|---|---|---|---|---|---|
+| 3000 2D | 0.54 | 141 | 54 | 318 | 51 | 105 (12.9 %) |
+| 3000 3D | 0.59 | 194 | 124 | 195 | 25 | 149 (18.3 %) |
+| 1500 2D + 1500 3D | 0.65 | 225 | 60 | 228 | 37 | 97 (11.9 %) |
+
+Out of 513 frames with a card and 300 without. The 3D frames alone teach the model to abstain - half the
+cards on empty frames, which is what the hand and the card in flight are there for - but more than
+double the wrong cards: a few hundred sequences show far fewer different piles than 3000 independent 2D
+scenes. Mixed, the model is better on every count but the wrong cards, which stay where they were. The
+shipped model, trained on 200 000 2D images, is at 448 correct, 17 wrong, 48 missed and 115 cards on empty
+frames on the same test - so the empty frames are its weak side, and the side 3D frames help with.
+
+**Where that leaves 3D:** a supplement for the hard frames, not the standard. It renders at less than a
+tenth of the 2D generator's rate, and on its own it names the wrong card more often; mixed in, it lowered
+the false counts at the same number of images. Whether that holds at the size of a real run - 200 000 2D
+images with some tens of thousands of 3D frames - is the next thing to measure, and a change to the
+training run's data is the owner's decision.
 
 ## Consistency checks
 

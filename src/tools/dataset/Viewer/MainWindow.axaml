@@ -1,13 +1,14 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:sessions="clr-namespace:JassCardEye.Dataset.Viewer.Sessions"
+        xmlns:simulate="clr-namespace:JassCardEye.Dataset.Viewer.Simulate"
         x:Class="JassCardEye.Dataset.Viewer.MainWindow"
         Title="JassCardEye Dataset Tool" Width="1240" Height="820" MinWidth="900" MinHeight="600"
         Background="#141414"
         KeyDown="OnKeyDown">
 
-    <!-- A sidebar with the four sections, and the section on the right. Browse and Label share the
-         image area and the status bar; Extract and Analyse sessions have pages of their own. -->
+    <!-- A sidebar with the five sections, and the section on the right. Browse and Label share the
+         image area and the status bar; Extract, Analyse sessions and Simulate table have pages of their own. -->
     <Grid ColumnDefinitions="210,*" Background="#141414">
 
         <!-- Sidebar -->
@@ -46,6 +47,13 @@
                             <TextBlock Text="Analyse sessions" VerticalAlignment="Center"/>
                         </StackPanel>
                     </ListBoxItem>
+                    <ListBoxItem ToolTip.Tip="Render a counting sequence in 3D with Blender and see the label of every frame next to the 2D generator">
+                        <StackPanel Orientation="Horizontal" Spacing="11">
+                            <PathIcon Width="15" Height="15"
+                                      Data="M12,2 L21,7 V17 L12,22 L3,17 V7 Z M12,4.3 L5,8.2 L12,12.1 L19,8.2 Z M5,10 V16 L11,19.4 V13.3 Z M13,13.3 V19.4 L19,16 V10 Z"/>
+                            <TextBlock Text="Simulate table" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </ListBoxItem>
                 </ListBox>
             </DockPanel>
         </Border>
@@ -54,6 +62,9 @@
 
             <!-- Analyse sessions: a page of its own, over the whole column -->
             <sessions:SessionsPage Name="SessionsPage" Grid.Row="0" Grid.RowSpan="4" IsVisible="False"/>
+
+            <!-- Simulate table: a page of its own too -->
+            <simulate:SimulatePage Name="SimulatePage" Grid.Row="0" Grid.RowSpan="4" IsVisible="False"/>
 
             <!-- Browse: header and toolbar -->
             <StackPanel Grid.Row="0" Name="BrowseHeader" Classes="header">

@@ -1,0 +1,99 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:simulate="clr-namespace:JassCardEye.Dataset.Viewer.Simulate"
+             x:Class="JassCardEye.Dataset.Viewer.Simulate.SimulatePage">
+
+    <!-- Simulate table: the parameters of a counting sequence on the left, the rendered 3D frame with its label
+         in the middle, the 2D generator's picture of the same deck and seed on the right, and the frames of
+         the sequence below. -->
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <StackPanel Grid.Row="0" Classes="header">
+            <TextBlock Text="Simulate table" Classes="title"/>
+            <TextBlock Classes="subtitle" TextWrapping="Wrap"
+                       Text="A card laid onto a pile, rendered in 3D by Blender: hand, card in flight, hard shadows and a shaking phone. Every frame carries the label a dataset would get, next to the 2D generator's picture of the same deck and seed."/>
+            <TextBlock Name="BlenderStatus" Classes="path" Margin="0,8,0,0"/>
+        </StackPanel>
+
+        <Grid Grid.Row="1" ColumnDefinitions="250,*,*" Margin="20,0,20,12">
+
+            <Border Classes="card" Margin="0,0,12,0">
+                <ScrollViewer>
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Deck" Classes="field"/>
+                        <ComboBox Name="DeckBox" HorizontalAlignment="Stretch" SelectedIndex="0">
+                            <ComboBoxItem Content="French"/>
+                            <ComboBoxItem Content="German"/>
+                        </ComboBox>
+                        <TextBlock Text="Cards already on the pile" Classes="field"/>
+                        <NumericUpDown Name="PlayedBox" Minimum="0" Maximum="35" Increment="1" Value="8" FormatString="0"/>
+                        <TextBlock Text="Table" Classes="field"/>
+                        <ComboBox Name="TableBox" HorizontalAlignment="Stretch" SelectedIndex="0">
+                            <ComboBoxItem Content="random"/>
+                            <ComboBoxItem Content="felt"/>
+                            <ComboBoxItem Content="solid"/>
+                            <ComboBoxItem Content="speckle"/>
+                            <ComboBoxItem Content="checker"/>
+                            <ComboBoxItem Content="tartan"/>
+                        </ComboBox>
+                        <TextBlock Text="Light" Classes="field"/>
+                        <ComboBox Name="LightBox" HorizontalAlignment="Stretch" SelectedIndex="0">
+                            <ComboBoxItem Content="random"/>
+                            <ComboBoxItem Content="lamp"/>
+                            <ComboBoxItem Content="diffuse"/>
+                            <ComboBoxItem Content="hdri"/>
+                        </ComboBox>
+                        <CheckBox Name="HandBox" Content="A hand lays the card" IsChecked="True"/>
+                        <TextBlock Text="Camera" Classes="field"/>
+                        <ComboBox Name="CameraBox" HorizontalAlignment="Stretch" SelectedIndex="0">
+                            <ComboBoxItem Content="handheld"/>
+                            <ComboBoxItem Content="steady"/>
+                            <ComboBoxItem Content="sweep"/>
+                        </ComboBox>
+                        <TextBlock Text="Seed" Classes="field"/>
+                        <NumericUpDown Name="SeedBox" Minimum="0" Maximum="1000000000" Increment="1" Value="1" FormatString="0"/>
+                        <TextBlock Text="Renderer" Classes="field"/>
+                        <ComboBox Name="EngineBox" HorizontalAlignment="Stretch" SelectedIndex="0"
+                                  ToolTip.Tip="EEVEE renders about ten times faster; Cycles traces the light and is closer to a photo">
+                            <ComboBoxItem Content="EEVEE"/>
+                            <ComboBoxItem Content="Cycles"/>
+                        </ComboBox>
+                        <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
+                            <Button Name="RenderButton" Content="Render" Click="OnRender" Classes="accent"/>
+                            <Button Name="CancelButton" Content="Stop" Click="OnCancel" IsEnabled="False"/>
+                        </StackPanel>
+                        <Button Name="OpenButton" Content="Open a render…" Click="OnOpen"
+                                ToolTip.Tip="A folder under output/simulate that an earlier render left"/>
+                        <TextBlock Name="ProgressText" Classes="subtitle" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+
+            <Grid Grid.Column="1" RowDefinitions="Auto,*,Auto" Margin="0,0,6,0">
+                <TextBlock Text="3D - rendered by Blender" Classes="field" Margin="0,0,0,6"/>
+                <Border Grid.Row="1" Background="#1b1b1b" CornerRadius="8">
+                    <simulate:SimulationFrameView Name="FrameView"/>
+                </Border>
+                <SelectableTextBlock Grid.Row="2" Name="FrameText" TextWrapping="Wrap" Margin="0,8,0,0"/>
+            </Grid>
+
+            <Grid Grid.Column="2" RowDefinitions="Auto,*,Auto" Margin="6,0,0,0">
+                <TextBlock Text="2D - the generator, same deck, seed and tilt" Classes="field" Margin="0,0,0,6"/>
+                <Border Grid.Row="1" Background="#1b1b1b" CornerRadius="8">
+                    <simulate:SimulationFrameView Name="CounterpartView"/>
+                </Border>
+                <SelectableTextBlock Grid.Row="2" Name="CounterpartText" TextWrapping="Wrap" Margin="0,8,0,0"/>
+            </Grid>
+        </Grid>
+
+        <Border Grid.Row="2" Classes="card" Margin="20,0,20,16">
+            <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto">
+                <TextBlock Name="FrameNumber" Classes="field" Width="120" VerticalAlignment="Center"/>
+                <Slider Grid.Column="1" Name="FrameSlider" Minimum="0" Maximum="0" TickFrequency="1" IsSnapToTickEnabled="True"
+                        ValueChanged="OnFrameChanged" IsEnabled="False"/>
+                <TextBlock Grid.Column="2" Text="← →" Classes="subtitle" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                <SelectableTextBlock Grid.Row="1" Grid.ColumnSpan="3" Name="SequenceText" TextWrapping="Wrap" Margin="0,6,0,0"/>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>
