@@ -17,7 +17,8 @@ permissions:
 #
 # - dataset: builds the .NET side, generates a small synthetic dataset, rebuilds the derived parts of
 #   the real one, and checks the run plan, the dataset's consistency, the pod watchdog, when a training
-#   run counts as finished, and how the dataset tool reads a session's recognition log.
+#   run counts as finished, the scenes of the 3D counting sequences, and how the dataset tool reads a
+#   session's recognition log.
 # - scoring: the Jass scoring and the pile, compiled on Linux with nothing but Foundation.
 # - android: the Android unit tests, a debug build and a shrunk release bundle without a key.
 #
@@ -76,6 +77,12 @@ jobs:
       # its model from. It follows what each variant left behind, not its exit code.
       - name: 🏁 Check when a training run counts as finished
         run: python src/tools/test_manifest.py
+
+      # What a seed means for a 3D counting sequence is decided without Blender, so the promises its
+      # labels rest on - the same scene for the same seed, one deck per pile, the laid card flat on top
+      # at the end - are checked here rather than by rendering.
+      - name: 🎬 Check the scenes of the 3D counting sequences
+        run: python src/tools/render3d/test_scene.py
 
       # The rules of the dataset tool that need no window. The recognition log of a recorded session is
       # read strictly - a row that goes missing would put every later detection on the wrong frame -

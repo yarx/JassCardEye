@@ -138,7 +138,7 @@ dotnet run -c Release --project src/tools/dataset/Viewer
 ```
 
 The window is called **JassCardEye Dataset Tool**, and its sidebar says "Dataset tool". The sidebar
-holds four sections, each showing only its own controls. The status bar at the bottom names the file
+holds five sections, each showing only its own controls. The status bar at the bottom names the file
 on screen and offers ← and → to page through and −, Fit and + to zoom.
 
 ### Browse dataset
@@ -300,6 +300,32 @@ one timeline. The columns of the recognition log and what counts as an anomaly a
 On screen and in file names frames count from 1, as in Extract frames; the log's `frame` column counts
 from 0.
 
+### Simulate table
+
+A card laid onto a pile, rendered in 3D by Blender, and the label every frame of it would get in a
+dataset. The renderer, its parameters and its rules are in
+[src/tools/render3d/README.md](../render3d/README.md); what the experiment is for is in
+[data-pipeline.md, "3D counting sequences"](../../../context/architecture/data-pipeline.md#3d-counting-sequences).
+
+- **On the left** the scene: **Deck**, **Cards already on the pile**, **Table**, **Light**, whether **a
+  hand lays the card**, how the **camera** moves (held by hand, steady, or sweeping sideways), the
+  **seed**, and the **renderer** - EEVEE, about ten times faster, or Cycles. `random` draws the value
+  from the seed, so the same settings give the same scene again.
+- **Render** writes the scene into a job and starts Blender without a window; the progress counts the
+  frames, **Stop** ends it. Two seconds of counting - one card laid, 66 frames - take ten seconds with
+  EEVEE on an M4 Max. The frames land in `output/simulate/<scene>/`, and **Open a render…** shows one
+  again.
+- **In the middle** the 3D frame with its label: the top card's outline in green for a positive, red for
+  a negative and amber for the ambiguous band a dataset leaves out, a dot on its first corner, and below
+  it why - how much of the card is visible, how it moves, whether a card is in the air.
+- **On the right** the 2D generator's picture of the same deck, seed and pile at the same camera tilt,
+  drawn in the tool by the generator itself.
+- **Below** the frames of the sequence, on a slider or with ← and →, and what the sequence holds: how
+  many positives, negatives and ambiguous frames, which renderer on which device, and how fast.
+
+It needs Blender - `$BLENDER`, `/Applications/Blender.app` or `blender` on the path - and has to be run
+from the repository, where the renderer and the card scans are.
+
 ### Keys
 
 | Key | Where | Action |
@@ -320,6 +346,7 @@ from 0.
 | Delete | correcting | delete the sample (press twice) |
 | Space, X | Review frames | mark or unmark the frame |
 | ← → | Analyse sessions | previous / next frame of the session |
+| ← → | Simulate table | previous / next frame of the sequence |
 
 Letters and digits do nothing while a text field has the focus.
 
@@ -337,8 +364,11 @@ For repeatable screenshots the tool can be driven from the environment, without 
 
 | Variable | Effect |
 |---|---|
-| `JASSCARDEYE_MODE` | `label`, `extract`, `review` or `sessions`: start in that section instead of Browse dataset |
-| `JASSCARDEYE_OPEN` | what to open – a dataset, the photos to label, the frames to review, or a session video |
+| `JASSCARDEYE_MODE` | `label`, `extract`, `review`, `sessions` or `simulate`: start in that section instead of Browse dataset |
+| `JASSCARDEYE_OPEN` | what to open – a dataset, the photos to label, the frames to review, a session video, or a rendered sequence |
+| `JASSCARDEYE_RENDER` | `1`: render a sequence with the page's settings (Simulate table) |
+| `JASSCARDEYE_SEED` | the seed of that sequence |
+| `JASSCARDEYE_FRAME` | how many frames on from the first to show (Simulate table) |
 | `JASSCARDEYE_FILE` | show the first image whose name contains this text |
 | `JASSCARDEYE_TAB` | `anomalies`, `cards` or `settings`: the tab of Analyse sessions to show |
 | `JASSCARDEYE_EDIT` | `1`: switch correcting on |

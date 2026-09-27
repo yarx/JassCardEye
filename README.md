@@ -32,6 +32,8 @@ alike. Each part of the code has its own README for the details.
   results of a run (`fetch_run.py`). [README](src/training/README.md)
 - **`src/scripts`** - what a training pod runs, the sweep that removes orphaned pods, and the release
   scripts of both apps. [Training pipeline](src/training/pipeline.md)
+- **`src/tools/render3d`** - counting sequences rendered in 3D by Blender, as an experiment next to the 2D
+  generator. [README](src/tools/render3d/README.md)
 - **`src/tools`** - checks (scoring, pile, dataset, run plan, pod sweep) and the generators of the icons and
   the tick sound.
 - **`src/web`** - the website: Angular, every page prerendered. [README](src/web/README.md)
@@ -63,6 +65,7 @@ python3 src/tools/check_run_plan.py
 python3 src/tools/check_dataset.py output/dataset data/real/val
 python3 src/tools/test_sweep.py
 python3 src/tools/test_manifest.py
+python3 src/tools/render3d/test_scene.py
 dotnet run -c Release --project src/tools/dataset/Checks
 
 # The Jass scoring and the pile, with nothing but Foundation

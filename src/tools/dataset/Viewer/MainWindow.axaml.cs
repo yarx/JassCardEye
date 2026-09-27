@@ -141,6 +141,7 @@ public partial class MainWindow : Window
         Closed += (_, _) =>
         {
             SessionsPage.CancelWork();
+            SimulatePage.CancelWork();
             _proposer?.Dispose();
         };
         _ready = true;
@@ -153,7 +154,7 @@ public partial class MainWindow : Window
     // not depend on the machine granting screen recording. So the window can open a folder, jump
     // to an image, switch the edit mode on and render itself to a PNG, all from the environment:
     //
-    //   JASSCARDEYE_MODE=label|extract|review|sessions
+    //   JASSCARDEYE_MODE=label|extract|review|sessions|simulate
     //                                                start in that section instead of browsing
     //                                                (review: the folder of frames to go through)
     //   JASSCARDEYE_MARK=1                           mark the frame on screen for deletion (review)
@@ -164,6 +165,9 @@ public partial class MainWindow : Window
     //   JASSCARDEYE_FILE=<part of an image name>     the image to show (first match)
     //   JASSCARDEYE_EDIT=1                           edit mode on: corners and rectified preview
     //   JASSCARDEYE_PROPOSE=1                        propose a label for the photo shown (Label photos)
+    //   JASSCARDEYE_RENDER=1                         render a sequence with the page's settings (Simulate
+    //                                                table; JASSCARDEYE_SEED picks the seed)
+    //   JASSCARDEYE_FRAME=<n>                        the frame of that sequence to show
     //   JASSCARDEYE_SNAPSHOT=<file.png>              render the window content there, then quit
     //
     // Rendered at 2x, which is what a Retina screen shows and what print needs.
@@ -177,6 +181,7 @@ public partial class MainWindow : Window
         switch (Environment.GetEnvironmentVariable("JASSCARDEYE_MODE"))
         {
             case "sessions": await SelectSectionAsync(ViewerSection.Sessions); break;
+            case "simulate": await SelectSectionAsync(ViewerSection.Simulate); break;
             case "label":   await SelectSectionAsync(ViewerSection.Label);   break;
             case "extract": await SelectSectionAsync(ViewerSection.Extract); break;
             case "review":  await SelectSectionAsync(ViewerSection.Extract); break;
@@ -184,7 +189,11 @@ public partial class MainWindow : Window
 
         if (Environment.GetEnvironmentVariable("JASSCARDEYE_OPEN") is { } open)
         {
-            if (_section == ViewerSection.Sessions)
+            if (_section == ViewerSection.Simulate)
+            {
+                await SimulatePage.OpenAsync(open);
+            }
+            else if (_section == ViewerSection.Sessions)
             {
                 await SessionsPage.OpenAsync([open]);
                 if (Environment.GetEnvironmentVariable("JASSCARDEYE_TAB") is { } tab) SessionsPage.ShowTab(tab);
@@ -232,6 +241,11 @@ public partial class MainWindow : Window
                 await ProposeAsync();          // what ⇧→ would place on this photo
         }
 
+        if (_section == ViewerSection.Simulate && Environment.GetEnvironmentVariable("JASSCARDEYE_RENDER") == "1")
+            await SimulatePage.RenderAsync(Environment.GetEnvironmentVariable("JASSCARDEYE_SEED"));
+        if (_section == ViewerSection.Simulate && int.TryParse(Environment.GetEnvironmentVariable("JASSCARDEYE_FRAME"), out int frame))
+            SimulatePage.Step(frame);
+
         if (Environment.GetEnvironmentVariable("JASSCARDEYE_SNAPSHOT") is not { } snapshot) return;
         await Task.Delay(1500);            // let the edit mode and the layout settle
         if (Content is not Control root) return;
@@ -249,16 +263,17 @@ public partial class MainWindow : Window
         bool hasImage = _bitmap is not null && _currentIndex >= 0 && _currentIndex < _imageFiles.Count;
 
         // Which parts belong to the current section – kept here so there is one place that decides.
-        bool sessions = _section == ViewerSection.Sessions;
-        SessionsPage.IsVisible = sessions;
+        SessionsPage.IsVisible = _section == ViewerSection.Sessions;
+        SimulatePage.IsVisible = _section == ViewerSection.Simulate;
+        bool ownPage = _section is ViewerSection.Sessions or ViewerSection.Simulate;
         bool extract = _section == ViewerSection.Extract;
         bool review = extract && _reviewing;
         BrowseHeader.IsVisible = _section == ViewerSection.Browse;
         LabelHeader.IsVisible = LabelMode;
         ReviewHeader.IsVisible = review;
         ExtractPage.IsVisible = extract && !review;
-        ImageArea.IsVisible = !sessions && (!extract || review);
-        StatusBar.IsVisible = !sessions && (!extract || review);
+        ImageArea.IsVisible = !ownPage && (!extract || review);
+        StatusBar.IsVisible = !ownPage && (!extract || review);
         AnnotateBar.IsVisible = Annotating;
 
         // Shared navigation + zoom.
@@ -363,7 +378,7 @@ public partial class MainWindow : Window
         }
 
         // The extraction and sessions pages have no images in the shared area; a review of extracted frames does.
-        if (section == ViewerSection.Sessions || (section == ViewerSection.Extract && !_reviewing))
+        if (section is ViewerSection.Sessions or ViewerSection.Simulate || (section == ViewerSection.Extract && !_reviewing))
         {
             UpdateCropPreview();
             UpdateControlStates();
@@ -1142,6 +1157,15 @@ public partial class MainWindow : Window
             }
             return;
         }
+        if (_section == ViewerSection.Simulate)
+        {
+            if (e.Key is Key.Left or Key.Right && e.KeyModifiers == KeyModifiers.None)
+            {
+                e.Handled = true;
+                SimulatePage.Step(e.Key == Key.Left ? -1 : 1);
+            }
+            return;
+        }
         if (_section == ViewerSection.Extract && !_reviewing) return;
 
         switch (e.Key)
@@ -1670,7 +1694,7 @@ public partial class MainWindow : Window
     {
         // The extraction page and the review have no shortcuts beyond those in OnTunnelKeyDown, which
         // also handles ← and → everywhere.
-        if (_section is ViewerSection.Extract or ViewerSection.Sessions) return;
+        if (_section is ViewerSection.Extract or ViewerSection.Sessions or ViewerSection.Simulate) return;
 
         // Letters and digits pick the class, but not while something is being typed into a text field.
         // Enter, Escape and the arrows stay live.
@@ -2169,7 +2193,7 @@ public partial class MainWindow : Window
     private void OnReset(object? s, RoutedEventArgs e)   { _zoom = ComputeFitZoom(); RenderCanvas(); }
 }
 
-internal enum ViewerSection { Browse, Label, Extract, Sessions }
+internal enum ViewerSection { Browse, Label, Extract, Sessions, Simulate }
 
 internal enum VariantKind { Detect, Classify, Plain }
 

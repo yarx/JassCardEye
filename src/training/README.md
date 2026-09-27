@@ -122,6 +122,29 @@ Runs of the box heads (`c`, `b1`) write publication-ready plots into their outpu
 The classifiers (`a`, `b2`) write only `results.csv` and their weights: Ultralytics 8.3.155 cannot
 plot classification training batches, so `train.py` turns plots off for them.
 
+## Counting on the real frames
+
+Ultralytics' validation ranks boxes and classes (mAP). What a counting app does on a frame is harsher:
+the best detection of the deck in play above the threshold of 0.6 names the right card, the wrong one, or
+nothing. `evaluate_real.py` asks every frame of `data/real/val` exactly that and counts the answers:
+
+```bash
+src/training/.venv/bin/python src/training/evaluate_real.py output/training/c/weights/best.pt output/training/other/weights/best.pt
+```
+
+| Column | |
+|---|---|
+| `correct` | the card on the frame |
+| `wrong` | another card - a false count |
+| `missed` | nothing above the threshold, on a frame with a card; the next frame can still count it |
+| `on neg.` | a card on a frame without one - a false count |
+| `false alarms` | `wrong` plus `on neg.`, and their share of all frames |
+
+Single frames: the stability rule, which needs several frames to agree, is not applied, so these are the
+raw errors it has to catch. A `.tflite` - the model the Android app ships - is read through LiteRT and the
+app's own decoding instead of Ultralytics; that needs `ai-edge-litert`, which the export environment for
+Android has. `--json` writes every number, and the frames each false alarm was on.
+
 ## Exporting for the apps
 
 Both apps run the same weights: `export.py` turns one `best.pt` into Core ML for iOS and macOS and
